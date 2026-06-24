@@ -1,0 +1,65 @@
+title: R2 Journal Format
+author: Replication Research (R2)
+version: 1.0.0
+quarto-required: ">=1.4.0"
+contributes:
+  formats:
+    # ---------------------------------------------------------------
+    # Shared defaults inherited by every R2 output format.
+    # ---------------------------------------------------------------
+    common:
+      number-sections: false
+      lang: en-US
+      bibliography: references.bib
+      link-citations: true
+      # R2 design tokens (overridable per-journal via themes/<name>/theme.yml).
+      r2:
+        journal: "Replication Research (R2)"
+        accent: "009CCF"
+        card-bg: "FEFDF6"
+        card-border: "EAE8DF"
+
+    # ---------------------------------------------------------------
+    # PDF  – self-contained LaTeX template ported from the R2 design.
+    # ---------------------------------------------------------------
+    pdf:
+      template: template.tex
+      pdf-engine: pdflatex
+      cite-method: biblatex
+      biblio-style: apa
+      biblatexoptions:
+        - backend=biber
+      keep-tex: true
+      link-citations: true
+      colorlinks: true
+
+    # ---------------------------------------------------------------
+    # HTML – Quarto html + R2 SCSS theme + custom masthead partial.
+    # ---------------------------------------------------------------
+    html:
+      theme:
+        - html/r2.scss
+      template-partials:
+        - html/title-block.html
+      css:
+        - html/r2-extra.css
+      embed-resources: true
+      toc: true
+      toc-location: right
+      toc-title: "Contents"
+      anchor-sections: true
+      citations-hover: true
+      csl: resources/apa.csl
+      link-external-newwindow: true
+      link-external-icon: false
+
+    # ---------------------------------------------------------------
+    # JATS – archival "publishing" tag set + R2 front-matter template.
+    # ---------------------------------------------------------------
+    jats:
+      to: jats_publishing
+      csl: resources/apa.csl
+      # R2-specific front matter (DOI, article categories, lay summary,
+      # funding, custom-meta) is injected post-render by
+      # engine/scripts/enrich_jats.py — Pandoc's JATS partial does not
+      # expose those fields directly.

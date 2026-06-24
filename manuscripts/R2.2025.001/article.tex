@@ -1,0 +1,657 @@
+% =====================================================================
+%  R2 Journal — Quarto/Pandoc LaTeX template
+%  Ported from the hand-authored R2 design (longsample_final_calibri.tex).
+%  The preamble is kept faithful to the original; only literal article
+%  content is replaced with Pandoc/Quarto template variables,
+%  and the minimal Pandoc plumbing is grafted in (tightlist, graphics
+%  scaling, longtable, code highlighting, header-includes).
+%
+%  Design tokens (accent colour, footer string, logo, …) come from the
+%  manuscript metadata / themes/<name>/theme.yml, so other journals can
+%  reuse this template unchanged.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+% --- Calibri-like font (Carlito) -------------------------------------
+\usepackage[sfdefault]{carlito}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% --- Authors / affiliations ------------------------------------------
+\usepackage[blocks]{authblk}
+\renewcommand\Affilfont{\itshape\footnotesize}
+\setlength{\affilsep}{0.5em}
+
+% --- Colours & design system -----------------------------------------
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{009CCF}
+\definecolor{absbg}{HTML}{FEFDF6}
+\definecolor{absframe}{HTML}{EAE8DF}
+\definecolor{chipbg}{HTML}{FEFDF6}
+
+\usepackage[most]{tcolorbox}
+\tcbset{
+  rtwo-abstract/.style={
+    enhanced, breakable,
+    colback=absbg, colframe=absframe,
+    boxrule=0.3pt, arc=1.2mm,
+    left=8pt, right=8pt, top=8pt, bottom=8pt,
+    before skip=8pt, after skip=10pt,
+    borderline west={2pt}{0pt}{accent}
+  },
+  rtwo-chip/.style={
+    enhanced, breakable,
+    colback=chipbg, colframe=chipbg,
+    boxrule=0pt, arc=1mm,
+    left=6pt, right=6pt, top=6pt, bottom=6pt,
+    before skip=6pt, after skip=10pt,
+    borderline west={2pt}{0pt}{accent}
+  }
+}
+\newif\ifRtwoTintAbstract \RtwoTintAbstracttrue
+\newif\ifRtwoTintCitation \RtwoTintCitationtrue
+
+% --- Hyperlinks ------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  citecolor=accent,
+  urlcolor=accent,
+  breaklinks=true,
+  pdftitle={Inaugural Editorial of Replication Research (R2)},
+  pdfauthor={Lukas Röseler; Lukas Wallrich; Susanne Adler; Prince Oppong Boakye; Thomas Rhys Evans; Janik Goltermann; Jan Horstmann; Max Korbmacher; Steven Verheyen; Ingmar Visser; Flavio Azevedo},
+  pdfcreator={R2 single-source pipeline (Quarto/Pandoc)}
+}
+\Urlmuskip=0mu plus 2mu
+
+% --- Geometry, header/footer -----------------------------------------
+\usepackage[includehead,includefoot]{geometry}
+\usepackage{fancyhdr}
+\setlength{\headheight}{20pt}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\usepackage{graphicx}
+% Scale images so they never overflow the text block (Pandoc behaviour).
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\providecommand{\pandocbounded}[1]{#1}
+
+% Page-edge accent rules (title page + main pages)
+\usepackage{tikz}
+\usepackage{tikzpagenodes}
+\usepackage{eso-pic}
+\usetikzlibrary{calc}
+
+% --- Language & typography -------------------------------------------
+\usepackage[american]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{listings}
+\lstset{basicstyle=\footnotesize\ttfamily, breaklines=true, breakatwhitespace=true}
+\newcommand{\passthrough}[1]{#1}
+% Correct ordering of longtables after \paragraph (Pandoc).
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+
+% Pandoc tight lists + emergency stretch + safe line breaking
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage[final]{microtype}
+\emergencystretch=3em
+\tolerance=2000
+\hyphenpenalty=1000
+\DisableLigatures{encoding = *, family = *}
+
+% Code-block highlighting macros (only emitted when code is present).
+
+% --- Elegant bullets -------------------------------------------------
+\usepackage{enumitem}
+\usepackage{pifont}
+\newcommand{\elegantbullet}{\raisebox{0.2ex}{\ding{70}}}
+\newenvironment{elegantlist}{%
+  \begin{itemize}[label=\elegantbullet, leftmargin=*, labelsep=0.6em,
+                  itemsep=0.25\baselineskip, topsep=0.25\baselineskip]%
+}{\end{itemize}}
+
+\usepackage{xurl}
+\usepackage{placeins}
+\raggedbottom
+
+% --- Citations (biblatex + biber, APA) -------------------------------
+\usepackage{csquotes}
+\usepackage[backend=biber,style=apa,hyperref=true,giveninits,uniquename=init]{biblatex}
+\DeclareLanguageMapping{american}{american-apa}
+\addbibresource{references.bib}
+\AtEveryBibitem{\clearfield{day}\clearfield{month}\clearfield{labelday}\clearfield{labelmonth}}
+
+\usepackage{orcidlink}
+
+% Where assets (logo, license, badges) live, relative to a manuscript
+% rendered in manuscripts/<id>/.  Also search figures/ and the cwd.
+\graphicspath{{./}{figures/}{../../_extensions/r2/resources/}{../../_extensions/r2/resources/badges/}}
+
+% =====================================================================
+%  Header / footer styles
+% =====================================================================
+\fancypagestyle{mainstyle}{
+  \fancyhf{}
+  \fancyhead[L]{\hspace*{\HeaderLeftDelta}\small Inaugural Editorial of
+Replication Research (R2)}
+  \fancyfoot[R]{%
+    \makebox[\dimexpr\textwidth+\FooterRightDelta\relax][r]{%
+      \small Replication Research
+(R2), 2025, vol 1, R2.2025.001 \textbar\ \thepage%
+    }%
+  }
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+% --- Front-matter cards ----------------------------------------------
+\newcommand{\RtwoAbstract}[1]{%
+  \ifRtwoTintAbstract
+    \begin{tcolorbox}[rtwo-abstract]\textbf{Abstract.}\ #1\end{tcolorbox}%
+  \else
+    \par\smallskip\noindent\textit{Abstract:} #1\par
+  \fi}
+\newcommand{\keywords}[1]{%
+  \ifRtwoTintAbstract
+    \vspace{-6pt}\begin{tcolorbox}[rtwo-abstract]\textbf{Keywords.}\ #1\end{tcolorbox}%
+  \else
+    \par\smallskip\noindent\textit{Keywords:} #1\par
+  \fi}
+\newcommand{\laysummary}[1]{%
+  \begin{tcolorbox}[rtwo-abstract]\textbf{Lay summary.}\ #1\end{tcolorbox}}
+\newcommand{\recommendedcitation}[1]{%
+  \ifRtwoTintCitation
+    \begin{tcolorbox}[rtwo-chip]\textbf{Citation.}\ #1\end{tcolorbox}%
+  \else
+    \par\smallskip\noindent\textit{Citation:} #1\par
+  \fi}
+
+% =====================================================================
+%  Front matter
+% =====================================================================
+\title{Inaugural Editorial of \emph{Replication Research (R2)}}
+
+\author[1]{Lukas Röseler\,\orcidlink{0000-0002-6446-1901}}
+\author[2]{Lukas Wallrich\,\orcidlink{0000-0003-2121-5177}}
+\author[3]{Susanne Adler\,\orcidlink{0000-0002-3211-6871}}
+\author[1]{Prince Oppong Boakye\,\orcidlink{0009-0003-5447-8034}}
+\author[4]{Thomas Rhys Evans\,\orcidlink{0000-0002-6670-0718}}
+\author[5]{Janik Goltermann\,\orcidlink{0000-0003-3087-1002}}
+\author[6]{Jan Horstmann\,\orcidlink{0000-0001-8047-2232}}
+\author[7]{Max Korbmacher\,\orcidlink{0000-0002-8113-2560}}
+\author[8]{Steven Verheyen\,\orcidlink{0000-0002-6778-6744}}
+\author[9]{Ingmar Visser\,\orcidlink{0000-0003-3855-2778}}
+\author[10]{Flavio Azevedo\,\orcidlink{0000-0001-9000-8513}}
+
+\affil[1]{University of Münster}
+\affil[2]{Birkbeck, University of London}
+\affil[3]{Ludwig-Maximilians-Universität München}
+\affil[4]{University of Greenwich}
+\affil[5]{Charité -- Universitätsmedizin Berlin}
+\affil[6]{University of Hamburg}
+\affil[7]{Haukeland University Hospital}
+\affil[8]{Erasmus University Rotterdam}
+\affil[9]{University of Amsterdam}
+\affil[10]{Utrecht University}
+
+\date{}
+
+\setlength{\headheight}{64pt}
+
+% --- Title-page header tuning knobs ----------------------------------
+\newlength{\TitleLeftBoxW}  \setlength{\TitleLeftBoxW}{0.99\headwidth}
+\newlength{\TitleRightBoxW} \setlength{\TitleRightBoxW}{.4\headwidth}
+\newlength{\TitleRuleRaise} \setlength{\TitleRuleRaise}{-30pt}
+\newlength{\TitleHeadExtra}  \setlength{\TitleHeadExtra}{14mm}
+\newlength{\TitleHeaderRaise}\setlength{\TitleHeaderRaise}{-10mm}
+\newlength{\TitleToAbstractGap}\setlength{\TitleToAbstractGap}{-0.2\baselineskip}
+
+\fancypagestyle{firststyle}{
+  \fancyhf{}
+  \fancyheadoffset[L]{\TitleHeadExtra}
+  \fancyheadoffset[R]{\TitleHeadExtra}
+  \setlength{\headwidth}{\textwidth\TitleHeadExtra}
+  \fancyhead[L]{%
+    \vspace*{-\TitleHeaderRaise}%
+    \parbox[b][\headheight][c]{\TitleLeftBoxW}{%
+      \includegraphics[height=12mm]{logo.png}%
+    }%
+  }
+  \fancyhead[R]{%
+    \vspace*{-\TitleHeaderRaise}%
+    \parbox[b][\headheight][c]{\TitleRightBoxW}{%
+      \raggedleft\scriptsize
+      \textit{Replication Research (R2)}, 2025, vol 1, R2.2025.001\\
+      \href{https://doi.org/10.15626/R2.2025.001}{https://doi.org/10.15626/R2.2025.001}\\
+      Article type: Editorial\\
+      Discipline: Multidisciplinary\\
+      Published under the CC-BY 4.0 license%
+    }%
+  }
+  \renewcommand{\headrulewidth}{1pt}
+  \renewcommand{\headrule}{%
+    \vspace*{\dimexpr\TitleRuleRaise-\TitleHeaderRaise\relax}%
+    \hbox to\headwidth{\color{accent}\rule{\headwidth}{\headrulewidth}}%
+  }
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\makeatletter
+\let\ps@plain\ps@firststyle
+\makeatother
+\setlength{\headheight}{54pt}
+\setlength{\headsep}{-9pt}
+\setlength{\topskip}{26pt}
+
+\newlength{\FooterYShift}\setlength{\FooterYShift}{-14pt}
+\newlength{\HeaderLeftDelta}\setlength{\HeaderLeftDelta}{0mm}
+\newlength{\FooterRightDelta}\setlength{\FooterRightDelta}{0mm}
+
+\setcounter{secnumdepth}{0}
+
+% User / Quarto header includes
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+
+\begin{document}
+
+% ---- Title page -----------------------------------------------------
+\thispagestyle{firststyle}
+\maketitle
+\enlargethispage{10\baselineskip}
+\vspace*{\TitleToAbstractGap}
+
+\RtwoAbstract{Reproducibility and replicability are vital for
+trustworthy, cumulative research, yet remain undervalued in most areas
+of academic publishing. Replication Research (R2) is a Diamond Open
+Access journal dedicated to publishing high-quality reproductions,
+replications, and related methodological work across disciplines. With
+robust standards for transparency, open peer review, and social
+responsibility, R2 offers practical guidance and support for authors. We
+aim to rebalance research culture by valuing diligence and robustness
+alongside innovation, thereby increasing confidence in research
+findings. We invite researchers to contribute to and benefit from an
+open, community-driven journal designed to elevate the status and impact
+of replications (repeated tests of published findings with different
+data) and reproductions (repeated tests of published findings with the
+same data). In this editorial, we introduce the aims, policies, and
+scope of Replication Research, outlining how the journal will operate
+and the values that guide it.}
+\keywords{reproduction, replication, metascience, open science, open
+access}
+\laysummary{Science depends on checking whether published findings hold
+up when they are repeated. Yet studies that reproduce or replicate
+earlier work are rarely published, even though they are essential for
+trust in research. Replication Research (R2) is a new, free-to-publish
+and free-to-read journal dedicated to these repeated studies across all
+fields, with open peer review and strong transparency standards.}
+\recommendedcitation{Röseler, L., Wallrich, L., Adler, S., Oppong
+Boakye, P., Rhys Evans, T. R., Goltermann, J., Horstmann, J.,
+Korbmacher, M., Verheyen, S., Visser, I., \& Azevedo, F. (2025).
+Inaugural editorial of Replication Research (R2). \emph{Replication
+Research (R2)}, \emph{1}, R2.2025.001.
+https://doi.org/10.15626/R2.2025.001}
+
+% Earned open-science badges (rendered if declared true in metadata).
+\begin{center}
+\includegraphics[height=8mm]{opendata.png}\hspace{0.5em}%
+\includegraphics[height=8mm]{opencode.png}\hspace{0.5em}%
+\includegraphics[height=8mm]{openmaterial.png}\hspace{0.5em}%
+%
+%
+\end{center}
+
+\newpage
+
+% ---- Page-edge accent rules from page 2 on --------------------------
+\AddToShipoutPictureFG{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[accent, line width=1pt, line cap=butt]
+      ([xshift=\HeaderLeftDelta]current page text area.north west) --
+      (current page.north east |- current page text area.north west);
+    \draw[accent, line width=1pt, line cap=butt]
+      ([yshift=\FooterYShift]current page.north west |- current page text area.south east) --
+      ([xshift=\FooterRightDelta,yshift=\FooterYShift]current page text area.south east);
+  \end{tikzpicture}%
+}
+
+\newgeometry{top=30mm, bottom=20mm}
+\pagestyle{mainstyle}
+\thispagestyle{mainstyle}
+
+% ---- Main body ------------------------------------------------------
+
+\begin{quote}
+``And what we find today we shall strike out from the record tomorrow,
+and only write it in again when we have once more discovered it.''
+
+--- \autocite{Brecht1974-gk}
+\end{quote}
+
+Scientific knowledge is built on trust, yet the foundations of that
+trust are often neglected. Continuously reiterating and reexamining
+scientific claims is necessary for research to be trustworthy and to
+facilitate cumulative science. While we strongly acknowledge the need
+for innovation and novelty, over reliance on these values has led to a
+neglect of a systematic evaluation of knowledge claims
+\autocite{Makel2012ReplicationsPsychology}. Specifically, we believe
+that more efforts should be made to support the repeated investigation
+of previously made claims, also called \emph{repetitive research}
+\autocite{Schoech2023RepetitiveResearch}. An overemphasis on innovation
+and novelty at the cost of repeated investigation of past findings can
+endanger scientific accuracy by allowing false-positive findings to
+persist and risks decreasing public trust in science. Furthermore, it
+leads to inefficient resource allocation when trying to build on
+allegedly known findings with weak evidence. Calls for more scientific
+rigor and criticism of the current academic system are widespread (e.g.,
+\autocite{king1995replication,Munafo2017ManifestoReproducibleScience}),
+and so is the idea of providing \emph{academic journals for
+replications} \autocite{Grunow2018LackReproducibility}. Yet, no
+cross-disciplinary journal dedicated to replications and reproductions
+across disciplines exists to date --- a crucial gap we aim to fill with
+this new dedicated \emph{Replication Research} journal.
+
+\subsection{A Community-Based Solution for Rigorous
+Research}\label{a-community-based-solution-for-rigorous-research}
+
+With \emph{Replication Research}, we want to support reproduction and
+replication studies across multiple disciplines. R2's core objectives
+include the following:
+
+\textbf{Providing an interdisciplinary dedicated outlet for repetitive
+research:} Despite the increasing recognition of the necessity and value
+of replication studies, only a limited number of journals accept
+replication studies. A dedicated journal for repetitive research allows
+a strong focus on rigor irrespective of novelty and facilitates the
+findability of replications and reproductions
+\autocite{Reed2025NoRoomInn}. The journals that currently focus on
+repetitive research (e.g., \emph{Journal of Comments and Replications in
+Economics}) are domain-specific; as an interdisciplinary journal, R2
+provides an opportunity to publish replications and reproductions to
+researchers from all fields.
+
+\textbf{Increasing the number of replications:} The share of
+replications in the published literature is still very low (e.g.,
+\autocite{Perry2022DecadeReplicationEducation,Pridemore2018ReplicationCriminology}),
+and methods that structurally examine replicability and reproducibility
+have only recently been developed (e.g.,
+\autocite{Heyard2025ScopingReproducibilityMetrics}). Nevertheless,
+replication rates are growing
+\autocite{Clarke2023PrevalenceDirectReplication,Reed2025NoRoomInn}. R2
+aims to support that trend and increase the prevalence, visibility and
+recognition of repetitive research.
+
+\textbf{Incentivizing high-quality replications and reproductions:}
+Publications remain the currency for career progression and research
+assessments in many disciplines. Therefore, a dedicated high-quality
+journal is essential. We support authors to increase the transparency
+and reproducibility of their findings. All accepted quantitative
+articles will undergo checks for numerical reproducibility to help the
+authors achieve field-specific best sharing practices and peer review
+reports will be published. Submissions are evaluated based on research
+quality and not on the novelty of their findings or their expected
+impact.
+
+\textbf{Supporting transparency:} R2 requires authors to first post
+their preprints online and embraces open peer review, in which all
+correspondence between authors, reviewers, and editors is made public.
+
+\textbf{Sustainable Diamond Open Access:} R2 is a Diamond Open Access
+journal -- that is, it is free to publish in and free to read and
+authors retain copyrights to their articles. All content is published
+under a CC-BY licence, ensuring it is free to reuse. It is sustained via
+institutional infrastructure and all articles are long-time archived.
+
+\textbf{Community-governed journal:} Rather than shaped by commercial
+pressures or institutions, R2 has been created through open discussions
+in a diverse community, such as a symposium to shape the journal (e.g.,
+\autocite{Roseler2025bR2SBook}). Ownership and decision-making are
+transparently described in the journal constitution
+\autocite{Roseler2025R2Constitution}. We are committed to running this
+service until at least early 2028 and will then review the journal
+success based on pre-determined success criteria
+\autocite{Roseler2025R2DiscontinuedConditions}.
+
+\textbf{Contributing to the creation of a sustainable, non-commercial
+publishing ecosystem:} Many existing journals must follow commercial
+imperatives that are not always aligned with scientific ideals. This
+includes the necessity to achieve target impact metrics regardless of
+research quality \autocite{brembs2018prestigious}, the rising costs for
+open access publishing \autocite{Grossmann2021MarketRates}, or the
+emergence of predatory journals (e.g.,
+\autocite{Beall2017PredatoryPublishers}). We think that scientific
+knowledge, made possible by public funding, is a public good that should
+be free to publish and free to read for everyone, which is why we have
+declared in our constitution that R2 is and will forever be a diamond
+open-access journal.
+
+\subsection{What does R2 publish?}\label{what-does-r2-publish}
+
+We envision R2 as a hub for researchers who are interested in rigorous
+and robust repetitive research. We welcome \textbf{reproductions}
+(repeated investigation of previous findings using \emph{the same}
+data), \textbf{replications} (repeated investigation of previous
+findings using \emph{different} data), and \textbf{related
+contributions} such as methods for replication research, meta-analyses
+of replications, multi- or many-analyst studies, tutorials, comments, or
+reviews of replications. Submitted articles may also consist of single
+studies that have been part of meta-articles (e.g.,
+\autocite{open2015estimating}) as long as they have not been published
+individually, meet our standards for openness, and declare transparently
+that they have been included in a meta-article. At launch, we accept
+submissions from numerous disciplines such as quantitative and
+qualitative social sciences (an up-to-date list is available at
+\href{https://replicationresearch.org/}{replicationresearch.org}).
+Submissions from other disciplines are welcome and may be considered
+depending on the availability of an ad hoc editor.
+
+\subsubsection{Transparency is the norm}\label{transparency-is-the-norm}
+
+R2 has high standards for transparency and openness: Studies should
+report whether they were preregistered and need to disclose all
+differences between the preregistration and the final report. In
+addition, analysis plans, materials, study protocols, code, and data
+should be shared and complete per disciplinary best-practices (e.g.,
+PRISMA for meta-analyses; \autocite{Page2021PRISMA2020}). We badge Open
+Data/Code/Materials, Preregistration, Computational Reproducibility and
+perform link checks prior to sending articles for review.
+
+\subsection{Guidance for authors}\label{guidance-for-authors}
+
+For reproductions and replications, we expect authors to justify their
+choice of the target study, explain their decision for the type of
+reproduction or replication, disclose deviations from the original
+study, provide readers with a differentiated judgment of success or
+failure, and discuss possible reasons for consistencies and
+discrepancies between the original and repetition's results in a
+constructive and factual manner. We recommend evaluation of reproduction
+or replication success based on a predetermined criterion
+\autocite{Heyard2025ScopingReproducibilityMetrics}. Editors judge the
+manuscript based on its potential to meet R2's standards and see it as
+their and the reviewers' task to help the authors achieve that
+potential. We acknowledge that many disciplines do not yet have clear
+standards on what constitutes a good replication, which is why we
+provide guidance in multiple ways.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  We convened a team of 13 researchers who have conducted numerous
+  reproductions and replications as part of their research, in
+  collaborations, and as student projects, who have published an open
+  handbook on conducting reproductions and replications
+  (\autocite{Roseler2025HandbookReplication};
+  \url{https://forrt.org/replication_guide}). For robustness
+  reproductions, we further recommend the protocol by
+  \textcite{AnkelPeters2025StructuredRobustness} and the Guide for
+  Accelerating Computational Reproducibility in the Social Sciences
+  \autocite{BITSS2020ACRE}.
+\item
+  Based on multiple guides and our experience with the Framework for
+  Open and Reproducible Research Training (FORRT) Replication Database
+  \autocite{roseler2024replicationdatabase}, we have created manuscript
+  templates for reproduction and replication studies that authors can
+  optionally use (\autocite{Roseler2025aStaRT};
+  \url{https://osf.io/brxtd}).
+\item
+  Authors interested in replications from their field may use the FORRT
+  Replication Database, with over 1000 replication studies, to search
+  for examples from their field
+  (\url{https://forrt.org/apps/fred_explorer.html}).
+\end{enumerate}
+
+\subsection{Social Impact \&
+Responsibility}\label{social-impact-responsibility}
+
+We criticize the lack of rigor in the current academic system and argue
+that replication and reproduction rates are too low. These arguments can
+be used to discredit researchers, their findings, and research in
+general. Calls for scientific rigor or \emph{sound science} have in the
+past been used to block policymakers from regulating industry
+\autocite{baba2005legislating}. While we have created R2 to support
+repetitive research and motivate researchers to conduct high quality
+reproduction and replication studies, we refute the call to disregard
+research findings that do not meet a high standard since ``demanding
+perfect evidence before action can be taken is often a way to avoid
+using evidence at all'' \autocite{COS2025RestoringGoldStandardScience}.
+
+\subsection{Conclusion}\label{conclusion}
+
+We invite researchers, students, and institutions to strengthen the
+foundations of scientific knowledge by submitting their replication and
+reproduction studies to R2. Together, we can reshape publishing
+practices and foster more robust, reliable research.
+
+\subsection*{Declarations}\label{declarations}
+\addcontentsline{toc}{subsection}{Declarations}
+
+\subsubsection*{Author Contributions}\label{author-contributions}
+\addcontentsline{toc}{subsubsection}{Author Contributions}
+
+\begin{itemize}
+\tightlist
+\item
+  LR: Writing -- first draft
+\item
+  All authors: Writing -- review and editing
+\end{itemize}
+
+\subsubsection*{Acknowledgments}\label{acknowledgments}
+\addcontentsline{toc}{subsubsection}{Acknowledgments}
+
+We thank participants from the ``Road to R2'' online discussion
+sessions, contributors from the Replication Research Symposium, members
+of the R2 Advisory Board, and contributors from our open community call.
+
+\subsubsection*{Funding}\label{funding}
+\addcontentsline{toc}{subsubsection}{Funding}
+
+This research was supported by the Landesinitiative openaccess.nrw
+(\url{https://osf.io/a82fe}) and the University of Münster Topical
+Program (\url{https://osf.io/wqe7n}). We gratefully acknowledge the
+financial support provided by both organizations.
+
+\subsubsection*{Potential conflicts of
+interest}\label{potential-conflicts-of-interest}
+\addcontentsline{toc}{subsubsection}{Potential conflicts of interest}
+
+All members of the R2 editorial board are actively engaged in repetitive
+research in various professional capacities (e.g., conducting,
+publishing, or advocating for such work). As such, they have
+professional and intellectual interests in the visibility and uptake of
+related research, and several authors' prior publications are cited in
+the reference list of this article. These relationships constitute
+non-financial competing interests that could be perceived as favoring
+the amplification of replication-related work. The authors declare no
+financial competing interests related to this editorial.
+
+\subsubsection*{Declaration of AI use}\label{declaration-of-ai-use}
+\addcontentsline{toc}{subsubsection}{Declaration of AI use}
+
+Parts of the initial draft of the abstract had been AI generated from
+the text. Moreover, we used ChatGPT 5 to check for consistency of
+references, convert references from plain text to .bib format and to
+generate suggestions to improve the text.
+
+\subsubsection*{Author Contact}\label{author-contact}
+\addcontentsline{toc}{subsubsection}{Author Contact}
+
+Correspondence concerning this article should be addressed to Lukas
+Röseler:
+\href{mailto:lukas.roeseler@uni-muenster.de}{\nolinkurl{lukas.roeseler@uni-muenster.de}}
+
+\subsection*{References}\label{references}
+\addcontentsline{toc}{subsection}{References}
+
+\printbibliography[heading=none]
+
+
+% ---- Licence badge --------------------------------------------------
+\vspace{1.5cm}
+\begin{center}
+  \textbf{Licence}\\[4pt]
+  \href{https://creativecommons.org/licenses/by/4.0/}{%
+    \includegraphics[height=8mm]{license-cc-by.png}%
+  }%
+\end{center}
+
+% ---- References -----------------------------------------------------
+\newpage
+
+\end{document}

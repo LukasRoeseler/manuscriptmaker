@@ -1,0 +1,18 @@
+project:
+  title: "R2 Publishing Workflow"
+  # Render manuscripts in place (article.html / .pdf / .xml land next to the
+  # source). This keeps the LaTeX \graphicspath and HTML asset paths stable.
+  render:
+    - "manuscripts/**/article.qmd"
+
+# Pull the active journal theme (colours, journal strings, OJS settings).
+# Switch journals by pointing this at a different themes/<name>/theme.yml.
+metadata-files:
+  - themes/r2/theme.yml
+
+# Every manuscript opts into the three R2 outputs. A manuscript can override
+# this in its own front matter if needed.
+format:
+  r2-html: default
+  r2-pdf: default
+  r2-jats: default

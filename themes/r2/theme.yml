@@ -1,0 +1,38 @@
+# =====================================================================
+#  R2 journal theme  —  the customization surface for this journal.
+#
+#  To adapt the engine to ANOTHER journal: copy this folder to
+#  themes/<your-journal>/, edit the values below, drop in your own
+#  assets/ (logo.png, license-cc-by.png, badges/), and point
+#  _quarto.yml's `metadata-files:` at your theme.yml. The engine
+#  (_extensions/r2) stays untouched.
+#
+#  Fields under `r2:` are merged into every manuscript's metadata and
+#  consumed by the PDF template, the HTML masthead, JATS enrichment,
+#  and the OJS package generator.
+# =====================================================================
+r2:
+  journal: "Replication Research (R2)"
+  issn: ""
+  publisher: "Münster Center for Open Science (MüCOS)"
+  homepage: "https://replicationresearch.org"
+
+  # --- Design tokens (mirror the LaTeX template) ---------------------
+  accent: "009CCF"        # teal accent used for rules, links, card bars
+  card-bg: "FEFDF6"       # warm tint behind abstract/keywords/citation
+  card-border: "EAE8DF"   # ultra-subtle card border
+
+  # --- Default license -----------------------------------------------
+  license: "CC-BY 4.0"
+  license-url: "https://creativecommons.org/licenses/by/4.0/"
+
+# --- OJS (Open Journal Systems) integration ---------------------------
+ojs:
+  journal-path: "r2"        # the OJS journal URL path
+  section-ref: "ART"        # section abbreviation in OJS
+  user-group-ref: "Author"  # author user-group label in OJS
+  schema-version: "3.4"     # target OJS native-XML schema major version
+
+# --- Footer / running strings -----------------------------------------
+# {journal} {year} {volume} {article-id} {page} are substituted at build.
+footer-template: "{journal}, {year}, vol {volume}, {article-id}"

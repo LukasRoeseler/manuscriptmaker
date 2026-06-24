@@ -1,0 +1,107 @@
+/*-- scss:defaults --*/
+// =====================================================================
+//  R2 Journal — HTML theme defaults
+//  Design tokens mirror the LaTeX template: accent #009CCF, warm card
+//  tint #FEFDF6, Carlito (Calibri-compatible) body font.
+// =====================================================================
+
+$r2-accent:      #009CCF !default;
+$r2-card-bg:     #FEFDF6 !default;
+$r2-card-border: #EAE8DF !default;
+
+$primary:    $r2-accent;
+$link-color: $r2-accent;
+$body-color: #1c1c1c;
+
+// Carlito everywhere (falls back to Calibri / system sans).
+$font-family-sans-serif: "Carlito", "Calibri", "Carlito", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif !default;
+$font-family-base: $font-family-sans-serif;
+$headings-font-family: $font-family-sans-serif;
+
+$body-bg: #ffffff;
+$content-padding-top: 0;
+$toc-color: $r2-accent;
+
+/*-- scss:rules --*/
+// --- Carlito web font (embedded via embed-resources) -----------------
+// Paths are resolved relative to the Quarto project root.
+@font-face {
+  font-family: "Carlito";
+  font-style: normal; font-weight: 400;
+  src: url("_extensions/r2/resources/fonts/Carlito-Regular.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Carlito";
+  font-style: italic; font-weight: 400;
+  src: url("_extensions/r2/resources/fonts/Carlito-Italic.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Carlito";
+  font-style: normal; font-weight: 700;
+  src: url("_extensions/r2/resources/fonts/Carlito-Bold.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Carlito";
+  font-style: italic; font-weight: 700;
+  src: url("_extensions/r2/resources/fonts/Carlito-BoldItalic.ttf") format("truetype");
+}
+
+// --- Masthead --------------------------------------------------------
+.r2-masthead { margin-bottom: 1.5rem; }
+
+.r2-masthead-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 1.5rem; padding-bottom: 0.6rem;
+  border-bottom: 2px solid $r2-accent;
+}
+.r2-logo { height: 46px; width: auto; }
+.r2-meta {
+  text-align: right; font-size: 0.72rem; line-height: 1.4; color: #333;
+}
+.r2-meta a { word-break: break-all; }
+
+#title-block-header h1.title,
+.r2-masthead h1.title {
+  text-align: center; font-weight: 700; font-size: 1.9rem;
+  margin: 1.4rem 0 0.8rem;
+}
+
+.r2-authors {
+  text-align: center; font-weight: 700; line-height: 1.6; margin-bottom: 0.4rem;
+}
+.r2-author { white-space: normal; }
+.r2-author sup { font-weight: 400; }
+.r2-orcid { display: inline-block; vertical-align: middle; margin-left: 2px; }
+.r2-affiliations {
+  text-align: center; font-style: italic; font-size: 0.85rem;
+  color: #444; margin-bottom: 1rem;
+}
+
+// --- Earned open-science badges --------------------------------------
+.r2-badges { text-align: center; margin: 0.8rem 0 1.2rem; }
+.r2-badges img { height: 34px; margin: 0 4px; vertical-align: middle; }
+
+// --- Front-matter cards (abstract / keywords / lay / citation) -------
+.r2-card {
+  background: $r2-card-bg;
+  border: 0.5px solid $r2-card-border;
+  border-left: 3px solid $r2-accent;
+  border-radius: 3px;
+  padding: 0.7rem 0.9rem;
+  margin: 0.6rem 0;
+  font-size: 0.94rem;
+}
+.r2-card .r2-card-label { font-weight: 700; }
+.r2-card.r2-citation, .r2-card.r2-keywords { background: $r2-card-bg; }
+
+// --- Body / references / footer --------------------------------------
+.r2-license { text-align: center; margin: 2.5rem 0 1rem; }
+.r2-license img { height: 31px; }
+
+#refs .csl-entry { margin-bottom: 0.5rem; }
+
+.r2-article-footer {
+  margin-top: 2.5rem; padding-top: 0.5rem;
+  border-top: 1px solid $r2-accent;
+  font-size: 0.75rem; color: #555; text-align: right;
+}

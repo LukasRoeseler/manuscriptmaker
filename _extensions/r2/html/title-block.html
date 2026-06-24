@@ -1,0 +1,62 @@
+$-- =====================================================================
+$-- R2 masthead — replaces Quarto's default HTML title block.
+$-- Renders: journal metadata header, title, authors (+ORCID +affil refs),
+$-- affiliation list, earned badges, and the abstract/keywords/lay-summary/
+$-- citation cards — mirroring the LaTeX/PDF design.
+$-- =====================================================================
+<header id="title-block-header" class="quarto-title-block default r2-masthead">
+
+  <div class="r2-masthead-top">
+    <img class="r2-logo" src="../../_extensions/r2/resources/logo.png" alt="$r2.journal$ logo" />
+    <div class="r2-meta">
+      <div><em>$r2.journal$</em>, $r2.year$, vol $r2.volume$, $r2.article-id$</div>
+$if(r2.doi)$
+      <div><a href="https://doi.org/$r2.doi$">https://doi.org/$r2.doi$</a></div>
+$endif$
+      <div>Article type: $r2.article-type$</div>
+      <div>Discipline: $r2.discipline$</div>
+      <div>Published under the $if(r2.license)$$r2.license$$else$CC-BY 4.0$endif$ license</div>
+    </div>
+  </div>
+
+  <h1 class="title">$title$</h1>
+
+$if(by-author)$
+  <div class="r2-authors">
+$for(by-author)$<span class="r2-author">$it.name.literal$$if(it.orcid)$<a class="r2-orcid" href="https://orcid.org/$it.orcid$" title="ORCID $it.orcid$" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle"><path fill="#A6CE39" d="M256 128c0 70.7-57.3 128-128 128S0 198.7 0 128 57.3 0 128 0s128 57.3 128 128z"/><path fill="#FFF" d="M86.3 186.2H70.9V79.1h15.4v107.1zM78.6 66.9c-5.5 0-10-4.5-10-10s4.5-10 10-10 10 4.5 10 10-4.5 10-10 10zM124.3 79.1h29.6c28.2 0 40.6 20.2 40.6 53.6 0 30.5-15.1 53.6-40.6 53.6h-29.6V79.1zm15.4 93.3h12.4c20.4 0 25.1-15.5 25.1-39.7 0-21.2-3.3-39.7-25.1-39.7h-12.4v79.4z"/></svg></a>$endif$<sup>$for(it.affiliations)$$it.number$$sep$,$endfor$</sup></span>$sep$, $endfor$
+  </div>
+$endif$
+
+$if(by-affiliation)$
+  <div class="r2-affiliations">
+$for(by-affiliation)$<sup>$it.number$</sup>&nbsp;$it.name$$sep$ &nbsp;&nbsp; $endfor$
+  </div>
+$endif$
+
+$if(r2.badges)$
+  <div class="r2-badges">
+$if(r2.badges.open-data)$<img src="../../_extensions/r2/resources/badges/opendata.png" alt="Open Data" />$endif$
+$if(r2.badges.open-code)$<img src="../../_extensions/r2/resources/badges/opencode.png" alt="Open Code" />$endif$
+$if(r2.badges.open-materials)$<img src="../../_extensions/r2/resources/badges/openmaterial.png" alt="Open Materials" />$endif$
+$if(r2.badges.preregistered)$<img src="../../_extensions/r2/resources/badges/preregestered.png" alt="Preregistered" />$endif$
+$if(r2.badges.codecheck)$<img src="../../_extensions/r2/resources/badges/codecheck.png" alt="CODECHECK" />$endif$
+  </div>
+$endif$
+
+$if(abstract)$
+  <div class="r2-card r2-abstract"><span class="r2-card-label">Abstract.</span> $abstract$</div>
+$endif$
+
+$if(keywords)$
+  <div class="r2-card r2-keywords"><span class="r2-card-label">Keywords.</span> $for(keywords)$$keywords$$sep$, $endfor$</div>
+$endif$
+
+$if(r2.lay-summary)$
+  <div class="r2-card r2-lay"><span class="r2-card-label">Lay summary.</span> $r2.lay-summary$</div>
+$endif$
+
+$if(r2.recommended-citation)$
+  <div class="r2-card r2-citation"><span class="r2-card-label">Citation.</span> $r2.recommended-citation$</div>
+$endif$
+
+</header>

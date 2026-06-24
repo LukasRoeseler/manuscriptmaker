@@ -1,0 +1,338 @@
+% =====================================================================
+%  R2 Journal — Quarto/Pandoc LaTeX template
+%  Ported from the hand-authored R2 design (longsample_final_calibri.tex).
+%  The preamble is kept faithful to the original; only literal article
+%  content is replaced with Pandoc/Quarto template variables,
+%  and the minimal Pandoc plumbing is grafted in (tightlist, graphics
+%  scaling, longtable, code highlighting, header-includes).
+%
+%  Design tokens (accent colour, footer string, logo, …) come from the
+%  manuscript metadata / themes/<name>/theme.yml, so other journals can
+%  reuse this template unchanged.
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+% --- Calibri-like font (Carlito) -------------------------------------
+\usepackage[sfdefault]{carlito}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+% --- Authors / affiliations ------------------------------------------
+\usepackage[blocks]{authblk}
+\renewcommand\Affilfont{\itshape\footnotesize}
+\setlength{\affilsep}{0.5em}
+
+% --- Colours & design system -----------------------------------------
+\usepackage{xcolor}
+\definecolor{accent}{HTML}{$if(r2.accent)$$r2.accent$$else$009CCF$endif$}
+\definecolor{absbg}{HTML}{$if(r2.card-bg)$$r2.card-bg$$else$FEFDF6$endif$}
+\definecolor{absframe}{HTML}{$if(r2.card-border)$$r2.card-border$$else$EAE8DF$endif$}
+\definecolor{chipbg}{HTML}{$if(r2.card-bg)$$r2.card-bg$$else$FEFDF6$endif$}
+
+\usepackage[most]{tcolorbox}
+\tcbset{
+  rtwo-abstract/.style={
+    enhanced, breakable,
+    colback=absbg, colframe=absframe,
+    boxrule=0.3pt, arc=1.2mm,
+    left=8pt, right=8pt, top=8pt, bottom=8pt,
+    before skip=8pt, after skip=10pt,
+    borderline west={2pt}{0pt}{accent}
+  },
+  rtwo-chip/.style={
+    enhanced, breakable,
+    colback=chipbg, colframe=chipbg,
+    boxrule=0pt, arc=1mm,
+    left=6pt, right=6pt, top=6pt, bottom=6pt,
+    before skip=6pt, after skip=10pt,
+    borderline west={2pt}{0pt}{accent}
+  }
+}
+\newif\ifRtwoTintAbstract \RtwoTintAbstracttrue
+\newif\ifRtwoTintCitation \RtwoTintCitationtrue
+
+% --- Hyperlinks ------------------------------------------------------
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=accent,
+  citecolor=accent,
+  urlcolor=accent,
+  breaklinks=true,
+  pdftitle={$title-meta$},
+  pdfauthor={$author-meta$},
+  pdfcreator={R2 single-source pipeline (Quarto/Pandoc)}
+}
+\Urlmuskip=0mu plus 2mu
+
+% --- Geometry, header/footer -----------------------------------------
+\usepackage[includehead,includefoot]{geometry}
+\usepackage{fancyhdr}
+\setlength{\headheight}{20pt}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\usepackage{graphicx}
+% Scale images so they never overflow the text block (Pandoc behaviour).
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\providecommand{\pandocbounded}[1]{#1}
+
+% Page-edge accent rules (title page + main pages)
+\usepackage{tikz}
+\usepackage{tikzpagenodes}
+\usepackage{eso-pic}
+\usetikzlibrary{calc}
+
+% --- Language & typography -------------------------------------------
+\usepackage[american]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{setspace}
+\usepackage{listings}
+\lstset{basicstyle=\footnotesize\ttfamily, breaklines=true, breakatwhitespace=true}
+\newcommand{\passthrough}[1]{#1}
+% Correct ordering of longtables after \paragraph (Pandoc).
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+
+% Pandoc tight lists + emergency stretch + safe line breaking
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage[final]{microtype}
+\emergencystretch=3em
+\tolerance=2000
+\hyphenpenalty=1000
+\DisableLigatures{encoding = *, family = *}
+
+% Code-block highlighting macros (only emitted when code is present).
+$if(highlighting-macros)$
+$highlighting-macros$
+$endif$
+
+% --- Elegant bullets -------------------------------------------------
+\usepackage{enumitem}
+\usepackage{pifont}
+\newcommand{\elegantbullet}{\raisebox{0.2ex}{\ding{70}}}
+\newenvironment{elegantlist}{%
+  \begin{itemize}[label=\elegantbullet, leftmargin=*, labelsep=0.6em,
+                  itemsep=0.25\baselineskip, topsep=0.25\baselineskip]%
+}{\end{itemize}}
+
+\usepackage{xurl}
+\usepackage{placeins}
+\raggedbottom
+
+% --- Citations (biblatex + biber, APA) -------------------------------
+\usepackage{csquotes}
+\usepackage[backend=biber,style=apa,hyperref=true,giveninits,uniquename=init]{biblatex}
+\DeclareLanguageMapping{american}{american-apa}
+$for(bibliography)$
+\addbibresource{$bibliography$}
+$endfor$
+\AtEveryBibitem{\clearfield{day}\clearfield{month}\clearfield{labelday}\clearfield{labelmonth}}
+
+\usepackage{orcidlink}
+
+% Where assets (logo, license, badges) live, relative to a manuscript
+% rendered in manuscripts/<id>/.  Also search figures/ and the cwd.
+\graphicspath{{./}{figures/}{../../_extensions/r2/resources/}{../../_extensions/r2/resources/badges/}}
+
+% =====================================================================
+%  Header / footer styles
+% =====================================================================
+\fancypagestyle{mainstyle}{
+  \fancyhf{}
+  \fancyhead[L]{\hspace*{\HeaderLeftDelta}\small $if(r2.running-head)$$r2.running-head$$else$$title-meta$$endif$}
+  \fancyfoot[R]{%
+    \makebox[\dimexpr\textwidth+\FooterRightDelta\relax][r]{%
+      \small $r2.journal$, $r2.year$, vol $r2.volume$, $r2.article-id$ \textbar\ \thepage%
+    }%
+  }
+  \renewcommand{\headrulewidth}{0pt}
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+% --- Front-matter cards ----------------------------------------------
+\newcommand{\RtwoAbstract}[1]{%
+  \ifRtwoTintAbstract
+    \begin{tcolorbox}[rtwo-abstract]\textbf{Abstract.}\ #1\end{tcolorbox}%
+  \else
+    \par\smallskip\noindent\textit{Abstract:} #1\par
+  \fi}
+\newcommand{\keywords}[1]{%
+  \ifRtwoTintAbstract
+    \vspace{-6pt}\begin{tcolorbox}[rtwo-abstract]\textbf{Keywords.}\ #1\end{tcolorbox}%
+  \else
+    \par\smallskip\noindent\textit{Keywords:} #1\par
+  \fi}
+\newcommand{\laysummary}[1]{%
+  \begin{tcolorbox}[rtwo-abstract]\textbf{Lay summary.}\ #1\end{tcolorbox}}
+\newcommand{\recommendedcitation}[1]{%
+  \ifRtwoTintCitation
+    \begin{tcolorbox}[rtwo-chip]\textbf{Citation.}\ #1\end{tcolorbox}%
+  \else
+    \par\smallskip\noindent\textit{Citation:} #1\par
+  \fi}
+
+% =====================================================================
+%  Front matter
+% =====================================================================
+\title{$title$}
+
+$for(by-author)$
+\author[$for(by-author.affiliations)$$it.number$$sep$,$endfor$]{$by-author.name.literal$$if(by-author.orcid)$\,\orcidlink{$by-author.orcid$}$endif$}
+$endfor$
+
+$for(by-affiliation)$
+\affil[$by-affiliation.number$]{$by-affiliation.name$}
+$endfor$
+
+\date{}
+
+\setlength{\headheight}{64pt}
+
+% --- Title-page header tuning knobs ----------------------------------
+\newlength{\TitleLeftBoxW}  \setlength{\TitleLeftBoxW}{0.99\headwidth}
+\newlength{\TitleRightBoxW} \setlength{\TitleRightBoxW}{.4\headwidth}
+\newlength{\TitleRuleRaise} \setlength{\TitleRuleRaise}{-30pt}
+\newlength{\TitleHeadExtra}  \setlength{\TitleHeadExtra}{14mm}
+\newlength{\TitleHeaderRaise}\setlength{\TitleHeaderRaise}{-10mm}
+\newlength{\TitleToAbstractGap}\setlength{\TitleToAbstractGap}{-0.2\baselineskip}
+
+\fancypagestyle{firststyle}{
+  \fancyhf{}
+  \fancyheadoffset[L]{\TitleHeadExtra}
+  \fancyheadoffset[R]{\TitleHeadExtra}
+  \setlength{\headwidth}{\textwidth\TitleHeadExtra}
+  \fancyhead[L]{%
+    \vspace*{-\TitleHeaderRaise}%
+    \parbox[b][\headheight][c]{\TitleLeftBoxW}{%
+      \includegraphics[height=12mm]{$if(r2.logo)$$r2.logo$$else$logo.png$endif$}%
+    }%
+  }
+  \fancyhead[R]{%
+    \vspace*{-\TitleHeaderRaise}%
+    \parbox[b][\headheight][c]{\TitleRightBoxW}{%
+      \raggedleft\scriptsize
+      \textit{$r2.journal$}, $r2.year$, vol $r2.volume$, $r2.article-id$\\
+      $if(r2.doi)$\href{https://doi.org/$r2.doi$}{https://doi.org/$r2.doi$}\\$endif$
+      Article type: $r2.article-type$\\
+      Discipline: $r2.discipline$\\
+      Published under the $if(r2.license)$$r2.license$$else$CC-BY 4.0$endif$ license%
+    }%
+  }
+  \renewcommand{\headrulewidth}{1pt}
+  \renewcommand{\headrule}{%
+    \vspace*{\dimexpr\TitleRuleRaise-\TitleHeaderRaise\relax}%
+    \hbox to\headwidth{\color{accent}\rule{\headwidth}{\headrulewidth}}%
+  }
+  \renewcommand{\footrulewidth}{0pt}
+}
+
+\makeatletter
+\let\ps@plain\ps@firststyle
+\makeatother
+\setlength{\headheight}{54pt}
+\setlength{\headsep}{-9pt}
+\setlength{\topskip}{26pt}
+
+\newlength{\FooterYShift}\setlength{\FooterYShift}{-14pt}
+\newlength{\HeaderLeftDelta}\setlength{\HeaderLeftDelta}{0mm}
+\newlength{\FooterRightDelta}\setlength{\FooterRightDelta}{0mm}
+
+\setcounter{secnumdepth}{$if(secnumdepth)$$secnumdepth$$else$0$endif$}
+
+% User / Quarto header includes
+$for(header-includes)$
+$header-includes$
+$endfor$
+$for(include-in-header)$
+$include-in-header$
+$endfor$
+
+\begin{document}
+
+% ---- Title page -----------------------------------------------------
+\thispagestyle{firststyle}
+\maketitle
+\enlargethispage{10\baselineskip}
+\vspace*{\TitleToAbstractGap}
+
+$if(abstract)$
+\RtwoAbstract{$abstract$}
+$endif$
+$if(keywords)$
+\keywords{$for(keywords)$$keywords$$sep$, $endfor$}
+$endif$
+$if(r2.lay-summary)$
+\laysummary{$r2.lay-summary$}
+$endif$
+$if(r2.recommended-citation)$
+\recommendedcitation{$r2.recommended-citation$}
+$endif$
+
+% Earned open-science badges (rendered if declared true in metadata).
+$if(r2.badges)$
+\begin{center}
+$if(r2.badges.open-data)$\includegraphics[height=8mm]{opendata.png}\hspace{0.5em}$endif$%
+$if(r2.badges.open-code)$\includegraphics[height=8mm]{opencode.png}\hspace{0.5em}$endif$%
+$if(r2.badges.open-materials)$\includegraphics[height=8mm]{openmaterial.png}\hspace{0.5em}$endif$%
+$if(r2.badges.preregistered)$\includegraphics[height=8mm]{preregestered.png}\hspace{0.5em}$endif$%
+$if(r2.badges.codecheck)$\includegraphics[height=8mm]{codecheck.png}$endif$%
+\end{center}
+$endif$
+
+\newpage
+
+% ---- Page-edge accent rules from page 2 on --------------------------
+\AddToShipoutPictureFG{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \draw[accent, line width=1pt, line cap=butt]
+      ([xshift=\HeaderLeftDelta]current page text area.north west) --
+      (current page.north east |- current page text area.north west);
+    \draw[accent, line width=1pt, line cap=butt]
+      ([yshift=\FooterYShift]current page.north west |- current page text area.south east) --
+      ([xshift=\FooterRightDelta,yshift=\FooterYShift]current page text area.south east);
+  \end{tikzpicture}%
+}
+
+\newgeometry{top=30mm, bottom=20mm}
+\pagestyle{mainstyle}
+\thispagestyle{mainstyle}
+
+% ---- Main body ------------------------------------------------------
+$for(include-before)$
+$include-before$
+$endfor$
+
+$body$
+
+$for(include-after)$
+$include-after$
+$endfor$
+
+% ---- Licence badge --------------------------------------------------
+\vspace{1.5cm}
+\begin{center}
+  \textbf{Licence}\\[4pt]
+  $if(r2.license-url)$\href{$r2.license-url$}{$endif$%
+    \includegraphics[height=8mm]{$if(r2.license-badge)$$r2.license-badge$$else$license-cc-by.png$endif$}%
+  $if(r2.license-url)$}$endif$%
+\end{center}
+
+% ---- References -----------------------------------------------------
+\newpage
+\printbibliography$if(biblio-title)$[title=$biblio-title$]$endif$
+
+\end{document}

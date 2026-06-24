@@ -1,0 +1,7 @@
+/* R2 HTML extras: keep the reading column comfortable and print-friendly. */
+#quarto-content main.content { max-width: 820px; }
+
+@media print {
+  .r2-masthead-top { border-bottom: 2px solid #009CCF; }
+  a { color: #009CCF !important; text-decoration: none; }
+}

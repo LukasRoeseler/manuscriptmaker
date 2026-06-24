@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>R2 Publishing Workflow</title>
+<style>
+  :root { --accent:#009CCF; --card-bg:#FEFDF6; --card-border:#EAE8DF; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Calibri","Carlito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         color:#1c1c1c; line-height:1.55; }
+  header { border-bottom:3px solid var(--accent); padding:2.2rem 1.5rem 1.4rem; max-width:980px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:.6rem; font-weight:700; font-size:1.4rem; letter-spacing:.02em; }
+  .brand .r { background:var(--accent); color:#fff; padding:0 .35rem; border-radius:3px; }
+  main { max-width:980px; margin:0 auto; padding:1.5rem; }
+  h1 { font-size:2rem; margin:.4rem 0 .2rem; }
+  .lede { font-size:1.12rem; color:#333; max-width:64ch; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin:1.6rem 0; }
+  .card { background:var(--card-bg); border:1px solid var(--card-border); border-left:4px solid var(--accent);
+          border-radius:5px; padding:1rem 1.1rem; }
+  .card h3 { margin:.1rem 0 .4rem; }
+  a { color:var(--accent); }
+  .btn { display:inline-block; background:var(--accent); color:#fff; text-decoration:none; font-weight:600;
+         padding:.55rem .95rem; border-radius:5px; margin:.3rem .4rem .3rem 0; }
+  pre { background:#0f1720; color:#e6edf3; padding:1rem; border-radius:6px; overflow:auto; font-size:.85rem; }
+  .flow { font-family:ui-monospace,Consolas,monospace; font-size:.82rem; white-space:pre; background:var(--card-bg);
+          border:1px solid var(--card-border); border-radius:6px; padding:1rem; overflow:auto; }
+  footer { border-top:1px solid var(--accent); margin-top:2.5rem; padding:1rem 1.5rem; max-width:980px;
+           margin-left:auto; margin-right:auto; font-size:.8rem; color:#555; }
+  table { border-collapse:collapse; width:100%; font-size:.9rem; }
+  td,th { border-bottom:1px solid var(--card-border); text-align:left; padding:.4rem .5rem; vertical-align:top; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="r">R</span> REPLICATION RESEARCH · Publishing Workflow</div>
+</header>
+<main>
+  <h1>From “accepted” to “published”, automatically.</h1>
+  <p class="lede">A single-source publishing pipeline that turns an accepted
+  manuscript — in Word, Markdown, Quarto, R Markdown, or LaTeX/Overleaf — into
+  <strong>HTML</strong>, a typeset <strong>PDF</strong>, archival
+  <strong>JATS XML</strong>, and an <strong>Open Journal Systems</strong>
+  import package, in the journal's exact design. Hosted entirely on GitHub —
+  no server to maintain.</p>
+
+  <div>
+    <a class="btn" href="author-guide.html">📤 Submit a manuscript</a>
+    <a class="btn" href="theme-customizer/">🎨 Customize for another journal</a>
+    <a class="btn" href="https://github.com/" id="repo-link">📦 Repository</a>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>One source, four outputs</h3>
+      Write or upload once. Quarto + Pandoc render HTML, PDF (LaTeX), and JATS
+      from a single canonical file; a script assembles the OJS package.</div>
+    <div class="card"><h3>Any input format</h3>
+      <code>.docx .doc .md .rmd .qmd .tex</code> and Overleaf <code>.zip</code>.
+      Word citations from Zotero/Mendeley are converted to BibTeX.</div>
+    <div class="card"><h3>Pull-request workflow</h3>
+      Submit by opening a PR. A bot posts a live preview and galleys.
+      Proofreading happens as PR comments; merging publishes the article.</div>
+    <div class="card"><h3>Reusable theme</h3>
+      The journal design is a Quarto extension parameterized by one
+      <code>theme.yml</code>. Other journals reuse the engine unchanged.</div>
+  </div>
+
+  <h2>The pipeline</h2>
+  <div class="flow">submit  →  normalize.py  →  article.qmd (+ references.bib + figures/)
+                                   │
+                quarto render  ────┼────────────┬───────────────┐
+                              r2-html        r2-pdf          r2-jats → enrich
+                                   └──────── build_ojs.py ──────────┘
+                                          OJS native-import XML</div>
+
+  <h2>What goes in a manuscript folder</h2>
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><code>source/&lt;file&gt;</code></td><td>The accepted manuscript, as submitted.</td></tr>
+    <tr><td><code>article.qmd</code></td><td>Canonical source (authored content + front matter). Auto-generated for non-Quarto inputs.</td></tr>
+    <tr><td><code>_metadata.yml</code></td><td>Editor-owned publication fields: DOI, volume, type, discipline, badges, citation.</td></tr>
+    <tr><td><code>references.bib</code></td><td>Bibliography (BibTeX).</td></tr>
+    <tr><td><code>figures/</code></td><td>Images.</td></tr>
+  </table>
+
+  <h2>Run it locally</h2>
+  <pre>pip install pyyaml jinja2
+NO_PDF=1 engine/scripts/build_all.sh manuscripts/R2.2025.001
+quarto render manuscripts/R2.2025.001/article.qmd --to r2-html</pre>
+</main>
+<footer>
+  Replication Research (R2) · Diamond Open Access · built with Quarto, Pandoc &amp; GitHub Actions.
+  Design system: accent <code>#009CCF</code>, Carlito. Inspired by the Magic Manuscript Maker.
+</footer>
+<script>
+  // Point the repo link at this repo when served from GitHub Pages.
+  (function(){ var h=location.hostname.split(".")[0], p=location.pathname.split("/")[1];
+    if(h && p){ document.getElementById("repo-link").href="https://github.com/"+h+"/"+p; } })();
+</script>
+</body>
+</html>

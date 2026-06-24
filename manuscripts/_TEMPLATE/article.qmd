@@ -1,0 +1,52 @@
+---
+# Authored content. (Editors: publication fields live in _metadata.yml.)
+# If you submit a .docx/.tex instead, this file is generated for you — delete it.
+title: "Your article title"
+author:
+  - name: { given: First, family: Author }
+    orcid: 0000-0000-0000-0000
+    email: first.author@example.org
+    corresponding: true
+    affiliations: [{ ref: aff1 }]
+  - name: { given: Second, family: Author }
+    orcid: 0000-0000-0000-0001
+    affiliations: [{ ref: aff2 }]
+affiliations:
+  - { id: aff1, name: "First University" }
+  - { id: aff2, name: "Second University" }
+abstract: >
+  One-paragraph abstract.
+keywords: [keyword one, keyword two, keyword three]
+bibliography: references.bib
+---
+
+Write the article body in Markdown. Cite with `[@key]` (parenthetical) or
+`@key` (in-text), where keys come from `references.bib`.
+
+## Introduction
+
+Your text here [@example2024].
+
+## Methods
+
+## Results
+
+## Discussion
+
+## Declarations {.unnumbered}
+
+### Author Contributions {.unnumbered}
+
+- First Author: ...
+- Second Author: ...
+
+### Funding {.unnumbered}
+
+### Potential conflicts of interest {.unnumbered}
+
+### Declaration of AI use {.unnumbered}
+
+## References {.unnumbered}
+
+::: {#refs}
+:::

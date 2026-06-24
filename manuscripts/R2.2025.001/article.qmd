@@ -1,0 +1,153 @@
+---
+title: "Inaugural Editorial of *Replication Research (R2)*"
+author:
+  - name: { given: Lukas, family: Röseler }
+    orcid: 0000-0002-6446-1901
+    email: lukas.roeseler@uni-muenster.de
+    corresponding: true
+    affiliations: [{ ref: muenster }]
+  - name: { given: Lukas, family: Wallrich }
+    orcid: 0000-0003-2121-5177
+    affiliations: [{ ref: birkbeck }]
+  - name: { given: Susanne, family: Adler }
+    orcid: 0000-0002-3211-6871
+    affiliations: [{ ref: lmu }]
+  - name: { given: Prince, family: Oppong Boakye }
+    orcid: 0009-0003-5447-8034
+    affiliations: [{ ref: muenster }]
+  - name: { given: Thomas Rhys, family: Evans }
+    orcid: 0000-0002-6670-0718
+    affiliations: [{ ref: greenwich }]
+  - name: { given: Janik, family: Goltermann }
+    orcid: 0000-0003-3087-1002
+    affiliations: [{ ref: charite }]
+  - name: { given: Jan, family: Horstmann }
+    orcid: 0000-0001-8047-2232
+    affiliations: [{ ref: hamburg }]
+  - name: { given: Max, family: Korbmacher }
+    orcid: 0000-0002-8113-2560
+    affiliations: [{ ref: haukeland }]
+  - name: { given: Steven, family: Verheyen }
+    orcid: 0000-0002-6778-6744
+    affiliations: [{ ref: erasmus }]
+  - name: { given: Ingmar, family: Visser }
+    orcid: 0000-0003-3855-2778
+    affiliations: [{ ref: amsterdam }]
+  - name: { given: Flavio, family: Azevedo }
+    orcid: 0000-0001-9000-8513
+    affiliations: [{ ref: utrecht }]
+affiliations:
+  - { id: muenster,  name: "University of Münster" }
+  - { id: birkbeck,  name: "Birkbeck, University of London" }
+  - { id: lmu,       name: "Ludwig-Maximilians-Universität München" }
+  - { id: greenwich, name: "University of Greenwich" }
+  - { id: charite,   name: "Charité – Universitätsmedizin Berlin" }
+  - { id: hamburg,   name: "University of Hamburg" }
+  - { id: haukeland, name: "Haukeland University Hospital" }
+  - { id: erasmus,   name: "Erasmus University Rotterdam" }
+  - { id: amsterdam, name: "University of Amsterdam" }
+  - { id: utrecht,   name: "Utrecht University" }
+abstract: >
+  Reproducibility and replicability are vital for trustworthy, cumulative
+  research, yet remain undervalued in most areas of academic publishing.
+  Replication Research (R2) is a Diamond Open Access journal dedicated to
+  publishing high-quality reproductions, replications, and related
+  methodological work across disciplines. With robust standards for
+  transparency, open peer review, and social responsibility, R2 offers
+  practical guidance and support for authors. We aim to rebalance research
+  culture by valuing diligence and robustness alongside innovation, thereby
+  increasing confidence in research findings. We invite researchers to
+  contribute to and benefit from an open, community-driven journal designed
+  to elevate the status and impact of replications (repeated tests of
+  published findings with different data) and reproductions (repeated tests
+  of published findings with the same data). In this editorial, we introduce
+  the aims, policies, and scope of Replication Research, outlining how the
+  journal will operate and the values that guide it.
+keywords:
+  - reproduction
+  - replication
+  - metascience
+  - open science
+  - open access
+bibliography: references.bib
+---
+
+> "And what we find today we shall strike out from the record tomorrow, and only write it in again when we have once more discovered it."
+>
+> --- [@Brecht1974-gk]
+
+Scientific knowledge is built on trust, yet the foundations of that trust are often neglected. Continuously reiterating and reexamining scientific claims is necessary for research to be trustworthy and to facilitate cumulative science. While we strongly acknowledge the need for innovation and novelty, over reliance on these values has led to a neglect of a systematic evaluation of knowledge claims [@Makel2012ReplicationsPsychology]. Specifically, we believe that more efforts should be made to support the repeated investigation of previously made claims, also called *repetitive research* [@Schoech2023RepetitiveResearch]. An overemphasis on innovation and novelty at the cost of repeated investigation of past findings can endanger scientific accuracy by allowing false-positive findings to persist and risks decreasing public trust in science. Furthermore, it leads to inefficient resource allocation when trying to build on allegedly known findings with weak evidence. Calls for more scientific rigor and criticism of the current academic system are widespread (e.g., [@king1995replication; @Munafo2017ManifestoReproducibleScience]), and so is the idea of providing *academic journals for replications* [@Grunow2018LackReproducibility]. Yet, no cross-disciplinary journal dedicated to replications and reproductions across disciplines exists to date --- a crucial gap we aim to fill with this new dedicated *Replication Research* journal.
+
+## A Community-Based Solution for Rigorous Research
+
+With *Replication Research*, we want to support reproduction and replication studies across multiple disciplines. R2's core objectives include the following:
+
+**Providing an interdisciplinary dedicated outlet for repetitive research:** Despite the increasing recognition of the necessity and value of replication studies, only a limited number of journals accept replication studies. A dedicated journal for repetitive research allows a strong focus on rigor irrespective of novelty and facilitates the findability of replications and reproductions [@Reed2025NoRoomInn]. The journals that currently focus on repetitive research (e.g., *Journal of Comments and Replications in Economics*) are domain-specific; as an interdisciplinary journal, R2 provides an opportunity to publish replications and reproductions to researchers from all fields.
+
+**Increasing the number of replications:** The share of replications in the published literature is still very low (e.g., [@Perry2022DecadeReplicationEducation; @Pridemore2018ReplicationCriminology]), and methods that structurally examine replicability and reproducibility have only recently been developed (e.g., [@Heyard2025ScopingReproducibilityMetrics]). Nevertheless, replication rates are growing [@Clarke2023PrevalenceDirectReplication; @Reed2025NoRoomInn]. R2 aims to support that trend and increase the prevalence, visibility and recognition of repetitive research.
+
+**Incentivizing high-quality replications and reproductions:** Publications remain the currency for career progression and research assessments in many disciplines. Therefore, a dedicated high-quality journal is essential. We support authors to increase the transparency and reproducibility of their findings. All accepted quantitative articles will undergo checks for numerical reproducibility to help the authors achieve field-specific best sharing practices and peer review reports will be published. Submissions are evaluated based on research quality and not on the novelty of their findings or their expected impact.
+
+**Supporting transparency:** R2 requires authors to first post their preprints online and embraces open peer review, in which all correspondence between authors, reviewers, and editors is made public.
+
+**Sustainable Diamond Open Access:** R2 is a Diamond Open Access journal -- that is, it is free to publish in and free to read and authors retain copyrights to their articles. All content is published under a CC-BY licence, ensuring it is free to reuse. It is sustained via institutional infrastructure and all articles are long-time archived.
+
+**Community-governed journal:** Rather than shaped by commercial pressures or institutions, R2 has been created through open discussions in a diverse community, such as a symposium to shape the journal (e.g., [@Roseler2025bR2SBook]). Ownership and decision-making are transparently described in the journal constitution [@Roseler2025R2Constitution]. We are committed to running this service until at least early 2028 and will then review the journal success based on pre-determined success criteria [@Roseler2025R2DiscontinuedConditions].
+
+**Contributing to the creation of a sustainable, non-commercial publishing ecosystem:** Many existing journals must follow commercial imperatives that are not always aligned with scientific ideals. This includes the necessity to achieve target impact metrics regardless of research quality [@brembs2018prestigious], the rising costs for open access publishing [@Grossmann2021MarketRates], or the emergence of predatory journals (e.g., [@Beall2017PredatoryPublishers]). We think that scientific knowledge, made possible by public funding, is a public good that should be free to publish and free to read for everyone, which is why we have declared in our constitution that R2 is and will forever be a diamond open-access journal.
+
+## What does R2 publish?
+
+We envision R2 as a hub for researchers who are interested in rigorous and robust repetitive research. We welcome **reproductions** (repeated investigation of previous findings using *the same* data), **replications** (repeated investigation of previous findings using *different* data), and **related contributions** such as methods for replication research, meta-analyses of replications, multi- or many-analyst studies, tutorials, comments, or reviews of replications. Submitted articles may also consist of single studies that have been part of meta-articles (e.g., [@open2015estimating]) as long as they have not been published individually, meet our standards for openness, and declare transparently that they have been included in a meta-article. At launch, we accept submissions from numerous disciplines such as quantitative and qualitative social sciences (an up-to-date list is available at [replicationresearch.org](https://replicationresearch.org/)). Submissions from other disciplines are welcome and may be considered depending on the availability of an ad hoc editor.
+
+### Transparency is the norm
+
+R2 has high standards for transparency and openness: Studies should report whether they were preregistered and need to disclose all differences between the preregistration and the final report. In addition, analysis plans, materials, study protocols, code, and data should be shared and complete per disciplinary best-practices (e.g., PRISMA for meta-analyses; [@Page2021PRISMA2020]). We badge Open Data/Code/Materials, Preregistration, Computational Reproducibility and perform link checks prior to sending articles for review.
+
+## Guidance for authors
+
+For reproductions and replications, we expect authors to justify their choice of the target study, explain their decision for the type of reproduction or replication, disclose deviations from the original study, provide readers with a differentiated judgment of success or failure, and discuss possible reasons for consistencies and discrepancies between the original and repetition's results in a constructive and factual manner. We recommend evaluation of reproduction or replication success based on a predetermined criterion [@Heyard2025ScopingReproducibilityMetrics]. Editors judge the manuscript based on its potential to meet R2's standards and see it as their and the reviewers' task to help the authors achieve that potential. We acknowledge that many disciplines do not yet have clear standards on what constitutes a good replication, which is why we provide guidance in multiple ways.
+
+1. We convened a team of 13 researchers who have conducted numerous reproductions and replications as part of their research, in collaborations, and as student projects, who have published an open handbook on conducting reproductions and replications ([@Roseler2025HandbookReplication]; <https://forrt.org/replication_guide>). For robustness reproductions, we further recommend the protocol by @AnkelPeters2025StructuredRobustness and the Guide for Accelerating Computational Reproducibility in the Social Sciences [@BITSS2020ACRE].
+2. Based on multiple guides and our experience with the Framework for Open and Reproducible Research Training (FORRT) Replication Database [@roseler2024replicationdatabase], we have created manuscript templates for reproduction and replication studies that authors can optionally use ([@Roseler2025aStaRT]; <https://osf.io/brxtd>).
+3. Authors interested in replications from their field may use the FORRT Replication Database, with over 1000 replication studies, to search for examples from their field (<https://forrt.org/apps/fred_explorer.html>).
+
+## Social Impact & Responsibility
+
+We criticize the lack of rigor in the current academic system and argue that replication and reproduction rates are too low. These arguments can be used to discredit researchers, their findings, and research in general. Calls for scientific rigor or *sound science* have in the past been used to block policymakers from regulating industry [@baba2005legislating]. While we have created R2 to support repetitive research and motivate researchers to conduct high quality reproduction and replication studies, we refute the call to disregard research findings that do not meet a high standard since "demanding perfect evidence before action can be taken is often a way to avoid using evidence at all" [@COS2025RestoringGoldStandardScience].
+
+## Conclusion
+
+We invite researchers, students, and institutions to strengthen the foundations of scientific knowledge by submitting their replication and reproduction studies to R2. Together, we can reshape publishing practices and foster more robust, reliable research.
+
+## Declarations {.unnumbered}
+
+### Author Contributions {.unnumbered}
+
+- LR: Writing -- first draft
+- All authors: Writing -- review and editing
+
+### Acknowledgments {.unnumbered}
+
+We thank participants from the "Road to R2" online discussion sessions, contributors from the Replication Research Symposium, members of the R2 Advisory Board, and contributors from our open community call.
+
+### Funding {.unnumbered}
+
+This research was supported by the Landesinitiative openaccess.nrw (<https://osf.io/a82fe>) and the University of Münster Topical Program (<https://osf.io/wqe7n>). We gratefully acknowledge the financial support provided by both organizations.
+
+### Potential conflicts of interest {.unnumbered}
+
+All members of the R2 editorial board are actively engaged in repetitive research in various professional capacities (e.g., conducting, publishing, or advocating for such work). As such, they have professional and intellectual interests in the visibility and uptake of related research, and several authors' prior publications are cited in the reference list of this article. These relationships constitute non-financial competing interests that could be perceived as favoring the amplification of replication-related work. The authors declare no financial competing interests related to this editorial.
+
+### Declaration of AI use {.unnumbered}
+
+Parts of the initial draft of the abstract had been AI generated from the text. Moreover, we used ChatGPT 5 to check for consistency of references, convert references from plain text to .bib format and to generate suggestions to improve the text.
+
+### Author Contact {.unnumbered}
+
+Correspondence concerning this article should be addressed to Lukas Röseler: <lukas.roeseler@uni-muenster.de>
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
