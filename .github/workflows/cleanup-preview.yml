@@ -1,0 +1,32 @@
+name: Cleanup PR preview
+
+# Remove a PR's /preview/pr-<n>/ subtree from the gh-pages branch once the
+# PR is closed, so preview builds don't accumulate.
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          fetch-depth: 0
+        continue-on-error: true
+      - name: Remove preview directory
+        run: |
+          dir="preview/pr-${{ github.event.pull_request.number }}"
+          if [ -d "$dir" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git rm -r "$dir"
+            git commit -m "Cleanup preview for PR #${{ github.event.pull_request.number }}"
+            git push
+          else
+            echo "No preview directory to clean ($dir)."
+          fi
