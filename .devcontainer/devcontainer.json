@@ -1,0 +1,13 @@
+{
+  "name": "R2 Publishing Workflow",
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "features": {
+    "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": { "version": "1.5.53", "installTinyTeX": true }
+  },
+  "postCreateCommand": "pip install pyyaml jinja2 && sudo apt-get update && sudo apt-get install -y fonts-crosextra-carlito libreoffice-writer && sudo fc-cache -f && quarto install tinytex --no-prompt || true",
+  "customizations": {
+    "vscode": {
+      "extensions": ["quarto.quarto", "ms-python.python"]
+    }
+  }
+}
