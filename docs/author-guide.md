@@ -3,6 +3,11 @@
 This guide takes one accepted manuscript from *“accepted”* to *“published in the
 R2 design.”* No software needs to run on your machine — GitHub does the work.
 
+> **Tip — instant preview.** Before submitting, drop your file into the
+> [in-browser preview](preview/) to see it typeset in the R2 design immediately
+> (`.docx`, Markdown/Quarto, and basic LaTeX). It runs entirely in your browser;
+> the authoritative PDF/JATS/OJS galleys are still produced by the pipeline below.
+
 ## 1. Create the manuscript folder
 
 1. On GitHub, click **Add file → Create new file** (or use the web editor).

@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Instant preview · R2 Publishing Workflow</title>
+<style>
+  :root { --accent:#009CCF; --card-bg:#FEFDF6; --card-border:#EAE8DF; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"Calibri","Carlito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         color:#1c1c1c; line-height:1.5; background:#fafafa; }
+  a { color:var(--accent); }
+  header.site { border-bottom:3px solid var(--accent); background:#fff; }
+  header.site .in { max-width:1280px; margin:0 auto; padding:1rem 1.2rem; display:flex; align-items:center; gap:.6rem; }
+  .brand { font-weight:700; letter-spacing:.02em; }
+  .brand .r { background:var(--accent); color:#fff; padding:0 .35rem; border-radius:3px; }
+  .brand a { text-decoration:none; color:inherit; }
+  .layout { display:grid; grid-template-columns:380px 1fr; gap:1.2rem; max-width:1280px; margin:0 auto; padding:1.2rem; align-items:start; }
+  @media (max-width:920px){ .layout { grid-template-columns:1fr; } }
+
+  /* ---- control panel ---- */
+  .panel { background:#fff; border:1px solid #e6e4db; border-radius:8px; padding:1rem; position:sticky; top:1rem; }
+  #drop { border:2px dashed var(--accent); border-radius:8px; padding:1.3rem 1rem; text-align:center;
+          color:#33707f; background:var(--card-bg); cursor:pointer; transition:.15s; }
+  #drop.drag { background:#e9f7fb; border-color:#0090bd; }
+  #drop strong { display:block; font-size:1.02rem; }
+  #drop small { color:#666; }
+  #fileinfo { font-size:.85rem; margin:.5rem 0; color:#333; min-height:1.1em; }
+  .fmt { display:inline-block; font-size:.72rem; background:var(--accent); color:#fff; padding:0 .4rem; border-radius:3px; }
+  details { margin-top:.7rem; border-top:1px solid #eee; }
+  summary { cursor:pointer; font-weight:600; padding:.5rem 0; }
+  label { display:block; font-weight:600; font-size:.82rem; margin:.5rem 0 .15rem; }
+  input,textarea,select { width:100%; padding:.4rem .5rem; border:1px solid #ccc; border-radius:4px; font:inherit; font-size:.88rem; }
+  textarea { resize:vertical; min-height:48px; }
+  .row { display:flex; gap:.5rem; } .row > div { flex:1; }
+  .badgechk { display:flex; flex-wrap:wrap; gap:.5rem; font-size:.8rem; font-weight:400; }
+  .badgechk label { display:flex; align-items:center; gap:.25rem; font-weight:400; margin:0; }
+  .actions { margin-top:.8rem; display:flex; gap:.5rem; flex-wrap:wrap; }
+  button { background:var(--accent); color:#fff; border:0; font-weight:600; padding:.5rem .9rem;
+           border-radius:6px; cursor:pointer; font-size:.9rem; }
+  button.ghost { background:#fff; color:var(--accent); border:1px solid var(--accent); }
+  .note { font-size:.78rem; color:#666; margin-top:.6rem; }
+
+  /* ---- article preview (mirrors the real r2-html output) ---- */
+  .stage { background:#fff; border:1px solid #e6e4db; border-radius:8px; padding:0; overflow:hidden; }
+  .stagebar { background:#f4f2ea; border-bottom:1px solid #e6e4db; padding:.4rem .8rem; font-size:.8rem; color:#555;
+              display:flex; justify-content:space-between; align-items:center; }
+  #paper { padding:2rem clamp(1rem,4vw,3rem); max-width:900px; margin:0 auto; }
+  .r2-top { display:flex; justify-content:space-between; align-items:flex-start; gap:1.5rem;
+            padding-bottom:.6rem; border-bottom:2px solid var(--accent); }
+  .r2-top img { height:44px; }
+  .r2-meta { text-align:right; font-size:.72rem; line-height:1.45; color:#333; }
+  .r2-title { text-align:center; font-weight:700; font-size:1.8rem; margin:1.3rem 0 .7rem; }
+  .r2-authors { text-align:center; font-weight:700; line-height:1.6; }
+  .r2-authors sup { font-weight:400; }
+  .r2-affils { text-align:center; font-style:italic; font-size:.85rem; color:#444; margin:.3rem 0 1rem; }
+  .r2-badges { text-align:center; margin:.6rem 0 1rem; } .r2-badges img { height:30px; margin:0 3px; vertical-align:middle; }
+  .r2-card { background:var(--card-bg); border:.5px solid var(--card-border); border-left:3px solid var(--accent);
+             border-radius:3px; padding:.65rem .85rem; margin:.55rem 0; font-size:.94rem; }
+  .r2-card b { font-weight:700; }
+  #r2-body { margin-top:1.4rem; }
+  #r2-body h1,#r2-body h2 { font-size:1.3rem; border-bottom:1px solid #eee; padding-bottom:.2rem; margin-top:1.6rem; }
+  #r2-body h3 { font-size:1.08rem; margin-top:1.2rem; }
+  #r2-body img { max-width:100%; height:auto; }
+  #r2-body table { border-collapse:collapse; } #r2-body td,#r2-body th { border:1px solid #ddd; padding:.3rem .5rem; }
+  #r2-body pre { background:#0f1720; color:#e6edf3; padding:.8rem; border-radius:6px; overflow:auto; }
+  .r2-license { text-align:center; margin:2rem 0 1rem; } .r2-license img { height:30px; }
+  .empty { color:#999; text-align:center; padding:4rem 1rem; }
+  .warn { background:#fff7e6; border-left:3px solid #e0a800; padding:.5rem .7rem; font-size:.82rem; margin:.6rem 0; }
+</style>
+</head>
+<body>
+<header class="site"><div class="in">
+  <span class="brand"><a href="../"><span class="r">R</span> REPLICATION RESEARCH</a></span>
+  <span style="color:#888">· Instant preview</span>
+</div></header>
+
+<div class="layout">
+  <!-- ---------------- control panel ---------------- -->
+  <aside class="panel">
+    <div id="drop">
+      <strong>⬆ Drop a manuscript</strong>
+      <small>or click to choose a file</small>
+      <input type="file" id="file" accept=".docx,.md,.markdown,.qmd,.rmd,.tex,.txt" hidden />
+    </div>
+    <div id="fileinfo">Supports <span class="fmt">.docx</span> <span class="fmt">.md</span>
+      <span class="fmt">.qmd</span> <span class="fmt">.rmd</span> <span class="fmt">.tex</span></div>
+    <div id="status" style="display:none; font-size:.85rem; color:var(--accent); font-weight:600; margin:.3rem 0;"></div>
+
+    <details open>
+      <summary>Article metadata</summary>
+      <label>Title</label><input id="m-title" placeholder="Article title" />
+      <label>Authors <small>(comma-separated)</small></label>
+      <input id="m-authors" placeholder="First Author, Second Author" />
+      <label>Affiliations <small>(one per line, optional)</small></label>
+      <textarea id="m-affils" placeholder="University of ..."></textarea>
+      <label>Abstract</label><textarea id="m-abstract"></textarea>
+      <label>Keywords <small>(comma-separated)</small></label>
+      <input id="m-keywords" />
+      <label>Lay summary <small>(optional)</small></label>
+      <textarea id="m-lay"></textarea>
+    </details>
+
+    <details>
+      <summary>Publication details</summary>
+      <label>Journal</label><input id="m-journal" value="Replication Research (R2)" />
+      <div class="row">
+        <div><label>Article type</label>
+          <select id="m-type">
+            <option>Replication</option><option>Reproduction</option><option>Editorial</option>
+            <option>Methods</option><option>Comment</option><option>Review</option><option>Tutorial</option>
+          </select></div>
+        <div><label>Discipline</label><input id="m-discipline" value="Multidisciplinary" /></div>
+      </div>
+      <div class="row">
+        <div><label>Volume</label><input id="m-volume" value="1" /></div>
+        <div><label>Year</label><input id="m-year" value="2025" /></div>
+      </div>
+      <div class="row">
+        <div><label>Article ID</label><input id="m-id" placeholder="R2.2025.000" /></div>
+        <div><label>DOI</label><input id="m-doi" placeholder="10.15626/R2.2025.000" /></div>
+      </div>
+      <label>Recommended citation <small>(optional)</small></label>
+      <textarea id="m-citation"></textarea>
+      <label>Open-science badges</label>
+      <div class="badgechk">
+        <label><input type="checkbox" id="b-open-data" /> Data</label>
+        <label><input type="checkbox" id="b-open-code" /> Code</label>
+        <label><input type="checkbox" id="b-open-materials" /> Materials</label>
+        <label><input type="checkbox" id="b-preregistered" /> Prereg.</label>
+        <label><input type="checkbox" id="b-codecheck" /> Codecheck</label>
+      </div>
+    </details>
+
+    <div class="actions">
+      <button id="dl" class="ghost">⬇ Download preview HTML</button>
+      <button id="reset" class="ghost">Reset</button>
+    </div>
+    <p class="note">100% in your browser — nothing is uploaded. This is a layout
+      preview. The authoritative PDF, JATS XML and OJS package are produced by
+      the GitHub Actions pipeline when you open a Pull Request
+      (<a href="../author-guide.html">how to submit</a>). Citations like
+      <code>[@key]</code> resolve there, not here.</p>
+  </aside>
+
+  <!-- ---------------- live article preview ---------------- -->
+  <main class="stage">
+    <div class="stagebar"><span>Preview — R2 design</span><span id="srcfmt"></span></div>
+    <div id="paper">
+      <div class="empty" id="empty">Drop a <strong>.docx</strong>, Markdown, or LaTeX file to see it
+        typeset in the Replication&nbsp;Research design.</div>
+      <article id="article" hidden>
+        <header>
+          <div class="r2-top">
+            <img src="../assets/logo.png" alt="R2 logo" />
+            <div class="r2-meta" id="r2-meta"></div>
+          </div>
+          <h1 class="r2-title" id="r2-title"></h1>
+          <div class="r2-authors" id="r2-authors"></div>
+          <div class="r2-affils" id="r2-affils"></div>
+          <div class="r2-badges" id="r2-badges"></div>
+          <div class="r2-card" id="r2-abstract" hidden><b>Abstract.</b> <span></span></div>
+          <div class="r2-card" id="r2-keywords" hidden><b>Keywords.</b> <span></span></div>
+          <div class="r2-card" id="r2-lay" hidden><b>Lay summary.</b> <span></span></div>
+          <div class="r2-card" id="r2-citation" hidden><b>Citation.</b> <span></span></div>
+        </header>
+        <div id="r2-body"></div>
+        <div class="r2-license"><b>Licence</b><br/><img src="../assets/license-cc-by.png" alt="CC BY 4.0" /></div>
+      </article>
+      <div id="warnbox"></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const md = window.markdownit({ html:true, linkify:true, typographer:true });
+let bodyHtml = "";
+
+/* ---------- file handling ---------- */
+const drop = $("#drop"), fileInput = $("#file");
+drop.addEventListener("click", () => fileInput.click());
+fileInput.addEventListener("change", e => e.target.files[0] && loadFile(e.target.files[0]));
+["dragover","dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("drag"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("drag"); }));
+drop.addEventListener("drop", e => e.dataTransfer.files[0] && loadFile(e.dataTransfer.files[0]));
+
+function warn(msg){ $("#warnbox").innerHTML = msg ? `<div class="warn">${msg}</div>` : ""; }
+function setStatus(msg){ $("#status").textContent = msg || ""; $("#status").style.display = msg ? "block" : "none"; }
+
+/* Convert .docx in a Web Worker so a pathological file can't freeze the tab,
+   and so we can enforce a timeout (mammoth is CPU-bound and uninterruptible
+   on the main thread). */
+function convertDocxInWorker(buf, timeoutMs){
+  return new Promise((resolve, reject) => {
+    const src = `importScripts("https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js");
+      self.onmessage = async (e) => {
+        try { const r = await mammoth.convertToHtml({arrayBuffer: e.data}); self.postMessage({html: r.value}); }
+        catch(err){ self.postMessage({error: String(err)}); }
+      };`;
+    let w;
+    try { w = new Worker(URL.createObjectURL(new Blob([src], {type:"text/javascript"}))); }
+    catch(e){ return reject(new Error("worker unavailable")); }
+    const timer = setTimeout(() => { w.terminate(); reject(new Error("timeout")); }, timeoutMs);
+    w.onmessage = e => { clearTimeout(timer); w.terminate();
+      e.data.error ? reject(new Error(e.data.error)) : resolve(e.data.html); };
+    w.onerror = e => { clearTimeout(timer); w.terminate(); reject(new Error(e.message || "worker error")); };
+    w.postMessage(buf, [buf]);
+  });
+}
+
+async function loadFile(file){
+  const ext = "." + file.name.split(".").pop().toLowerCase();
+  $("#fileinfo").innerHTML = `Loaded <strong>${file.name}</strong> <span class="fmt">${ext}</span>`;
+  $("#srcfmt").textContent = ext;
+  warn("");
+  try {
+    if (ext === ".docx") {
+      setStatus("⏳ Converting .docx…");
+      if (file.size > 3*1024*1024)
+        warn("Large file — in-browser conversion may be slow. The Pull-Request pipeline converts it reliably either way.");
+      const buf = await file.arrayBuffer();
+      try {
+        bodyHtml = await convertDocxInWorker(buf, 25000);
+        if (bodyHtml && !$("#m-title").value)
+          $("#m-title").value = guessTitle(bodyHtml) || file.name.replace(/\.docx$/i,"");
+      } catch(err){
+        bodyHtml = "";
+        warn(err.message === "timeout"
+          ? "This .docx is too complex to preview in the browser (usually heavy nested tables or many images). It will still convert via the <a href='../author-guide.html'>Pull-Request pipeline</a>."
+          : "Could not convert this .docx: " + err.message);
+      } finally { setStatus(""); }
+    } else if (ext === ".doc") {
+      warn("Legacy <code>.doc</code> can't be read in the browser. Save as .docx, or submit it through the pipeline (LibreOffice converts it server-side).");
+      bodyHtml = "";
+    } else if ([".md",".markdown",".qmd",".rmd"].includes(ext)) {
+      const text = await file.text();
+      const { meta, body } = splitFrontMatter(text);
+      applyMeta(meta);
+      bodyHtml = md.render(stripCodeChunks(body));
+    } else if (ext === ".tex") {
+      const text = await file.text();
+      const { meta, body } = parseLatex(text);
+      applyMeta(meta);
+      bodyHtml = body;
+      warn("LaTeX preview is <strong>best-effort</strong> (headings, emphasis, links and lists). Tables, maths and macros render fully in the PDF/JATS pipeline.");
+    } else {
+      bodyHtml = md.render(await file.text());
+    }
+  } catch(err){ warn("Could not convert this file: " + err.message); bodyHtml = ""; }
+  render();
+}
+
+/* ---------- format helpers ---------- */
+function splitFrontMatter(text){
+  const m = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+  if (!m) return { meta:{}, body:text };
+  try { return { meta: jsyaml.load(m[1]) || {}, body: m[2] }; }
+  catch(e){ return { meta:{}, body:text }; }
+}
+function stripCodeChunks(mdText){
+  // Drop executable chunk options so .qmd/.rmd chunks show as plain code.
+  return mdText.replace(/```\{[^}]*\}/g, "```");
+}
+function guessTitle(html){
+  const h = html.match(/<h1[^>]*>(.*?)<\/h1>/i) || html.match(/<p[^>]*>\s*<strong>(.*?)<\/strong>\s*<\/p>/i);
+  return h ? h[1].replace(/<[^>]+>/g,"").trim() : "";
+}
+function applyMeta(meta){
+  if (!meta || typeof meta !== "object") return;
+  const set = (id,v) => { if (v && !$(id).value) $(id).value = v; };
+  set("#m-title", meta.title);
+  if (meta.author) set("#m-authors", normAuthors(meta.author));
+  if (meta.affiliations) set("#m-affils", (meta.affiliations||[]).map(a=>a.name||a).join("\n"));
+  set("#m-abstract", typeof meta.abstract==="string"?meta.abstract:"");
+  if (meta.keywords) set("#m-keywords", [].concat(meta.keywords).join(", "));
+  const r2 = meta.r2 || {};
+  set("#m-discipline", r2.discipline); set("#m-id", r2["article-id"]); set("#m-doi", r2.doi);
+  set("#m-lay", r2["lay-summary"]); set("#m-citation", r2["recommended-citation"]);
+  if (r2.volume) set("#m-volume", r2.volume); if (r2.year) set("#m-year", r2.year);
+  if (r2["article-type"]) $("#m-type").value = r2["article-type"];
+  const b = r2.badges || {};
+  ["open-data","open-code","open-materials","preregistered","codecheck"].forEach(k=>{ if(b[k]) $("#b-"+k).checked=true; });
+}
+function normAuthors(a){
+  return [].concat(a).map(x=>{
+    if (typeof x === "string") return x;
+    if (x.name && typeof x.name === "object") return [x.name.given,x.name.family].filter(Boolean).join(" ");
+    return x.name || "";
+  }).filter(Boolean).join(", ");
+}
+function parseLatex(tex){
+  const meta = { r2:{} };
+  const grab = re => { const m = tex.match(re); return m ? m[1].trim() : ""; };
+  const balanced = name => {
+    const i = tex.indexOf("\\"+name+"{"); if (i<0) return "";
+    let j=i+name.length+2, d=1; const s=j;
+    while (j<tex.length && d){ if(tex[j]==="{")d++; else if(tex[j]==="}")d--; j++; }
+    return tex.slice(s, j-1);
+  };
+  meta.title = clean(grab(/\\title\{([^}]*)\}/));
+  meta.abstract = clean(balanced("RtwoAbstract"));
+  const kw = clean(balanced("keywords")); if (kw) meta.keywords = kw.split(/[,;]/).map(s=>s.trim());
+  meta.r2["recommended-citation"] = clean(balanced("recommendedcitation"));
+  const authors = [...tex.matchAll(/\\author(?:\[[^\]]*\])?\{([^}]*)\}/g)]
+    .map(m => clean(m[1].replace(/\\orcidlink\{[^}]*\}/g,""))).filter(Boolean);
+  if (authors.length) meta.author = authors;
+  const affils = [...tex.matchAll(/\\affil(?:\[[^\]]*\])?\{([^}]*)\}/g)].map(m=>clean(m[1]));
+  if (affils.length) meta.affiliations = affils.map(name=>({name}));
+  let body = (tex.match(/\\begin\{document\}([\s\S]*?)\\end\{document\}/)||[,tex])[1];
+  return { meta, body: texBodyToHtml(body) };
+}
+function clean(s){ return (s||"").replace(/\\(textit|textbf|emph|texttt)\{([^}]*)\}/g,"$2").replace(/[{}]/g,"").replace(/\\,/g,"").replace(/\s+/g," ").trim(); }
+function texBodyToHtml(b){
+  // strip the front-matter macros we've already captured
+  b = b.replace(/\\(maketitle|RtwoAbstract|keywords|recommendedcitation|laysummary|printbibliography|newpage|clearpage|tableofcontents|thispagestyle\{[^}]*\}|AddToShipoutPictureFG\{[\s\S]*?\})/g,"");
+  b = b.replace(/\\begin\{(abstract|center|flushright)\}|\\end\{(abstract|center|flushright)\}/g,"");
+  b = b.replace(/\\section\*?\{([^}]*)\}/g,"\n\n## $1\n\n")
+       .replace(/\\subsection\*?\{([^}]*)\}/g,"\n\n### $1\n\n")
+       .replace(/\\textbf\{([^}]*)\}/g,"**$1**")
+       .replace(/\\(textit|emph)\{([^}]*)\}/g,"*$2*")
+       .replace(/\\href\{([^}]*)\}\{([^}]*)\}/g,"[$2]($1)")
+       .replace(/\\url\{([^}]*)\}/g,"<$1>")
+       .replace(/\\begin\{(itemize|enumerate|elegantlist)\}/g,"\n").replace(/\\end\{(itemize|enumerate|elegantlist)\}/g,"\n")
+       .replace(/\\item\s*/g,"\n- ")
+       .replace(/\\(parencite|textcite|cite|citeyear)\{([^}]*)\}/g,"[@$2]")
+       .replace(/%[^\n]*/g,"")
+       .replace(/\\[a-zA-Z]+(\[[^\]]*\])?(\{[^}]*\})?/g,"")
+       .replace(/[{}]/g,"");
+  return md.render(b);
+}
+
+/* ---------- render the R2 article ---------- */
+function render(){
+  const has = bodyHtml.trim().length>0;
+  $("#empty").hidden = has; $("#article").hidden = !has;
+  const v = id => $(id).value.trim();
+  $("#r2-title").textContent = v("#m-title") || "Untitled";
+  // masthead meta
+  const doi = v("#m-doi");
+  $("#r2-meta").innerHTML =
+    `<div><em>${esc(v("#m-journal"))}</em>, ${esc(v("#m-year"))}, vol ${esc(v("#m-volume"))}${v("#m-id")?", "+esc(v("#m-id")):""}</div>`
+    + (doi?`<div><a href="https://doi.org/${esc(doi)}">https://doi.org/${esc(doi)}</a></div>`:"")
+    + `<div>Article type: ${esc($("#m-type").value)}</div>`
+    + `<div>Discipline: ${esc(v("#m-discipline"))}</div>`
+    + `<div>Published under the CC-BY 4.0 license</div>`;
+  // authors + affils
+  const authors = v("#m-authors").split(",").map(s=>s.trim()).filter(Boolean);
+  $("#r2-authors").innerHTML = authors.map(a=>esc(a)).join(", ");
+  const affils = v("#m-affils").split("\n").map(s=>s.trim()).filter(Boolean);
+  $("#r2-affils").innerHTML = affils.map((a,i)=>`<sup>${i+1}</sup>&nbsp;${esc(a)}`).join(" &nbsp; ");
+  $("#r2-affils").hidden = !affils.length;
+  // badges
+  const bdef = {"open-data":"opendata","open-code":"opencode","open-materials":"openmaterial","preregistered":"preregestered","codecheck":"codecheck"};
+  $("#r2-badges").innerHTML = Object.entries(bdef).filter(([k])=>$("#b-"+k).checked)
+    .map(([,img])=>`<img src="../assets/badges/${img}.png" alt="${img}">`).join("");
+  // cards
+  card("#r2-abstract", v("#m-abstract")); card("#r2-keywords", v("#m-keywords"));
+  card("#r2-lay", v("#m-lay")); card("#r2-citation", v("#m-citation"));
+  $("#r2-body").innerHTML = bodyHtml;
+}
+function card(id,val){ const el=$(id); el.hidden=!val; el.querySelector("span").textContent=val; }
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* live updates from the form */
+document.querySelectorAll("input,textarea,select").forEach(el => el.addEventListener("input", render));
+
+/* ---------- download standalone HTML ---------- */
+$("#dl").addEventListener("click", async () => {
+  if ($("#article").hidden) { warn("Load a manuscript first."); return; }
+  const css = document.querySelector("style").textContent;
+  const article = await inlineImages($("#article").cloneNode(true));
+  const html = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>${esc($("#m-title").value||"R2 preview")}</title><style>
+body{font-family:"Calibri","Carlito",system-ui,sans-serif;color:#1c1c1c;line-height:1.5;margin:0;}
+#paper{max-width:900px;margin:0 auto;padding:2rem;}
+${css.split("/* ---- article preview")[1]?("/* ---- article preview"+css.split("/* ---- article preview")[1]):css}
+</style></head><body><div id="paper">${article.innerHTML}</div></body></html>`;
+  const blob = new Blob([html], {type:"text/html"});
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+  a.download = ($("#m-id").value || "r2-preview") + ".html"; a.click();
+});
+async function inlineImages(node){
+  for (const img of node.querySelectorAll("img")){
+    try { const r = await fetch(img.getAttribute("src")); const b = await r.blob();
+      img.src = await new Promise(res=>{ const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.readAsDataURL(b); });
+    } catch(e){}
+  }
+  return node;
+}
+
+$("#reset").addEventListener("click", () => location.reload());
+</script>
+</body>
+</html>
