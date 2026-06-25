@@ -31,7 +31,7 @@ ojs:
   journal-path: "r2"        # the OJS journal URL path
   section-ref: "ART"        # section abbreviation in OJS
   user-group-ref: "Author"  # author user-group label in OJS
-  schema-version: "3.4"     # target OJS native-XML schema major version
+  schema-version: "3.3"     # target OJS native-XML schema (you run 3.3; bump to 3.5 later)
 
 # --- Footer / running strings -----------------------------------------
 # {journal} {year} {volume} {article-id} {page} are substituted at build.

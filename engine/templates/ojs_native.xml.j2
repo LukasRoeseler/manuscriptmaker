@@ -10,7 +10,7 @@
           xsi:schemaLocation="http://pkp.sfu.ca/SWORD native.xsd">
   <article xmlns="http://pkp.sfu.ca/SWORD" locale="{{ locale }}"
            date_submitted="{{ date_published }}" status="3"
-           submission_progress="" current_publication_id="1" stage="production">
+           submission_progress="0" current_publication_id="1" stage="production">
     <id type="internal" advice="ignore">1</id>
     {% for g in galleys %}
     <submission_file xmlns="http://pkp.sfu.ca/SWORD" id="{{ g.file_id }}"

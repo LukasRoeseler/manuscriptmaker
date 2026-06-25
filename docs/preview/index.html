@@ -62,7 +62,12 @@
   #r2-body h1,#r2-body h2 { font-size:1.3rem; border-bottom:1px solid #eee; padding-bottom:.2rem; margin-top:1.6rem; }
   #r2-body h3 { font-size:1.08rem; margin-top:1.2rem; }
   #r2-body img { max-width:100%; height:auto; }
-  #r2-body table { border-collapse:collapse; } #r2-body td,#r2-body th { border:1px solid #ddd; padding:.3rem .5rem; }
+  /* APA 7 tables: horizontal rules only — top, under headers, bottom; no verticals. */
+  #r2-body table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:.9rem;
+                   border-top:1.5px solid #222; border-bottom:1.5px solid #222; }
+  #r2-body td, #r2-body th { border:0; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  #r2-body th { font-weight:400; border-bottom:1px solid #222; }
+  #r2-body table tr:first-child > * { border-bottom:1px solid #222; }
   #r2-body pre { background:#0f1720; color:#e6edf3; padding:.8rem; border-radius:6px; overflow:auto; }
   .r2-license { text-align:center; margin:2rem 0 1rem; } .r2-license img { height:30px; }
   .empty { color:#999; text-align:center; padding:4rem 1rem; }
@@ -224,9 +229,17 @@ async function loadFile(file){
         warn("Large file — in-browser conversion may be slow. The Pull-Request pipeline converts it reliably either way.");
       const buf = await file.arrayBuffer();
       try {
-        bodyHtml = await convertDocxInWorker(buf, 25000);
-        if (bodyHtml && !$("#m-title").value)
-          $("#m-title").value = guessTitle(bodyHtml) || file.name.replace(/\.docx$/i,"");
+        const raw = await convertDocxInWorker(buf, 25000);
+        if (raw) {
+          const fm = extractDocxFront(raw);
+          bodyHtml = fm.bodyHtml || raw;
+          const setIf = (id,v) => { if (v && !$(id).value) $(id).value = v; };
+          setIf("#m-title", fm.title || file.name.replace(/\.docx$/i,""));
+          setIf("#m-authors", fm.authors);
+          setIf("#m-affils", fm.affiliation);
+          setIf("#m-abstract", fm.abstract);
+          setIf("#m-keywords", fm.keywords);
+        } else { bodyHtml = ""; }
       } catch(err){
         bodyHtml = "";
         warn(err.message === "timeout"
@@ -268,6 +281,53 @@ function stripCodeChunks(mdText){
 function guessTitle(html){
   const h = html.match(/<h1[^>]*>(.*?)<\/h1>/i) || html.match(/<p[^>]*>\s*<strong>(.*?)<\/strong>\s*<\/p>/i);
   return h ? h[1].replace(/<[^>]+>/g,"").trim() : "";
+}
+/* Best-effort extraction of APA front matter from mammoth's flat HTML:
+   pulls the title, authors, affiliation, abstract and keywords into the
+   metadata fields (so the boxes fill), and returns the body with the
+   title page / author note / abstract / keywords removed so it isn't
+   duplicated. Falls back to the raw HTML if the structure isn't found. */
+function extractDocxFront(html){
+  const fb = { title:"", authors:"", affiliation:"", abstract:"", keywords:"", bodyHtml: html };
+  let root;
+  try { root = new DOMParser().parseFromString("<div id='r'>"+html+"</div>","text/html").getElementById("r"); }
+  catch(e){ return fb; }
+  const blocks = root ? [...root.children] : [];
+  if (!blocks.length) return fb;
+  const T = el => (el.textContent||"").replace(/\s+/g," ").trim();
+  const isHeading = el => /^H[1-6]$/.test(el.tagName) ||
+        (el.tagName==="P" && el.querySelector("strong") && T(el)===T(el.querySelector("strong")) && T(el).length<140);
+
+  const idxOf = re => blocks.findIndex(b => re.test(T(b)));
+  const noteIdx = idxOf(/^author note$/i);
+  const absIdx  = idxOf(/^abstract$/i);
+  let   kwIdx   = idxOf(/^key\s?words?\b/i);
+
+  const title = T(blocks[0]);
+  const frontEnd = noteIdx>0 ? noteIdx : (absIdx>0 ? absIdx : 1);
+  const authLines = blocks.slice(1, frontEnd).map(T).filter(Boolean);
+  const authors = authLines[0] || "";
+  const affiliation = authLines.slice(1).join("\n");
+
+  let abstract = "";
+  if (absIdx >= 0){
+    let i = absIdx+1, parts = [];
+    while (i<blocks.length && !/^key\s?words?\b/i.test(T(blocks[i])) && !isHeading(blocks[i])){
+      if (T(blocks[i])) parts.push(T(blocks[i])); i++;
+    }
+    abstract = parts.join(" ");
+    if (kwIdx < 0 && i < blocks.length && /^key\s?words?\b/i.test(T(blocks[i]))) kwIdx = i;
+  }
+  const keywords = kwIdx>=0 ? T(blocks[kwIdx]).replace(/^key\s?words?:?\s*/i,"") : "";
+
+  let start = 0;
+  if (kwIdx >= 0) start = kwIdx+1;
+  else if (absIdx >= 0){ start = absIdx+1; while (start<blocks.length && !isHeading(blocks[start])) start++; }
+  while (start<blocks.length && T(blocks[start]) === title) start++;   // skip repeated title
+  const bodyBlocks = blocks.slice(start).filter(b => T(b) || b.querySelector("img,table"));
+  const bodyHtml = bodyBlocks.length ? bodyBlocks.map(b=>b.outerHTML).join("\n") : html;
+
+  return { title, authors, affiliation, abstract, keywords, bodyHtml };
 }
 function applyMeta(meta){
   if (!meta || typeof meta !== "object") return;

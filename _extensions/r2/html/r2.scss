@@ -98,6 +98,30 @@ $toc-color: $r2-accent;
 .r2-license { text-align: center; margin: 2.5rem 0 1rem; }
 .r2-license img { height: 31px; }
 
+// --- APA 7 tables: horizontal rules only, no vertical lines ----------
+.quarto-title-block + * table,
+#quarto-document-content table,
+main table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+  border-top: 1.5px solid #222;
+  border-bottom: 1.5px solid #222;
+}
+main table td, main table th {
+  border: 0;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+main table th { font-weight: 400; border-bottom: 1px solid #222; }
+main table thead tr > *, main table tr:first-child > * { border-bottom: 1px solid #222; }
+// Table number/title (Quarto caption) in APA style: number bold, title italic.
+main table caption, main .quarto-float-caption, figcaption.quarto-float-caption-top {
+  text-align: left; caption-side: top; font-style: italic; color: #222; margin-bottom: .3rem;
+}
+
 #refs .csl-entry { margin-bottom: 0.5rem; }
 
 .r2-article-footer {
