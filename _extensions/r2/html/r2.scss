@@ -98,6 +98,19 @@ $toc-color: $r2-accent;
 .r2-license { text-align: center; margin: 2.5rem 0 1rem; }
 .r2-license img { height: 31px; }
 
+// Final-page block (License chip · journal · year, DOI, FORRT/MüCOS)
+.r2-final { margin: 2.5rem 0 0; text-align: center; font-size: 0.82rem; color: #333; }
+.r2-final .line1 { display: flex; justify-content: center; align-items: center; gap: 0.55rem;
+                   font-weight: 700; font-variant: small-caps; letter-spacing: 0.03em; }
+.r2-final .line1 img { height: 26px; }
+.r2-final .sep { color: $r2-accent; font-weight: 400; }
+.r2-final .doi { margin: 0.6rem 0 1.2rem; }
+.r2-final .doi a { font-size: 0.95rem; }
+.r2-final .part { font-style: italic; line-height: 1.55; color: #444; max-width: 560px; margin: 0 auto; }
+.r2-final .orgs { margin-top: 0.7rem; font-weight: 600; }
+.r2-final .orgs a { text-decoration: none; }
+.r2-final .rule { border-top: 2px solid $r2-accent; margin-top: 1.6rem; }
+
 // --- APA 7 tables: horizontal rules only, no vertical lines ----------
 .quarto-title-block + * table,
 #quarto-document-content table,

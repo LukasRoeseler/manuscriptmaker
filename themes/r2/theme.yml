@@ -13,9 +13,11 @@
 # =====================================================================
 r2:
   journal: "Replication Research (R2)"
-  issn: ""
+  issn: "3052-5977"
   publisher: "Münster Center for Open Science (MüCOS)"
   homepage: "https://replicationresearch.org"
+  forrt-url: "https://forrt.org"
+  mucos-url: "https://www.uni-muenster.de/MueCOS"
 
   # --- Design tokens (mirror the LaTeX template) ---------------------
   accent: "009CCF"        # teal accent used for rules, links, card bars
@@ -34,5 +36,6 @@ ojs:
   schema-version: "3.3"     # target OJS native-XML schema (you run 3.3; bump to 3.5 later)
 
 # --- Footer / running strings -----------------------------------------
-# {journal} {year} {volume} {article-id} {page} are substituted at build.
-footer-template: "{journal}, {year}, vol {volume}, {article-id}"
+# {journal} {year} {volume} {doi} {page} are substituted at build.
+# House style: the page footer carries the DOI (not the article-id).
+footer-template: "{journal}, {year}, vol {volume}, {doi}"

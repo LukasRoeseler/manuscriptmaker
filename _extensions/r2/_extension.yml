@@ -43,6 +43,8 @@ contributes:
         - html/title-block.html
       css:
         - html/r2-extra.css
+      filters:
+        - filters/r2-final.lua
       embed-resources: true
       toc: true
       toc-location: right

@@ -150,10 +150,11 @@
   \fancyhf{}
   \fancyhead[L]{\hspace*{\HeaderLeftDelta}\small Inaugural Editorial of
 Replication Research (R2)}
+  % House style: the running footer carries the DOI (falls back to article-id).
   \fancyfoot[R]{%
     \makebox[\dimexpr\textwidth+\FooterRightDelta\relax][r]{%
       \small Replication Research
-(R2), 2025, vol 1, R2.2025.001 \textbar\ \thepage%
+(R2), 2025, vol 1, \href{https://doi.org/10.15626/R2.2025.001}{10.15626/R2.2025.001} \textbar\ \thepage%
     }%
   }
   \renewcommand{\headrulewidth}{0pt}
@@ -642,13 +643,29 @@ Röseler:
 \printbibliography[heading=none]
 
 
-% ---- Licence badge --------------------------------------------------
+% ---- Final-page block (License chip, DOI, FORRT/MüCOS lines) --------
 \vspace{1.5cm}
 \begin{center}
-  \textbf{Licence}\\[4pt]
+  {\small\scshape License}\hspace{0.5em}%
   \href{https://creativecommons.org/licenses/by/4.0/}{%
-    \includegraphics[height=8mm]{license-cc-by.png}%
+    \raisebox{-1.5mm}{\includegraphics[height=6mm]{license-cc-by.png}}%
   }%
+  \hspace{0.5em}{\color{accent}\textbar}\hspace{0.5em}%
+  {\small\scshape\bfseries Replication Research (R2)}%
+  \hspace{0.5em}{\color{accent}\textbar}\hspace{0.5em}{\small 2025}\\[6pt]
+  \href{https://doi.org/10.15626/R2.2025.001}{doi.org/10.15626/R2.2025.001}\\[16pt]
+  {\itshape\footnotesize
+    Replication Research (R2) (ISSN: 3052-5977) is part of the\\
+    Framework for Open and Reproducible Research Training
+    (FORRT; \href{https://forrt.org}{forrt.org})\\
+    and the M\"unster Center for Open Science
+    (M\"uCOS; \href{https://www.uni-muenster.de/MueCOS}{uni-muenster.de/MueCOS})}\\[10pt]
+  {\small
+    \href{https://www.uni-muenster.de/MueCOS}{M\"uCOS}
+    \ {\color{accent}\textbar}\
+    \href{https://forrt.org}{FORRT}
+    \ {\color{accent}\textbar}\
+    \href{https://replicationresearch.org}{R2}}
 \end{center}
 
 % ---- References -----------------------------------------------------

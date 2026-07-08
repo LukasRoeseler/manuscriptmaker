@@ -18,8 +18,9 @@
   .layout { display:grid; grid-template-columns:380px 1fr; gap:1.2rem; max-width:1280px; margin:0 auto; padding:1.2rem; align-items:start; }
   @media (max-width:920px){ .layout { grid-template-columns:1fr; } }
 
-  /* ---- control panel ---- */
-  .panel { background:#fff; border:1px solid #e6e4db; border-radius:8px; padding:1rem; position:sticky; top:1rem; }
+  /* ---- control panel (sticky + independently scrollable) ---- */
+  .panel { background:#fff; border:1px solid #e6e4db; border-radius:8px; padding:1rem; position:sticky; top:1rem;
+           max-height:calc(100vh - 2rem); overflow-y:auto; overscroll-behavior:contain; }
   #drop { border:2px dashed var(--accent); border-radius:8px; padding:1.3rem 1rem; text-align:center;
           color:#33707f; background:var(--card-bg); cursor:pointer; transition:.15s; }
   #drop.drag { background:#e9f7fb; border-color:#0090bd; }
@@ -69,9 +70,54 @@
   #r2-body th { font-weight:400; border-bottom:1px solid #222; }
   #r2-body table tr:first-child > * { border-bottom:1px solid #222; }
   #r2-body pre { background:#0f1720; color:#e6edf3; padding:.8rem; border-radius:6px; overflow:auto; }
-  .r2-license { text-align:center; margin:2rem 0 1rem; } .r2-license img { height:30px; }
+
+  /* Figures in formats browsers can't display (EMF/WMF from Word) */
+  .r2-figph { border:1.5px dashed var(--accent); border-radius:6px; background:var(--card-bg);
+              padding:1.1rem 1rem; margin:1rem 0; text-align:center; color:#33707f; font-size:.88rem; }
+  .r2-figph b { display:block; margin-bottom:.2rem; }
+
+  /* In-text citations linked to the reference list */
+  a.r2-cite { color:var(--accent); text-decoration:none; }
+  a.r2-cite:hover { text-decoration:underline; }
+  .r2-refhl { background:#e9f7fb; transition:background 1.2s; }
+
+  /* References: APA hanging indent */
+  .r2-refs p { padding-left:1.5em; text-indent:-1.5em; margin:.45rem 0; }
+
+  /* ---- final page block (matches the published R2 design) ---- */
+  .r2-final { margin:2.5rem 0 0; text-align:center; font-size:.82rem; color:#333; }
+  .r2-final .line1 { display:flex; justify-content:center; align-items:center; gap:.55rem;
+                     font-weight:700; font-variant:small-caps; letter-spacing:.03em; }
+  .r2-final .line1 img { height:26px; }
+  .r2-final .sep { color:var(--accent); font-weight:400; }
+  .r2-final .doi { margin:.6rem 0 1.2rem; }
+  .r2-final .doi a { font-size:.95rem; }
+  .r2-final .part { font-style:italic; line-height:1.55; color:#444; max-width:560px; margin:0 auto; }
+  .r2-final .orgs { margin-top:.7rem; font-weight:600; }
+  .r2-final .orgs a { text-decoration:none; }
+  .r2-final .rule { border-top:2px solid var(--accent); margin-top:1.6rem; }
+
   .empty { color:#999; text-align:center; padding:4rem 1rem; }
   .warn { background:#fff7e6; border-left:3px solid #e0a800; padding:.5rem .7rem; font-size:.82rem; margin:.6rem 0; }
+
+  /* ---- print / PDF export: R2 page furniture on every page ---- */
+  .printbar { display:none; }
+  @media print {
+    header.site, .panel, .stagebar, #warnbox, .empty { display:none !important; }
+    body { background:#fff; }
+    .layout { display:block; padding:0; max-width:none; }
+    .stage { border:0; border-radius:0; }
+    #paper { max-width:none; padding:10mm 2mm 14mm; }
+    @page { margin:14mm 15mm 18mm; }
+    /* Blue rules + footer repeat on each printed page (position:fixed). */
+    .printbar { display:block; position:fixed; left:0; right:0; z-index:99; }
+    .printbar.top { top:0; border-top:1.5pt solid var(--accent); }
+    .printbar.bottom { bottom:9mm; border-top:1.5pt solid var(--accent); }
+    .printfoot { display:block; position:fixed; bottom:2mm; right:0; font-size:7.5pt; color:#333; text-align:right; }
+    .printfoot a { color:var(--accent); text-decoration:none; }
+    .r2-figph { break-inside:avoid; }
+    #r2-body table { break-inside:avoid; }
+  }
 </style>
 </head>
 <body>
@@ -138,6 +184,7 @@
     </details>
 
     <div class="actions">
+      <button id="pdf">🖨 Export PDF</button>
       <button id="dl" class="ghost">⬇ Download preview HTML</button>
       <button id="reset" class="ghost">Reset</button>
     </div>
@@ -170,12 +217,43 @@
           <div class="r2-card" id="r2-citation" hidden><b>Citation.</b> <span></span></div>
         </header>
         <div id="r2-body"></div>
-        <div class="r2-license"><b>Licence</b><br/><img src="../assets/license-cc-by.png" alt="CC BY 4.0" /></div>
+        <!-- Final-page block (matches the published R2 layout) -->
+        <div class="r2-final" id="r2-final">
+          <div class="line1">
+            <span>License</span>
+            <img src="../assets/license-cc-by.png" alt="CC BY 4.0" />
+            <span class="sep">|</span>
+            <span id="f-journal">Replication Research R2</span>
+            <span class="sep">|</span>
+            <span id="f-year">2025</span>
+          </div>
+          <div class="doi" id="f-doi"></div>
+          <div class="part" id="f-part">
+            <em>Replication Research (R2, ISSN: 3052-5977)</em> is part of the<br/>
+            Framework for Open and Reproducible Research Training
+            (FORRT; <a href="https://forrt.org">forrt.org</a>)<br/>
+            and the Münster Center for Open Science
+            (MüCOS; <a href="https://www.uni-muenster.de/MueCOS">uni-muenster.de/MueCOS</a>)
+          </div>
+          <div class="orgs">
+            <a href="https://www.uni-muenster.de/MueCOS">MüCOS</a>
+            <span class="sep">&nbsp;|&nbsp;</span>
+            <a href="https://forrt.org">FORRT</a>
+            <span class="sep">&nbsp;|&nbsp;</span>
+            <a href="https://replicationresearch.org">R2</a>
+          </div>
+          <div class="rule"></div>
+        </div>
       </article>
       <div id="warnbox"></div>
     </div>
   </main>
 </div>
+
+<!-- Print-only page furniture: blue rules + running footer on every page -->
+<div class="printbar top"></div>
+<div class="printbar bottom"></div>
+<div class="printfoot" id="printfoot"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
@@ -264,6 +342,15 @@ async function loadFile(file){
       bodyHtml = md.render(await file.text());
     }
   } catch(err){ warn("Could not convert this file: " + err.message); bodyHtml = ""; }
+
+  // Shared post-processing: EMF placeholders, linked citations, refs indent.
+  if (bodyHtml){
+    const pp = postProcessBody(bodyHtml);
+    bodyHtml = pp.html;
+    if (pp.emf > 0)
+      warn(($("#warnbox").textContent ? $("#warnbox").innerHTML + " " : "") +
+        `${pp.emf} figure${pp.emf>1?"s are":" is"} embedded as EMF/WMF (a Word vector format browsers can't show) — shown as placeholders here. The publishing pipeline converts them automatically for the final PDF/HTML.`);
+  }
   render();
 }
 
@@ -303,11 +390,35 @@ function extractDocxFront(html){
   const absIdx  = idxOf(/^abstract$/i);
   let   kwIdx   = idxOf(/^key\s?words?\b/i);
 
-  const title = T(blocks[0]);
+  let title = T(blocks[0]);
   const frontEnd = noteIdx>0 ? noteIdx : (absIdx>0 ? absIdx : 1);
   const authLines = blocks.slice(1, frontEnd).map(T).filter(Boolean);
-  const authors = authLines[0] || "";
-  const affiliation = authLines.slice(1).join("\n");
+  let authors = authLines[0] || "";
+  let affiliation = authLines.slice(1).join("\n");
+  let consumed = 0;   // extra leading blocks consumed by the fallback scan
+
+  // Fallback for preprint-style fronts without an "Author Note"/"Abstract"
+  // heading: title possibly split over two heading lines, then a short
+  // author line like "Ian Hussey[1]", then short affiliation lines.
+  if (!authors){
+    const authorRx = /^[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?(?:\s*(?:,|and|&)\s*[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?)*$/;
+    let j = 1;
+    // second heading line = continuation of a two-line title
+    if (j < blocks.length && isHeading(blocks[j]) && T(blocks[j]).length < 180 &&
+        j+1 < blocks.length && authorRx.test(T(blocks[j+1]))){
+      title += ": " + T(blocks[j]); j++;
+    }
+    if (j < blocks.length && T(blocks[j]).length < 90 && authorRx.test(T(blocks[j]))){
+      authors = T(blocks[j]).replace(/\s*\[\d+\]/g, ""); j++;
+      const affs = [];
+      while (j < blocks.length && T(blocks[j]).length && T(blocks[j]).length < 80 &&
+             !isHeading(blocks[j]) && !/[.!?]$/.test(T(blocks[j]))){
+        affs.push(T(blocks[j])); j++;
+      }
+      affiliation = affs.join("\n");
+      consumed = j;
+    }
+  }
 
   let abstract = "";
   if (absIdx >= 0){
@@ -323,11 +434,103 @@ function extractDocxFront(html){
   let start = 0;
   if (kwIdx >= 0) start = kwIdx+1;
   else if (absIdx >= 0){ start = absIdx+1; while (start<blocks.length && !isHeading(blocks[start])) start++; }
-  while (start<blocks.length && T(blocks[start]) === title) start++;   // skip repeated title
+  start = Math.max(start, consumed);
+  while (start<blocks.length && (T(blocks[start]) === title || title.startsWith(T(blocks[start])))) start++;   // skip repeated title lines
   const bodyBlocks = blocks.slice(start).filter(b => T(b) || b.querySelector("img,table"));
   const bodyHtml = bodyBlocks.length ? bodyBlocks.map(b=>b.outerHTML).join("\n") : html;
 
   return { title, authors, affiliation, abstract, keywords, bodyHtml };
+}
+
+/* Post-process converted body HTML (all input formats):
+   1. Replace EMF/WMF images (Word metafiles browsers can't show) with placeholders.
+   2. Give reference entries anchor ids + hanging indent (References section).
+   3. Link in-text citations "(Name et al., 2013)" / "Name (2013)" to their entry. */
+function postProcessBody(html){
+  let root;
+  try { root = new DOMParser().parseFromString("<div id='r'>"+html+"</div>","text/html").getElementById("r"); }
+  catch(e){ return { html, emf:0, linked:0 }; }
+  if (!root) return { html, emf:0, linked:0 };
+
+  // --- 1. EMF/WMF placeholders -------------------------------------
+  let emf = 0;
+  root.querySelectorAll("img").forEach(img => {
+    const src = img.getAttribute("src") || "";
+    if (/^data:image\/x-(emf|wmf)/i.test(src) || /\.(emf|wmf)([?#]|$)/i.test(src)) {
+      emf++;
+      const ph = document.createElement("div");
+      ph.className = "r2-figph";
+      ph.innerHTML = "<b>🖼 Figure (" + emf + ")</b>This image is embedded in a format " +
+        "(EMF/WMF) that browsers cannot display. The publishing pipeline converts it " +
+        "automatically — it will appear in the final PDF and HTML.";
+      img.replaceWith(ph);
+    }
+  });
+
+  // --- 2. References section: ids + hanging indent ------------------
+  const blocks = [...root.children];
+  const refHeadIdx = blocks.findIndex(b => /^references$/i.test((b.textContent||"").trim()));
+  const refIndex = new Map();               // "surname|year" -> anchor id
+  if (refHeadIdx >= 0){
+    const wrap = document.createElement("div");
+    wrap.className = "r2-refs";
+    blocks[refHeadIdx].after(wrap);
+    blocks.slice(refHeadIdx+1).forEach((b, i) => {
+      const t = (b.textContent||"").trim();
+      if (t){
+        b.id = "ref-" + (i+1);
+        const surname = (t.match(/^([A-Za-zÀ-ÿ'’\-]+)/) || [,""])[1].toLowerCase();
+        if (surname)
+          [...t.matchAll(/\b(\d{4}[a-z]?)\b/g)].forEach(m => {
+            const key = surname + "|" + m[1];
+            if (!refIndex.has(key)) refIndex.set(key, b.id);
+          });
+      }
+      wrap.appendChild(b);
+    });
+  }
+
+  // --- 3. Link in-text citations to their reference entry -----------
+  let linked = 0;
+  if (refIndex.size){
+    // surname [+ et al. / & Name / and Name]* [,(] year
+    const CITE = /([A-ZÀ-Þ][\w'’\-]+)((?:\s+(?:et al\.?|&|and)\s+[A-ZÀ-Þ][\w'’\-]+)*(?:\s+et al\.?)?)[\s,]*\(?\s*(\d{4}[a-z]?)/g;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode(n){
+      if (!n.nodeValue || !/\d{4}/.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
+      for (let p = n.parentElement; p && p !== root; p = p.parentElement)
+        if (p.tagName === "A" || (p.classList && p.classList.contains("r2-refs")))
+          return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }});
+    const nodes = []; let n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(node => {
+      const text = node.nodeValue;
+      let frag = null, last = 0, m;
+      CITE.lastIndex = 0;
+      while ((m = CITE.exec(text))){
+        const id = refIndex.get(m[1].toLowerCase() + "|" + m[3]) ||
+                   refIndex.get(m[1].toLowerCase() + "|" + m[3].replace(/[a-z]$/,""));
+        if (!id) continue;
+        let end = m.index + m[0].length;
+        if (m[0].includes("(") && text[end] === ")") end++;   // keep parens balanced in link
+        if (!frag) frag = document.createDocumentFragment();
+        frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        const a = document.createElement("a");
+        a.className = "r2-cite"; a.href = "#" + id;
+        a.textContent = text.slice(m.index, end);
+        frag.appendChild(a);
+        last = end; linked++;
+        CITE.lastIndex = end;
+      }
+      if (frag){
+        frag.appendChild(document.createTextNode(text.slice(last)));
+        node.replaceWith(frag);
+      }
+    });
+  }
+
+  return { html: root.innerHTML, emf, linked };
 }
 function applyMeta(meta){
   if (!meta || typeof meta !== "object") return;
@@ -413,14 +616,23 @@ function render(){
   const affils = v("#m-affils").split("\n").map(s=>s.trim()).filter(Boolean);
   $("#r2-affils").innerHTML = affils.map((a,i)=>`<sup>${i+1}</sup>&nbsp;${esc(a)}`).join(" &nbsp; ");
   $("#r2-affils").hidden = !affils.length;
-  // badges
-  const bdef = {"open-data":"opendata","open-code":"opencode","open-materials":"openmaterial","preregistered":"preregestered","codecheck":"codecheck"};
+  // badges (codecheck is SVG for crispness)
+  const bdef = {"open-data":"opendata.png","open-code":"opencode.png","open-materials":"openmaterial.png",
+                "preregistered":"preregestered.png","codecheck":"codecheck.svg"};
   $("#r2-badges").innerHTML = Object.entries(bdef).filter(([k])=>$("#b-"+k).checked)
-    .map(([,img])=>`<img src="../assets/badges/${img}.png" alt="${img}">`).join("");
+    .map(([k,img])=>`<img src="../assets/badges/${img}" alt="${k}">`).join("");
   // cards
   card("#r2-abstract", v("#m-abstract")); card("#r2-keywords", v("#m-keywords"));
   card("#r2-lay", v("#m-lay")); card("#r2-citation", v("#m-citation"));
   $("#r2-body").innerHTML = bodyHtml;
+
+  // final-page block + running print footer
+  $("#f-journal").textContent = v("#m-journal").replace(/\s*\(R2\)\s*$/i, " R2") || "Replication Research R2";
+  $("#f-year").textContent = v("#m-year") || "";
+  $("#f-doi").innerHTML = doi ? `<a href="https://doi.org/${esc(doi)}">doi.org/${esc(doi)}</a>` : "";
+  $("#printfoot").innerHTML =
+    `${esc(v("#m-journal"))}, ${esc(v("#m-year"))}, vol ${esc(v("#m-volume"))}` +
+    (doi ? `, <a href="https://doi.org/${esc(doi)}">${esc(doi)}</a>` : "") + `&nbsp;`;
 }
 function card(id,val){ const el=$(id); el.hidden=!val; el.querySelector("span").textContent=val; }
 function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -453,6 +665,24 @@ async function inlineImages(node){
 }
 
 $("#reset").addEventListener("click", () => location.reload());
+
+/* ---------- PDF export (browser print → save as PDF) ---------- */
+$("#pdf").addEventListener("click", () => {
+  if ($("#article").hidden) { warn("Load a manuscript first."); return; }
+  window.print();   // choose "Save as PDF" — blue page rules + footer are included
+});
+
+/* Smooth-scroll + highlight when clicking an in-text citation */
+$("#paper").addEventListener("click", e => {
+  const a = e.target.closest("a.r2-cite");
+  if (!a) return;
+  const target = document.getElementById(a.getAttribute("href").slice(1));
+  if (!target) return;
+  e.preventDefault();
+  target.scrollIntoView({ behavior:"smooth", block:"center" });
+  target.classList.add("r2-refhl");
+  setTimeout(() => target.classList.remove("r2-refhl"), 1600);
+});
 </script>
 </body>
 </html>

@@ -50,14 +50,20 @@ def run(cmd: list[str], cwd: Path | None = None) -> None:
     subprocess.run(cmd, cwd=cwd, check=True)
 
 
+def _is_real_source(p: Path) -> bool:
+    """A candidate source file — skips Office lock files (~$foo.docx)."""
+    return (p.is_file()
+            and p.suffix.lower() in SUPPORTED - {".zip"}
+            and not p.name.startswith("~$"))
+
+
 def _candidates_in(search: Path) -> list[Path]:
     # Unzip an Overleaf export first, if present.
     for z in sorted(search.glob("*.zip")):
         print(f"  unzipping {z.name}")
         with zipfile.ZipFile(z) as zf:
             zf.extractall(search)
-    return [p for p in search.rglob("*")
-            if p.suffix.lower() in SUPPORTED - {".zip"} and p.is_file()]
+    return [p for p in search.rglob("*") if _is_real_source(p)]
 
 
 def find_source(mdir: Path) -> Path:
@@ -66,8 +72,7 @@ def find_source(mdir: Path) -> Path:
     # already sitting in the manuscript folder (idempotent re-runs).
     candidates = _candidates_in(src_dir) if src_dir.is_dir() else []
     if not candidates:
-        candidates = [p for p in mdir.glob("*")
-                      if p.suffix.lower() in SUPPORTED - {".zip"} and p.is_file()]
+        candidates = [p for p in mdir.glob("*") if _is_real_source(p)]
     if not candidates:
         raise SystemExit(f"No supported source file found in {src_dir} or {mdir}")
     # Prefer an explicit main file; else the largest .tex/.docx/.md.
@@ -117,7 +122,8 @@ def from_docx(src: Path, mdir: Path) -> None:
     except subprocess.CalledProcessError:
         _warn_no_bib(mdir)
 
-    _assemble_qmd(mdir, body.read_text(encoding="utf-8"))
+    text = _convert_metafiles(mdir, body.read_text(encoding="utf-8"))
+    _assemble_qmd(mdir, text)
     body.unlink(missing_ok=True)
 
 
@@ -137,7 +143,8 @@ def from_latex(src: Path, mdir: Path) -> None:
     run(PANDOC + [str(src), "-f", "latex", "-t", "markdown",
                   "--extract-media=figures", "--wrap=none", "-o", "_body.md"],
         cwd=mdir)
-    _assemble_qmd(mdir, body.read_text(encoding="utf-8"), extracted)
+    text = _convert_metafiles(mdir, body.read_text(encoding="utf-8"))
+    _assemble_qmd(mdir, text, extracted)
     body.unlink(missing_ok=True)
 
 
@@ -185,6 +192,36 @@ def _assemble_qmd(mdir: Path, body: str, extracted: dict | None = None) -> None:
               "fill it in (validation will fail until then).")
     (mdir / "article.qmd").write_text(content, encoding="utf-8")
     print("  wrote article.qmd")
+
+
+def _convert_metafiles(mdir: Path, body: str) -> str:
+    """Convert extracted EMF/WMF images (Word vector metafiles that neither
+    browsers nor most PDF toolchains handle) to PNG via LibreOffice, and
+    rewrite the links in the markdown body. CI installs libreoffice-writer;
+    locally we warn and keep the originals if soffice is unavailable."""
+    metafiles = [p for p in (mdir / "figures").rglob("*")
+                 if p.suffix.lower() in {".emf", ".wmf"}]
+    if not metafiles:
+        return body
+    soffice = shutil.which("soffice")
+    if not soffice:
+        print(f"::warning::{len(metafiles)} EMF/WMF figure(s) found but LibreOffice "
+              "(soffice) is not installed — figures left unconverted. CI converts "
+              "them automatically.")
+        return body
+    for mf in metafiles:
+        run([soffice, "--headless", "--convert-to", "png",
+             "--outdir", str(mf.parent), str(mf)])
+        png = mf.with_suffix(".png")
+        if png.exists():
+            rel_old = mf.relative_to(mdir).as_posix()
+            rel_new = png.relative_to(mdir).as_posix()
+            body = body.replace(rel_old, rel_new)
+            mf.unlink()
+            print(f"  converted {rel_old} -> {rel_new}")
+        else:
+            print(f"::warning::Could not convert {mf.name} to PNG.")
+    return body
 
 
 def _warn_no_bib(mdir: Path) -> None:

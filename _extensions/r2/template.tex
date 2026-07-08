@@ -154,9 +154,10 @@ $endfor$
 \fancypagestyle{mainstyle}{
   \fancyhf{}
   \fancyhead[L]{\hspace*{\HeaderLeftDelta}\small $if(r2.running-head)$$r2.running-head$$else$$title-meta$$endif$}
+  % House style: the running footer carries the DOI (falls back to article-id).
   \fancyfoot[R]{%
     \makebox[\dimexpr\textwidth+\FooterRightDelta\relax][r]{%
-      \small $r2.journal$, $r2.year$, vol $r2.volume$, $r2.article-id$ \textbar\ \thepage%
+      \small $r2.journal$, $r2.year$, vol $r2.volume$, $if(r2.doi)$\href{https://doi.org/$r2.doi$}{$r2.doi$}$else$$r2.article-id$$endif$ \textbar\ \thepage%
     }%
   }
   \renewcommand{\headrulewidth}{0pt}
@@ -322,13 +323,29 @@ $for(include-after)$
 $include-after$
 $endfor$
 
-% ---- Licence badge --------------------------------------------------
+% ---- Final-page block (License chip, DOI, FORRT/MüCOS lines) --------
 \vspace{1.5cm}
 \begin{center}
-  \textbf{Licence}\\[4pt]
+  {\small\scshape License}\hspace{0.5em}%
   $if(r2.license-url)$\href{$r2.license-url$}{$endif$%
-    \includegraphics[height=8mm]{$if(r2.license-badge)$$r2.license-badge$$else$license-cc-by.png$endif$}%
+    \raisebox{-1.5mm}{\includegraphics[height=6mm]{$if(r2.license-badge)$$r2.license-badge$$else$license-cc-by.png$endif$}}%
   $if(r2.license-url)$}$endif$%
+  \hspace{0.5em}{\color{accent}\textbar}\hspace{0.5em}%
+  {\small\scshape\bfseries $r2.journal$}%
+  \hspace{0.5em}{\color{accent}\textbar}\hspace{0.5em}{\small $r2.year$}\\[6pt]
+  $if(r2.doi)$\href{https://doi.org/$r2.doi$}{doi.org/$r2.doi$}\\[16pt]$endif$
+  {\itshape\footnotesize
+    $r2.journal$$if(r2.issn)$ (ISSN: $r2.issn$)$endif$ is part of the\\
+    Framework for Open and Reproducible Research Training
+    (FORRT; \href{$if(r2.forrt-url)$$r2.forrt-url$$else$https://forrt.org$endif$}{forrt.org})\\
+    and the M\"unster Center for Open Science
+    (M\"uCOS; \href{$if(r2.mucos-url)$$r2.mucos-url$$else$https://www.uni-muenster.de/MueCOS$endif$}{uni-muenster.de/MueCOS})}\\[10pt]
+  {\small
+    \href{$if(r2.mucos-url)$$r2.mucos-url$$else$https://www.uni-muenster.de/MueCOS$endif$}{M\"uCOS}
+    \ {\color{accent}\textbar}\
+    \href{$if(r2.forrt-url)$$r2.forrt-url$$else$https://forrt.org$endif$}{FORRT}
+    \ {\color{accent}\textbar}\
+    $if(r2.homepage)$\href{$r2.homepage$}{R2}$else$R2$endif$}
 \end{center}
 
 % ---- References -----------------------------------------------------

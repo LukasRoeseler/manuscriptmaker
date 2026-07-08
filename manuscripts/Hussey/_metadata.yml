@@ -1,0 +1,25 @@
+# Editor-owned registry metadata — fill in before publishing.
+date: 2026-01-01
+
+r2:
+  volume: 2
+  year: 2026
+  article-id: "TODO-assign"                     # e.g. R2.2026.010 (rename folder to match)
+  doi: "10.17879/replicationresearch-2026-TODO"
+  article-type: "Replication"
+  discipline: "Psychology"
+  running-head: "TODO: short running head"
+
+  lay-summary: >
+    TODO: one plain-language paragraph.
+
+  recommended-citation: >
+    Hussey, I. (2026). TODO title. *Replication Research (R2)*, *2*,
+    TODO-article-id. https://doi.org/10.17879/replicationresearch-2026-TODO
+
+  badges:
+    open-data: false
+    open-code: false
+    open-materials: false
+    preregistered: false
+    codecheck: false

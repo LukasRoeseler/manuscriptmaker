@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 148" role="img" aria-label="CODECHECK badge">
+  <!-- Crisp vector CODECHECK badge (rosette seal + ribbon + check). -->
+  <defs>
+    <path id="cc-arc" d="M 60 60 m -23 0 a 23 23 0 1 1 46 0" fill="none"/>
+  </defs>
+  <!-- ribbon tails -->
+  <path d="M40 86 L40 140 L60 124 L80 140 L80 86 Z" fill="#026B30"/>
+  <!-- 12-point rosette: three rounded squares rotated 30° apart -->
+  <g fill="#028A3D">
+    <rect x="24" y="24" width="72" height="72" rx="10"/>
+    <rect x="24" y="24" width="72" height="72" rx="10" transform="rotate(30 60 60)"/>
+    <rect x="24" y="24" width="72" height="72" rx="10" transform="rotate(60 60 60)"/>
+  </g>
+  <circle cx="60" cy="60" r="34" fill="#ffffff"/>
+  <circle cx="60" cy="60" r="30" fill="#028A3D"/>
+  <!-- curved label -->
+  <text font-family="Arial, Helvetica, sans-serif" font-size="8.5" font-weight="700"
+        fill="#ffffff" letter-spacing="1">
+    <textPath href="#cc-arc" startOffset="50%" text-anchor="middle">CODECHECK</textPath>
+  </text>
+  <!-- check mark (kept below the label arc) -->
+  <path d="M48 68 l8 8 l16 -18" stroke="#ffffff" stroke-width="6" fill="none"
+        stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
