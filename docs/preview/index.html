@@ -100,23 +100,37 @@
   .empty { color:#999; text-align:center; padding:4rem 1rem; }
   .warn { background:#fff7e6; border-left:3px solid #e0a800; padding:.5rem .7rem; font-size:.82rem; margin:.6rem 0; }
 
-  /* ---- print / PDF export: R2 page furniture on every page ---- */
-  .printbar { display:none; }
+  /* ---- print / PDF export ------------------------------------------
+     @page margin:0 suppresses the browser's own date/title/URL/page-number
+     furniture. A <table> with thead/tfoot spacers (built at export time)
+     reserves header/footer zones on EVERY page, and fixed "runner"
+     elements draw the blue rules + DOI footer into those zones. */
+  #printfoot { display:none; }             /* hidden storage for footer text */
+  .print-runner-top, .print-runner-bottom { display:none; }
   @media print {
+    @page { size:A4; margin:0; }
+    html, body { margin:0 !important; padding:0 !important; background:#fff; }
     header.site, .panel, .stagebar, #warnbox, .empty { display:none !important; }
-    body { background:#fff; }
-    .layout { display:block; padding:0; max-width:none; }
+    .layout { display:block; padding:0; max-width:none; margin:0; }
     .stage { border:0; border-radius:0; }
-    #paper { max-width:none; padding:10mm 2mm 14mm; }
-    @page { margin:14mm 15mm 18mm; }
-    /* Blue rules + footer repeat on each printed page (position:fixed). */
-    .printbar { display:block; position:fixed; left:0; right:0; z-index:99; }
-    .printbar.top { top:0; border-top:1.5pt solid var(--accent); }
-    .printbar.bottom { bottom:9mm; border-top:1.5pt solid var(--accent); }
-    .printfoot { display:block; position:fixed; bottom:2mm; right:0; font-size:7.5pt; color:#333; text-align:right; }
-    .printfoot a { color:var(--accent); text-decoration:none; }
+    body.printing #paper { max-width:none; padding:0 15mm; margin:0; }
+    table.print-wrap { width:100%; border-collapse:collapse; }
+    table.print-wrap > * > tr > td { padding:0; border:0 !important; }
+    .print-header-space { height:15mm; }
+    .print-footer-space { height:17mm; }
+    /* runners repeat on every printed page */
+    .print-runner-top { display:block; position:fixed; top:0; left:15mm; right:15mm; height:15mm; }
+    .print-runner-top::after { content:""; position:absolute; left:0; right:0; bottom:3mm;
+                               border-top:1.5pt solid var(--accent); }
+    .print-runner-bottom { display:block; position:fixed; bottom:0; left:15mm; right:15mm; height:17mm;
+                           font-size:7.5pt; color:#333; }
+    .print-runner-bottom::before { content:""; position:absolute; left:0; right:0; top:3mm;
+                                   border-top:1.5pt solid var(--accent); }
+    .print-runner-bottom .txt { position:absolute; right:0; top:4.6mm; text-align:right; }
+    .print-runner-bottom a { color:var(--accent); text-decoration:none; }
     .r2-figph { break-inside:avoid; }
     #r2-body table { break-inside:avoid; }
+    #r2-body h1, #r2-body h2, #r2-body h3 { break-after:avoid; }
   }
 </style>
 </head>
@@ -185,6 +199,7 @@
 
     <div class="actions">
       <button id="pdf">🖨 Export PDF</button>
+      <button id="docx" class="ghost">📝 Export .docx</button>
       <button id="dl" class="ghost">⬇ Download preview HTML</button>
       <button id="reset" class="ghost">Reset</button>
     </div>
@@ -192,7 +207,9 @@
       preview. The authoritative PDF, JATS XML and OJS package are produced by
       the GitHub Actions pipeline when you open a Pull Request
       (<a href="../author-guide.html">how to submit</a>). Citations like
-      <code>[@key]</code> resolve there, not here.</p>
+      <code>[@key]</code> resolve there, not here. The <strong>.docx export</strong>
+      is a separate, fully editable copy for manual polishing — edits made to it
+      do not flow back into the pipeline.</p>
   </aside>
 
   <!-- ---------------- live article preview ---------------- -->
@@ -250,14 +267,14 @@
   </main>
 </div>
 
-<!-- Print-only page furniture: blue rules + running footer on every page -->
-<div class="printbar top"></div>
-<div class="printbar bottom"></div>
-<div class="printfoot" id="printfoot"></div>
+<!-- Hidden storage: render() keeps the current footer text here; the PDF
+     export copies it into the per-page runner it builds at print time. -->
+<div id="printfoot"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js"></script>
 <script>
 const $ = s => document.querySelector(s);
 const md = window.markdownit({ html:true, linkify:true, typographer:true });
@@ -406,7 +423,7 @@ function extractDocxFront(html){
     // second heading line = continuation of a two-line title
     if (j < blocks.length && isHeading(blocks[j]) && T(blocks[j]).length < 180 &&
         j+1 < blocks.length && authorRx.test(T(blocks[j+1]))){
-      title += ": " + T(blocks[j]); j++;
+      title = title.replace(/[:;,\s]+$/, "") + ": " + T(blocks[j]); j++;
     }
     if (j < blocks.length && T(blocks[j]).length < 90 && authorRx.test(T(blocks[j]))){
       authors = T(blocks[j]).replace(/\s*\[\d+\]/g, ""); j++;
@@ -664,12 +681,132 @@ async function inlineImages(node){
   return node;
 }
 
+/* ---------- .docx export (editable copy, for manual polishing) ----------
+   html-docx-js only understands a plain HTML/CSS subset (no flexbox, no
+   CSS variables, no ::before/::after) — so this builds a separate,
+   table/inline-style version of the article rather than reusing the
+   on-screen CSS. Editing this file does not feed back into the pipeline;
+   the authoritative DOCX would need its own export path (not built here). */
+function buildWordHtml(){
+  const v = id => $(id).value.trim();
+  const ACCENT = "#009CCF", CARDBG = "#FEFDF6", CARDBORDER = "#EAE8DF";
+  const doi = v("#m-doi");
+  const metaLines = [
+    `<i>${esc(v("#m-journal"))}</i>, ${esc(v("#m-year"))}, vol ${esc(v("#m-volume"))}${v("#m-id")?", "+esc(v("#m-id")):""}`,
+    doi ? `<a href="https://doi.org/${esc(doi)}">https://doi.org/${esc(doi)}</a>` : "",
+    `Article type: ${esc($("#m-type").value)}`,
+    `Discipline: ${esc(v("#m-discipline"))}`,
+    `Published under the CC-BY 4.0 license`
+  ].filter(Boolean).join("<br/>");
+
+  const authors = v("#m-authors").split(",").map(s=>s.trim()).filter(Boolean);
+  const authorsHtml = authors.map((a,i)=>`${esc(a)}<sup>${i+1}</sup>`).join(", ");
+  const affils = v("#m-affils").split("\n").map(s=>s.trim()).filter(Boolean);
+  const affilsHtml = affils.map((a,i)=>`<sup>${i+1}</sup>&nbsp;${esc(a)}`).join("&nbsp;&nbsp;&nbsp;");
+
+  const bdef = {"open-data":"opendata.png","open-code":"opencode.png","open-materials":"openmaterial.png",
+                "preregistered":"preregestered.png","codecheck":"codecheck.png"};   // raster (no SVG in Word)
+  const badgeImgs = Object.entries(bdef).filter(([k])=>$("#b-"+k).checked)
+    .map(([k,img])=>`<img src="../assets/badges/${img}" alt="${k}" height="34" style="margin:0 3px;">`).join("");
+
+  const card = (label, val) => val ? `<table role="presentation" width="100%" style="background:${CARDBG};border:0.5pt solid ${CARDBORDER};border-left:3pt solid ${ACCENT};margin:8pt 0;"><tr><td style="padding:6pt 10pt;font-size:11pt;"><b>${label}.</b> ${esc(val)}</td></tr></table>` : "";
+
+  const header = `
+<table role="presentation" width="100%" style="border-bottom:2pt solid ${ACCENT};margin-bottom:10pt;">
+  <tr>
+    <td width="50%" style="vertical-align:bottom;"><img src="../assets/logo.png" height="40"></td>
+    <td width="50%" style="text-align:right;font-size:9pt;vertical-align:bottom;">${metaLines}</td>
+  </tr>
+</table>
+<h1 style="text-align:center;font-size:20pt;margin:16pt 0 8pt;">${esc(v("#m-title")||"Untitled")}</h1>
+<p style="text-align:center;font-weight:bold;font-size:12pt;">${authorsHtml}</p>
+${affils.length ? `<p style="text-align:center;font-style:italic;font-size:10pt;color:#444;">${affilsHtml}</p>` : ""}
+${badgeImgs ? `<p style="text-align:center;">${badgeImgs}</p>` : ""}
+${card("Abstract", v("#m-abstract"))}
+${card("Keywords", v("#m-keywords"))}
+${card("Lay summary", v("#m-lay"))}
+${card("Citation", v("#m-citation"))}`;
+
+  const finalBlock = `
+<hr style="border:none;border-top:2pt solid ${ACCENT};margin-top:24pt;">
+<p style="text-align:center;margin-top:14pt;"><b>License</b> &nbsp;
+  <img src="../assets/license-cc-by.png" height="26"> &nbsp;
+  <span style="color:${ACCENT};">|</span> &nbsp;<b>${esc(v("#m-journal"))}</b> &nbsp;
+  <span style="color:${ACCENT};">|</span> &nbsp;${esc(v("#m-year"))}</p>
+${doi ? `<p style="text-align:center;"><a href="https://doi.org/${esc(doi)}">doi.org/${esc(doi)}</a></p>` : ""}
+<p style="text-align:center;font-style:italic;font-size:9pt;color:#444;">
+  ${esc(v("#m-journal"))} (ISSN: 3052-5977) is part of the Framework for Open and
+  Reproducible Research Training (FORRT; forrt.org) and the M&#252;nster Center
+  for Open Science (M&#252;COS; uni-muenster.de/MueCOS)</p>`;
+
+  return { header, body: bodyHtml, finalBlock };
+}
+
+$("#docx").addEventListener("click", async () => {
+  if ($("#article").hidden) { warn("Load a manuscript first."); return; }
+  if (typeof htmlDocx === "undefined") { warn("The .docx export library failed to load — check your connection and retry."); return; }
+  setStatus("⏳ Building .docx…");
+  try {
+    const { header, body, finalBlock } = buildWordHtml();
+    // Resolve every image (badges/logo/figures) to a data: URI so the
+    // exported file is self-contained and opens correctly offline.
+    const holder = document.createElement("div");
+    holder.innerHTML = header + body + finalBlock;
+    await inlineImages(holder);
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc($("#m-title").value||"R2 preview")}</title></head>
+<body style="font-family:Calibri, Carlito, sans-serif; font-size:11pt; color:#1c1c1c;">
+${holder.innerHTML}
+</body></html>`;
+    const blob = htmlDocx.asBlob(html);
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = ($("#m-id").value || "r2-preview") + ".docx"; a.click();
+  } catch(err){
+    warn("Could not build the .docx export: " + err.message);
+  } finally { setStatus(""); }
+});
+
 $("#reset").addEventListener("click", () => location.reload());
 
-/* ---------- PDF export (browser print → save as PDF) ---------- */
+/* ---------- PDF export (browser print → save as PDF) ----------
+   Wraps #paper in a table whose thead/tfoot spacers repeat on every
+   printed page (reserving room), adds fixed runners that draw the blue
+   rules + DOI footer into those zones, prints, then restores the DOM.
+   @page margin:0 suppresses the browser's date/URL/page-number text. */
+function preparePrint(){
+  const paper = $("#paper");
+  document.body.classList.add("printing");
+  const wrap = document.createElement("table");
+  wrap.className = "print-wrap";
+  wrap.innerHTML =
+    `<thead><tr><td><div class="print-header-space"></div></td></tr></thead>` +
+    `<tbody><tr><td class="print-content"></td></tr></tbody>` +
+    `<tfoot><tr><td><div class="print-footer-space"></div></td></tr></tfoot>`;
+  paper.parentNode.insertBefore(wrap, paper);
+  wrap.querySelector(".print-content").appendChild(paper);
+  const top = document.createElement("div");
+  top.className = "print-runner-top";
+  const bottom = document.createElement("div");
+  bottom.className = "print-runner-bottom";
+  bottom.innerHTML = `<span class="txt">${$("#printfoot").innerHTML}</span>`;
+  document.body.append(top, bottom);
+}
+function cleanupPrint(){
+  const wrap = document.querySelector("table.print-wrap");
+  if (wrap){
+    wrap.parentNode.insertBefore($("#paper"), wrap);
+    wrap.remove();
+  }
+  document.querySelectorAll(".print-runner-top,.print-runner-bottom").forEach(e => e.remove());
+  document.body.classList.remove("printing");
+}
 $("#pdf").addEventListener("click", () => {
   if ($("#article").hidden) { warn("Load a manuscript first."); return; }
-  window.print();   // choose "Save as PDF" — blue page rules + footer are included
+  preparePrint();
+  let done = false;
+  const finish = () => { if (!done){ done = true; cleanupPrint(); } };
+  window.addEventListener("afterprint", finish, { once:true });
+  window.print();   // choose "Save as PDF" in the dialog
+  setTimeout(finish, 500);   // fallback if afterprint doesn't fire
 });
 
 /* Smooth-scroll + highlight when clicking an in-text citation */
