@@ -196,23 +196,41 @@ def _assemble_qmd(mdir: Path, body: str, extracted: dict | None = None) -> None:
 
 def _convert_metafiles(mdir: Path, body: str) -> str:
     """Convert extracted EMF/WMF images (Word vector metafiles that neither
-    browsers nor most PDF toolchains handle) to PNG via LibreOffice, and
-    rewrite the links in the markdown body. CI installs libreoffice-writer;
-    locally we warn and keep the originals if soffice is unavailable."""
+    browsers nor most PDF toolchains handle) to PNG, and rewrite the links
+    in the markdown body.
+
+    LibreOffice's headless --convert-to does not reliably import bare
+    EMF/WMF graphic files outside a document context (this failed silently
+    in CI regardless of which LO packages were installed), so this uses
+    dedicated converters instead: emf2svg-conv for .emf, wmf2svg (from
+    libwmf-bin) for .wmf, then rsvg-convert to rasterize the resulting SVG
+    to PNG. CI installs all three; locally we warn and keep the originals
+    if they're unavailable.
+    """
     metafiles = [p for p in (mdir / "figures").rglob("*")
                  if p.suffix.lower() in {".emf", ".wmf"}]
     if not metafiles:
         return body
-    soffice = shutil.which("soffice")
-    if not soffice:
-        print(f"::warning::{len(metafiles)} EMF/WMF figure(s) found but LibreOffice "
-              "(soffice) is not installed — figures left unconverted. CI converts "
-              "them automatically.")
+    emf2svg, wmf2svg, rsvg = (shutil.which(n) for n in ("emf2svg-conv", "wmf2svg", "rsvg-convert"))
+    if not rsvg or not (emf2svg or wmf2svg):
+        print(f"::warning::{len(metafiles)} EMF/WMF figure(s) found but the converters "
+              "(emf2svg-conv/wmf2svg + rsvg-convert) are not installed — figures left "
+              "unconverted. CI converts them automatically.")
         return body
     for mf in metafiles:
-        run([soffice, "--headless", "--convert-to", "png",
-             "--outdir", str(mf.parent), str(mf)])
-        png = mf.with_suffix(".png")
+        is_emf = mf.suffix.lower() == ".emf"
+        converter = emf2svg if is_emf else wmf2svg
+        if not converter:
+            print(f"::warning::No converter for {mf.suffix} — skipping {mf.name}.")
+            continue
+        svg, png = mf.with_suffix(".svg"), mf.with_suffix(".png")
+        if is_emf:
+            run([converter, "-i", str(mf), "-o", str(svg)])
+        else:
+            run([converter, "-o", str(svg), str(mf)])
+        if svg.exists():
+            run([rsvg, "-o", str(png), str(svg)])
+            svg.unlink()
         if png.exists():
             rel_old = mf.relative_to(mdir).as_posix()
             rel_new = png.relative_to(mdir).as_posix()

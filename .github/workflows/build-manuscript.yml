@@ -72,7 +72,7 @@ jobs:
       - name: Install Carlito font + LaTeX packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y fonts-crosextra-carlito libreoffice-writer libreoffice-graphicfilter
+          sudo apt-get install -y fonts-crosextra-carlito libreoffice-writer emf2svg libwmf-bin librsvg2-bin
           sudo fc-cache -f
           tlmgr --version >/dev/null 2>&1 && \
           tlmgr install carlito tcolorbox fancyhdr tikzfill tikzpagenodes eso-pic \
