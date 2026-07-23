@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Instant preview · R2 Publishing Workflow</title>
+<title>Instant preview · Manuscript Maker</title>
 <style>
   :root { --accent:#009CCF; --card-bg:#FAFAFA; --card-border:#EAE8DF; }
   * { box-sizing:border-box; }
@@ -12,9 +12,9 @@
   a { color:var(--accent); }
   header.site { border-bottom:3px solid var(--accent); background:#fff; }
   header.site .in { max-width:1280px; margin:0 auto; padding:1rem 1.2rem; display:flex; align-items:center; gap:.6rem; }
-  .brand { font-weight:700; letter-spacing:.02em; }
-  .brand .r { background:var(--accent); color:#fff; padding:0 .35rem; border-radius:3px; }
-  .brand a { text-decoration:none; color:inherit; }
+  .brand { font-weight:700; letter-spacing:.02em; display:inline-flex; align-items:center; gap:.5rem; }
+  .brand-logo { height:1.6rem; width:auto; vertical-align:middle; }
+  .brand a { text-decoration:none; color:inherit; display:inline-flex; align-items:center; gap:.5rem; }
   .layout { display:grid; grid-template-columns:380px 1fr; gap:1.2rem; max-width:1280px; margin:0 auto; padding:1.2rem; align-items:start; }
   @media (max-width:920px){ .layout { grid-template-columns:1fr; } }
 
@@ -143,7 +143,7 @@
 </head>
 <body>
 <header class="site"><div class="in">
-  <span class="brand"><a href="../"><span class="r">R</span> REPLICATION RESEARCH</a></span>
+  <span class="brand"><a href="../"><img src="../assets/mucos_icon.png" alt="MüCOS" class="brand-logo" /> MANUSCRIPT MAKER</a></span>
   <span style="color:#888">· Instant preview</span>
 </div></header>
 
@@ -162,9 +162,9 @@
     <details open>
       <summary>Article metadata</summary>
       <label>Title</label><input id="m-title" placeholder="Article title" />
-      <label>Authors <small>(comma-separated)</small></label>
-      <input id="m-authors" placeholder="First Author, Second Author" />
-      <label>ORCID iDs <small>(comma-separated, same order as authors, optional)</small></label>
+      <label>Authors <small>(one per line — end each with their affiliation number(s), e.g. "Jane Doe1" or "John Smith1,2")</small></label>
+      <textarea id="m-authors" placeholder="Jane Doe1&#10;John Smith1,2" rows="3"></textarea>
+      <label>ORCID iDs <small>(comma-separated, same order as author lines, optional)</small></label>
       <input id="m-orcids" placeholder="0000-0000-0000-0000, 0000-0000-0000-0001" />
       <label>Affiliations <small>(one per line, optional)</small></label>
       <textarea id="m-affils" placeholder="University of ..."></textarea>
@@ -184,11 +184,19 @@
       <label>Journal</label><input id="m-journal" value="Replication Research (R2)" />
       <div class="row">
         <div><label>Article type</label>
-          <select id="m-type">
+          <input id="m-type" list="type-options" value="Replication" placeholder="Pick or type your own" />
+          <datalist id="type-options">
             <option>Replication</option><option>Reproduction</option><option>Editorial</option>
             <option>Methods</option><option>Comment</option><option>Review</option><option>Tutorial</option>
-          </select></div>
-        <div><label>Discipline</label><input id="m-discipline" value="Multidisciplinary" /></div>
+          </datalist></div>
+        <div><label>Discipline</label>
+          <input id="m-discipline" list="discipline-options" value="Multidisciplinary" placeholder="Pick or type your own" />
+          <datalist id="discipline-options">
+            <option>Multidisciplinary</option><option>Psychology</option><option>Economics</option>
+            <option>Sociology</option><option>Political Science</option><option>Biology</option>
+            <option>Medicine</option><option>Education</option><option>Neuroscience</option>
+            <option>Computer Science</option>
+          </datalist></div>
       </div>
       <div class="row">
         <div><label>Volume</label><input id="m-volume" value="1" /></div>
@@ -469,7 +477,14 @@ function extractDocxFront(html){
   const bodyBlocks = blocks.slice(start).filter(b => T(b) || b.querySelector("img,table"));
   const bodyHtml = bodyBlocks.length ? bodyBlocks.map(b=>b.outerHTML).join("\n") : html;
 
-  return { title, authors, affiliation, abstract, keywords, bodyHtml };
+  return { title, authors: splitAuthorNames(authors), affiliation, abstract, keywords, bodyHtml };
+}
+/* Word manuscripts often list authors on one physical line ("Jane Doe,
+   John Smith, and Jane Roe" / "Jane Doe & John Smith"). The Authors box is
+   now one-name-per-line, so split that into separate lines here. A line
+   with no such separators is returned unchanged (still one author). */
+function splitAuthorNames(s){
+  return (s||"").split(/\s*(?:,|&|\band\b)\s*/i).map(x=>x.trim()).filter(Boolean).join("\n");
 }
 
 /* Post-process converted body HTML (all input formats):
@@ -566,7 +581,8 @@ function applyMeta(meta){
   if (!meta || typeof meta !== "object") return;
   const set = (id,v) => { if (v && !$(id).value) $(id).value = v; };
   set("#m-title", meta.title);
-  if (meta.author) set("#m-authors", normAuthors(meta.author));
+  if (meta.authorLines) set("#m-authors", meta.authorLines.join("\n"));
+  else if (meta.author) set("#m-authors", normAuthorLines(meta));
   const orcidList = meta.orcids ||
     (Array.isArray(meta.author) ? meta.author.map(a => (a && typeof a === "object" && a.orcid) ? a.orcid : "") : []);
   if (orcidList.some(Boolean)) set("#m-orcids", orcidList.join(", "));
@@ -581,12 +597,24 @@ function applyMeta(meta){
   const b = r2.badges || {};
   ["open-data","open-code","open-materials","preregistered","codecheck"].forEach(k=>{ if(b[k]) $("#b-"+k).checked=true; });
 }
-function normAuthors(a){
-  return [].concat(a).map(x=>{
-    if (typeof x === "string") return x;
-    if (x.name && typeof x.name === "object") return [x.name.given,x.name.family].filter(Boolean).join(" ");
-    return x.name || "";
-  }).filter(Boolean).join(", ");
+/* Builds one "Name" or "Name1,2" line per author from Quarto-style metadata:
+   author[].affiliations[].ref is matched against affiliations[].id (in
+   list order) to get each author's 1-indexed affiliation number(s). */
+function normAuthorLines(meta){
+  const refToNum = {};
+  (meta.affiliations||[]).forEach((a,i)=>{ if (a && a.id) refToNum[a.id] = i+1; });
+  return [].concat(meta.author||[]).map(x=>{
+    let name = "";
+    if (typeof x === "string") name = x;
+    else if (x && x.name && typeof x.name === "object") name = [x.name.given,x.name.family].filter(Boolean).join(" ");
+    else if (x) name = x.name || "";
+    if (!name) return "";
+    let nums = [];
+    if (x && typeof x === "object" && Array.isArray(x.affiliations)){
+      nums = x.affiliations.map(r => refToNum[(r && typeof r==="object") ? r.ref : r]).filter(Boolean);
+    }
+    return nums.length ? `${name}${nums.join(",")}` : name;
+  }).filter(Boolean).join("\n");
 }
 function parseLatex(tex){
   const meta = { r2:{} };
@@ -601,11 +629,16 @@ function parseLatex(tex){
   meta.abstract = clean(balanced("RtwoAbstract"));
   const kw = clean(balanced("keywords")); if (kw) meta.keywords = kw.split(/[,;]/).map(s=>s.trim());
   meta.r2["recommended-citation"] = clean(balanced("recommendedcitation"));
-  const authorMatches = [...tex.matchAll(/\\author(?:\[[^\]]*\])?\{([^}]*)\}/g)];
-  const authors = authorMatches.map(m => clean(m[1].replace(/\\orcidlink\{[^}]*\}/g,""))).filter(Boolean);
+  const authorMatches = [...tex.matchAll(/\\author(?:\[([^\]]*)\])?\{([^}]*)\}/g)];
+  const authors = authorMatches.map(m => clean(m[2].replace(/\\orcidlink\{[^}]*\}/g,""))).filter(Boolean);
   if (authors.length) {
     meta.author = authors;
-    meta.orcids = authorMatches.map(m => (m[1].match(/\\orcidlink\{([^}]*)\}/) || [,""])[1].trim());
+    meta.orcids = authorMatches.map(m => (m[2].match(/\\orcidlink\{([^}]*)\}/) || [,""])[1].trim());
+    // \author[1,2]{Name} already gives the affiliation numbers directly.
+    meta.authorLines = authorMatches.map((m,i) => {
+      const nums = (m[1]||"").replace(/\s+/g,"");
+      return nums ? `${authors[i]}${nums}` : authors[i];
+    });
   }
   const affils = [...tex.matchAll(/\\affil(?:\[[^\]]*\])?\{([^}]*)\}/g)].map(m=>clean(m[1]));
   if (affils.length) meta.affiliations = affils.map(name=>({name}));
@@ -632,6 +665,18 @@ function texBodyToHtml(b){
   return md.render(b);
 }
 
+/* One author per line, each optionally ending in affiliation number(s):
+   "Jane Doe1" or "Jane Doe 1" or "John Smith1,2" -> {name, nums:[...]}.
+   A line with no trailing digit is just a name with no affiliation marker,
+   so plain "Jane Doe" still works fine. */
+function parseAuthorLines(text){
+  return (text||"").split("\n").map(s=>s.trim()).filter(Boolean).map(line => {
+    const m = line.match(/^(.+?)[\s,]*([0-9]+(?:\s*,\s*[0-9]+)*)$/);
+    if (m && m[1].trim()) return { name: m[1].trim(), nums: m[2].split(",").map(s=>s.trim()).filter(Boolean) };
+    return { name: line, nums: [] };
+  });
+}
+
 /* ---------- render the R2 article ---------- */
 function render(){
   const has = bodyHtml.trim().length>0;
@@ -647,12 +692,13 @@ function render(){
     + `<div>Discipline: ${esc(v("#m-discipline"))}</div>`
     + `<div>Published under the CC-BY 4.0 license</div>`;
   // authors (+ optional linked ORCID icon) + affiliations (one per line)
-  const authors = v("#m-authors").split(",").map(s=>s.trim()).filter(Boolean);
+  const authors = parseAuthorLines(v("#m-authors"));
   const orcids = v("#m-orcids").split(",").map(s=>s.trim());
   $("#r2-authors").innerHTML = authors.map((a,i)=>{
     const oid = orcids[i];
     const icon = oid ? `<a class="r2-orcid" href="https://orcid.org/${esc(oid)}" target="_blank" rel="noopener" title="ORCID ${esc(oid)}"><img src="../assets/orcid.svg" alt="ORCID"></a>` : "";
-    return `${esc(a)}${icon}<sup>${i+1}</sup>`;
+    const sup = a.nums.length ? `<sup>${esc(a.nums.join(","))}</sup>` : "";
+    return `${esc(a.name)}${icon}${sup}`;
   }).join(", ");
   const affils = v("#m-affils").split("\n").map(s=>s.trim()).filter(Boolean);
   $("#r2-affils").innerHTML = affils.map((a,i)=>`<div><sup>${i+1}</sup>&nbsp;${esc(a)}</div>`).join("");
@@ -734,12 +780,13 @@ function buildWordHtml(){
     `Published under the CC-BY 4.0 license`
   ].filter(Boolean).join("<br/>");
 
-  const authors = v("#m-authors").split(",").map(s=>s.trim()).filter(Boolean);
+  const authors = parseAuthorLines(v("#m-authors"));
   const orcids = v("#m-orcids").split(",").map(s=>s.trim());
   const authorsHtml = authors.map((a,i)=>{
     const oid = orcids[i];
     const icon = oid ? ` <a href="https://orcid.org/${esc(oid)}"><img src="../assets/orcid.png" height="12" style="vertical-align:middle;"></a>` : "";
-    return `${esc(a)}${icon}<sup>${i+1}</sup>`;
+    const sup = a.nums.length ? `<sup>${esc(a.nums.join(","))}</sup>` : "";
+    return `${esc(a.name)}${icon}${sup}`;
   }).join(", ");
   const affils = v("#m-affils").split("\n").map(s=>s.trim()).filter(Boolean);
   const affilsHtml = affils.map((a,i)=>`<sup>${i+1}</sup>&nbsp;${esc(a)}`).join("<br/>");
