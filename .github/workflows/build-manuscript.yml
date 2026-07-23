@@ -1,0 +1,148 @@
+name: Build manuscript (PR preview)
+
+# When a PR adds or changes anything under manuscripts/, build every changed
+# article to HTML + PDF + JATS + an OJS package, attach the files as artifacts,
+# deploy a live HTML preview to GitHub Pages, and post one sticky PR comment.
+on:
+  pull_request:
+    paths:
+      - "manuscripts/**"
+      - "_extensions/**"
+      - "themes/**"
+      - "engine/**"
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write          # deploy preview to the gh-pages branch
+  pull-requests: write     # post the sticky comment
+
+concurrency:
+  group: build-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.find.outputs.matrix }}
+      any: ${{ steps.find.outputs.any }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - id: find
+        name: Detect changed manuscripts
+        run: |
+          base="origin/${{ github.base_ref }}"
+          dirs=$(git diff --name-only "$base"...HEAD -- 'manuscripts/**' \
+                 | awk -F/ 'NF>=3 && $2 !~ /^_/ {print $1"/"$2}' | sort -u)
+          echo "Changed manuscripts:"; echo "$dirs"
+          if [ -z "$dirs" ]; then
+            echo "any=false" >> "$GITHUB_OUTPUT"
+            echo 'matrix={"dir":[]}' >> "$GITHUB_OUTPUT"
+          else
+            json=$(echo "$dirs" | jq -R . | jq -cs '{dir: .}')
+            echo "any=true" >> "$GITHUB_OUTPUT"
+            echo "matrix=$json" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.any == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Cache TinyTeX + Quarto
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.TinyTeX
+            ~/.local/share/quarto
+          key: r2-tex-${{ runner.os }}-${{ hashFiles('_extensions/**', '.github/workflows/build-manuscript.yml') }}
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: "1.5.53"
+          tinytex: true
+
+      - name: Install Carlito font + LaTeX packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-crosextra-carlito libreoffice-writer
+          sudo fc-cache -f
+          tlmgr --version >/dev/null 2>&1 && \
+          tlmgr install carlito tcolorbox fancyhdr tikzfill tikzpagenodes eso-pic \
+            biblatex biber biblatex-apa csquotes orcidlink pifont enumitem \
+            microtype xurl placeins booktabs setspace listings authblk \
+            pgf etoolbox xcolor || true
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml jinja2
+
+      - name: Build ${{ matrix.dir }}
+        run: |
+          chmod +x engine/scripts/build_all.sh
+          engine/scripts/build_all.sh "${{ matrix.dir }}"
+
+      - name: Stage outputs
+        id: stage
+        run: |
+          id=$(basename "${{ matrix.dir }}")
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          out="_preview/$id"
+          mkdir -p "$out"
+          cp "${{ matrix.dir }}/article.html" "$out/index.html"
+          cp "${{ matrix.dir }}/article.pdf"  "$out/$id.pdf"  2>/dev/null || true
+          cp "${{ matrix.dir }}/article.xml"  "$out/$id.xml"  2>/dev/null || true
+          cp "${{ matrix.dir }}"/ojs/*.xml     "$out/"         2>/dev/null || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.stage.outputs.id }}-galleys
+          path: |
+            ${{ matrix.dir }}/article.html
+            ${{ matrix.dir }}/article.pdf
+            ${{ matrix.dir }}/article.xml
+            ${{ matrix.dir }}/ojs/*.xml
+
+      - name: Deploy HTML preview to GitHub Pages
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _preview
+          destination_dir: preview/pr-${{ github.event.pull_request.number }}
+          keep_files: true
+
+      - name: Post sticky PR comment
+        if: github.event.pull_request.head.repo.full_name == github.repository
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview-${{ steps.stage.outputs.id }}
+          message: |
+            ### 📄 `${{ steps.stage.outputs.id }}` — galleys built
+
+            | Output | Link |
+            |---|---|
+            | 🌐 HTML preview | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/preview/pr-${{ github.event.pull_request.number }}/${{ steps.stage.outputs.id }}/ |
+            | 📕 PDF / 🗂️ JATS / 📦 OJS package | see the **Artifacts** of [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+
+            Built from `${{ matrix.dir }}` · commit ${{ github.event.pull_request.head.sha }}.
+            Re-push to rebuild. ✅ checks must pass before merge.
+
+      - name: Fork PR notice (no Pages write)
+        if: github.event.pull_request.head.repo.full_name != github.repository
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview-${{ steps.stage.outputs.id }}
+          message: |
+            ### 📄 `${{ steps.stage.outputs.id }}` — galleys built (fork PR)
+            This PR is from a fork, so a live Pages preview can't be deployed.
+            Download the HTML, PDF, JATS and OJS package from the **Artifacts**
+            of [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Theme customizer · R2 Publishing Workflow</title>
+<style>
+  body { margin:0; font-family:"Calibri","Carlito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+         color:#1c1c1c; line-height:1.5; }
+  .wrap { max-width:1040px; margin:0 auto; padding:1.5rem; }
+  header { border-bottom:3px solid var(--accent,#009CCF); }
+  h1 { margin:.2rem 0; } .muted { color:#555; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; align-items:start; }
+  @media (max-width:780px){ .cols { grid-template-columns:1fr; } }
+  label { display:block; font-weight:600; margin:.7rem 0 .2rem; font-size:.92rem; }
+  input,select { width:100%; padding:.45rem .5rem; border:1px solid #ccc; border-radius:4px; font-size:.95rem; }
+  .row { display:flex; gap:.6rem; } .row > div { flex:1; }
+  fieldset { border:1px solid #e2e0d7; border-radius:6px; margin:1rem 0; padding:.6rem 1rem 1rem; }
+  legend { font-weight:700; padding:0 .4rem; }
+  pre { background:#0f1720; color:#e6edf3; padding:1rem; border-radius:6px; overflow:auto;
+        font-size:.82rem; white-space:pre; min-height:280px; }
+  .preview { border:1px solid #e2e0d7; border-radius:6px; padding:1rem; }
+  .pv-top { display:flex; justify-content:space-between; border-bottom:2px solid var(--accent,#009CCF);
+            padding-bottom:.4rem; }
+  .pv-card { background:var(--cardbg,#FEFDF6); border:1px solid var(--cardborder,#EAE8DF);
+             border-left:4px solid var(--accent,#009CCF); border-radius:4px; padding:.6rem .8rem; margin-top:.7rem; }
+  .pv-logo { font-weight:700; } .pv-logo .r { background:var(--accent,#009CCF); color:#fff; padding:0 .3rem; border-radius:3px; }
+  button { background:var(--accent,#009CCF); color:#fff; border:0; font-weight:600; padding:.55rem 1rem;
+           border-radius:5px; cursor:pointer; margin-top:.8rem; }
+  a { color:var(--accent,#009CCF); }
+  code { background:#f3f1e9; padding:0 .25rem; border-radius:3px; }
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>Theme customizer</h1>
+  <p class="muted">Generate a <code>theme.yml</code> to adapt this publishing
+  workflow to another journal. Save it as
+  <code>themes/&lt;your-journal&gt;/theme.yml</code> and point
+  <code>_quarto.yml</code>'s <code>metadata-files:</code> at it.</p></div></header>
+
+<div class="wrap cols">
+  <form id="f">
+    <fieldset><legend>Journal</legend>
+      <label>Journal name</label>
+      <input id="journal" value="Replication Research (R2)" />
+      <div class="row">
+        <div><label>ISSN</label><input id="issn" placeholder="3052-5977" /></div>
+        <div><label>Volume / Year</label>
+          <div class="row"><input id="volume" value="1" /><input id="year" value="2025" /></div>
+        </div>
+      </div>
+      <label>Publisher</label>
+      <input id="publisher" value="Münster Center for Open Science (MüCOS)" />
+      <label>Homepage</label>
+      <input id="homepage" value="https://replicationresearch.org" />
+    </fieldset>
+
+    <fieldset><legend>Design tokens</legend>
+      <div class="row">
+        <div><label>Accent</label><input id="accent" type="color" value="#009CCF" /></div>
+        <div><label>Card background</label><input id="cardbg" type="color" value="#FEFDF6" /></div>
+        <div><label>Card border</label><input id="cardborder" type="color" value="#EAE8DF" /></div>
+      </div>
+      <label>Body font (must be installed for PDF / available as web font)</label>
+      <input id="font" value="Carlito" />
+    </fieldset>
+
+    <fieldset><legend>License</legend>
+      <div class="row">
+        <div><label>License label</label><input id="license" value="CC-BY 4.0" /></div>
+        <div><label>License URL</label><input id="licenseurl" value="https://creativecommons.org/licenses/by/4.0/" /></div>
+      </div>
+    </fieldset>
+
+    <fieldset><legend>Open Journal Systems</legend>
+      <div class="row">
+        <div><label>Journal path</label><input id="ojspath" value="r2" /></div>
+        <div><label>Section ref</label><input id="ojssection" value="ART" /></div>
+      </div>
+      <div class="row">
+        <div><label>Author user-group</label><input id="ojsgroup" value="Author" /></div>
+        <div><label>OJS schema version</label>
+          <select id="ojsver"><option>3.4</option><option>3.3</option><option>3.2</option></select></div>
+      </div>
+    </fieldset>
+    <button type="button" onclick="copyYaml()">📋 Copy theme.yml</button>
+  </form>
+
+  <div>
+    <div class="preview" id="pv">
+      <div class="pv-top">
+        <span class="pv-logo"><span class="r">R</span> <span id="pv-journal">Replication Research (R2)</span></span>
+        <span class="muted" style="font-size:.75rem">vol <span id="pv-vol">1</span>, <span id="pv-year">2025</span></span>
+      </div>
+      <div class="pv-card"><strong>Abstract.</strong> A short preview of how the
+        front-matter cards and accent colour will look with your tokens.</div>
+      <div class="pv-card"><strong>Keywords.</strong> replication, metascience, open science</div>
+    </div>
+    <h3>theme.yml</h3>
+    <pre id="out"></pre>
+  </div>
+</div>
+
+<script>
+const ids = ["journal","issn","volume","year","publisher","homepage","accent","cardbg",
+             "cardborder","font","license","licenseurl","ojspath","ojssection","ojsgroup","ojsver"];
+const $ = id => document.getElementById(id);
+const hex = id => $(id).value.replace("#","").toUpperCase();
+
+function render() {
+  // live preview
+  document.documentElement.style.setProperty("--accent", $("accent").value);
+  document.documentElement.style.setProperty("--cardbg", $("cardbg").value);
+  document.documentElement.style.setProperty("--cardborder", $("cardborder").value);
+  $("pv-journal").textContent = $("journal").value;
+  $("pv-vol").textContent = $("volume").value;
+  $("pv-year").textContent = $("year").value;
+
+  const y =
+`# Generated by the R2 theme customizer.
+# Save as themes/<your-journal>/theme.yml and point _quarto.yml at it.
+r2:
+  journal: ${q($("journal").value)}
+  issn: ${q($("issn").value)}
+  publisher: ${q($("publisher").value)}
+  homepage: ${q($("homepage").value)}
+
+  accent: "${hex("accent")}"
+  card-bg: "${hex("cardbg")}"
+  card-border: "${hex("cardborder")}"
+
+  license: ${q($("license").value)}
+  license-url: ${q($("licenseurl").value)}
+
+ojs:
+  journal-path: ${q($("ojspath").value)}
+  section-ref: ${q($("ojssection").value)}
+  user-group-ref: ${q($("ojsgroup").value)}
+  schema-version: "${$("ojsver").value}"
+
+footer-template: "{journal}, {year}, vol {volume}, {article-id}"
+`;
+  $("out").textContent = y;
+}
+function q(s){ return s && /[:#"']/.test(s) ? JSON.stringify(s) : '"'+ (s||"") +'"'; }
+function copyYaml(){ navigator.clipboard.writeText($("out").textContent)
+  .then(()=>{ const b=document.querySelector("button"); const t=b.textContent;
+    b.textContent="✅ Copied"; setTimeout(()=>b.textContent=t,1500); }); }
+ids.forEach(id => $(id).addEventListener("input", render));
+render();
+</script>
+</body>
+</html>

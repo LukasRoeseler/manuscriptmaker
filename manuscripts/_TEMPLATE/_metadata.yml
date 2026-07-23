@@ -1,0 +1,26 @@
+# Editor-owned registry metadata. Fill every field before opening the PR.
+# (Research assistants: edit article.qmd for prose; editors own this file.)
+date: 2025-01-01            # publication date (YYYY-MM-DD)
+
+r2:
+  volume: 1
+  year: 2025
+  article-id: "R2.2025.000"      # MUST match this folder's name
+  doi: "10.15626/R2.2025.000"
+  article-type: "Replication"    # Editorial | Replication | Reproduction | Methods | Comment | Review | Tutorial
+  discipline: "Psychology"
+  running-head: "Short running head"
+
+  lay-summary: >
+    One short plain-language paragraph for non-specialists.
+
+  recommended-citation: >
+    Author, A., & Author, B. (2025). Title. *Replication Research (R2)*, *1*,
+    R2.2025.000. https://doi.org/10.15626/R2.2025.000
+
+  badges:
+    open-data: false
+    open-code: false
+    open-materials: false
+    preregistered: false
+    codecheck: false

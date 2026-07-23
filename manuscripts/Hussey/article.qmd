@@ -1,0 +1,315 @@
+---
+title: "TODO: article title"
+author:
+  - name: { given: TODO, family: TODO }
+    orcid: ""
+    email: ""
+    corresponding: true
+    affiliations: [{ ref: aff1 }]
+affiliations:
+  - { id: aff1, name: "TODO: affiliation" }
+abstract: >
+  TODO: abstract (paste here if it was not detected automatically).
+keywords: [TODO]
+bibliography: references.bib
+---
+
+# No evidence of differences between hierarchical versus distinction relations in self-based ACT exercises: 
+
+# A critical reanalysis of Foody et al. (2013) and Foody et al. (2015)
+
+# Ian Hussey[^1]
+
+The evidential link between Relational Frame Theory (RFT) and Acceptance and Commitment Therapy (ACT) is a matter of on-going debate. Foody et al. (2013) is frequently cited as evidence for ACT's concept of Self-as-Context and as evidence for the ties between ACT's middle level clinical terms and the more basic account of language and cognition provided by RFT. However, the failed replication study by Foody et al. (2015) typically goes uncited. Given their importance, I critically re-evaluate the results of both articles. I found several issues, the most important of which was that the central claim does not correspond with the reported analyses. When I extracted summary statistics from both studies and used them to conduct a multiverse analysis, that mapped directly onto the original claim (i.e., that the hierarchy condition reduced distress more than the distinction condition), null results were found under every set of conditions. Taken together, results illustrate how weak or flawed research practices and uncritical citation of results can hinder cumulative science and evidence based clinical practice.
+
+This article presents a critical reanalysis of a study published in the field of psychology, specifically clinical psychology and more specifically Acceptance and Commitment Therapy [ACT: @1816]. A long-standing debate within this literature is whether or not ACT's model of therapeutic change is or is not linked to the more basic science of learning and behavioral processes, specifically relational responding, described by Relational Frame Theory [RFT: @1834]. RFT is a modern behaviorist account of language and higher cognition in terms of humans' ability to relate stimuli in complex ways. An introduction to ACT and RFT, and the long-debated link between the two, is beyond the scope of this article, but readers can find longer treatments of these issues in Barnes-Holmes et al., [@2711] and McLoughlin and Roche [@4834]. For the purposes of the current article, it is suffice to say that Foody et al. (2013) argued that they were among the first to successfully attempt to bridge the gap between ACT's model of therapeutic change and RFT, specifically by recasting what ACT calls the therapeutic processes of "defusion" and "the three selves" into the more precise language of what RFT refers to as deictic relational responding (see Foody et al., 2013). Specifically, Foody et al. [@118] adapted two different ultra-brief therapeutic interventions designed to decrease distress from Luciano et al. (2011). Briefly, these defined the distinction condition, in which participants were instructed to attempt to see their thoughts and feelings as distinct from their sense of self (i.e., you are not your thoughts), versus the hierarchy condition, in which participants were instructed to attempt to see their thoughts and feelings as contained by an overarching sense of self (i.e., you contain your thoughts).
+
+Elsewhere, over the past decade, the Replication Crisis in psychology has raised questions about the replicability, robustness, and credibility of claims in the psychology literature [@3111; @3102]. Although the replication crisis began in social psychology, recognition of the same systemic weaknesses, flaws and biases in our research processes have more recently also been acknowledged in clinical psychology [@115; @4529]. More recently, awareness of this issue has also spread to the behavioral research communities. In an editorial for Perspectives on Behavior Science, Hantula stated that "the 'replication crisis' in psychology could well be repeated in behavior science and behavior analysis. Even if it is not, it may hold some important lessons for both scientists and practitioners." [@5032, pp. 4-5]. Encouragingly, however, the Association for Contextual Behavioral Science's Task force on the Strategies and Tactics of Contextual Behavioral Science Research [@5039] recently announced its explicit support for Open Science principles. As such, there appears to be growing support for the idea that behavioral research would be enhanced by examining and enhancing the reproducibility and credibility of its claims.
+
+To this end, a number of studies have examined the replicability and studies that attempt to tie RFT principles to ACT practices, such as the use of metaphor in therapy [e.g., @1037] but have failed to replicate [see @468; for a series of replies, in order of publication, see: @140; @4626; @451]. As such, it also seems important to reexamine the credibility of similar claims in this literature, such as Foody et al. (2013, 2015) This paper evaluates only whether these two studies support this specific claim; it is not an assessment of the ACT--RFT literature as a whole.
+
+# The Impact of Foody et al. (2013, , 2015)
+
+Foody et al. (2013) represents a key article in the on-going debate about the strength of the evidence for ACT's core processes and their ties to basic science via RFT [see @2711; @4834], and is itself stated to be a conceptual replication of previous study by Luciano et al. (2011). At the time of writing it has 134 citations on Google Scholar, placing it in the top 1% of most-cited psychology articles [@36090].
+
+Foody et al. (2013) is often cited as evidence for (a) the superiority of hierarchy-based interventions over distinction-based interventions, and therefore (b) as evidence for ACT's concept of Self-As-Context. More generally, Foody et al. (2013) is often cited as evidence of (c) the link between RFT and ACT, in general. I provide several examples below. These examples are intended to be illustrative rather than a systematic review. I have selected them from sources that are likely to be particularly influential such as textbooks, articles providing introductions to the topic, and articles advocating for the expansion of ACT training (e.g., based on its putative links to RFT). In these examples, it is worth noting the pattern that the articles are cited without interrogating the strength of the evidence provided by Foody et al. (2013) and without acknowledging that these results failed to replicate in Foody et al. (2015). The nature of this failed replication is obscured by the fact that Foody et al. (2015) state in their abstract that the results "somewhat support" (Foody et al., 2015, p. 231) for differential efficacy and elsewhere in their discussion that the "current data concord almost entirely with those outcomes \[in Foody et al. (2013)\]" (Foody et al., 2015, p. 241), when in fact the results of the RM-ANOVAs in Foody et al. (2015) are all non-significant. I return to this point later.
+
+Foody et al. (2013; 2015) are cited in three different chapters of the recently published Oxford Handbook of Acceptance and Commitment Therapy [@36091]. In their chapter on "Cognitive Defusion", a key concept within ACT, Ruiz et al. [@29175] state *"Foody, Barnes-Holmes, Barnes-Holmes, and Luciano (2013) found that Defusion II \[hierarchy\] was more efficacious in reducing experimentally induced emotional distress than Defusion I \[distinction\]."* This takes the conclusions of Foody et al. (2013) at face value without interrogating the strength of the evidence it provides for the claim. Additionally, they erroneously state *"Foody, Barnes-Holmes, Barnes-Holmes, Rai, and Luciano (2015) found that protocols that included framing ongoing private events through hierarchical relations were more efficacious than those that only introduced deictic relations."* (p. 13). This inaccurately characterizes the null results found by Foody et al. (2015) as if they support the claim.
+
+In their chapter on "Clinical behavior analysis and RFT: Conceptualizing psychopathology and its treatment", Luciano et al. [@29197] cite Foody et al. (2013) as supportive evidence in the section on *"Evidence of hierarchically framing ongoing behavior as a central relational process"*. Again, this takes the conclusions of Foody et al. (2013) at face value without interrogating the strength of the evidence it actually provides for the claim. Additionally, they do not cite the failed replication by Foody et al. (2015).
+
+In their chapter on "A primer on Relational Frame Theory", Harte & Barnes-Holmes [@29203] cite Foody et al. (2013) as a demonstration of hierarchical framing, again without interrogating the strength of the evidence it provides, and do not cite the failed replication by Foody et al. (2015).
+
+Foody and colleagues' work is also cited in other influential textbooks. In "Behavior Therapy" [@36092], the chapter "The Future of Third Wave Cognitive Behavior Therapies" [@29177] cites both Foody et al. (2013) and Foody et al. (2015) as an illustrative example of the link between RFT and ACT. However, they neither interrogate the strength of the evidence nor mention that the latter article is a failed replication. Additionally, they cite Sierra et al. [@1037] without citing or discussing the failed replication of that study by Pendrous et al. [@468].
+
+Many other examples can be found. In their article advocating for the inclusion of ACT training in Applied Behavior Analysis curricula, Kelly & Kelly [@29190] cite Foody et al. (2013) as evidence of the link between RFT and ACT. They do not examine the strength of the evidence provided by Foody et al. (2013) or cite the failed replication by Foody et al. (2015). In their article on the same topic, Dixon and Hayes [@29192] cite both articles as supportive evidence without acknowledging that the latter is a failed replication. In their article celebrating the contributions of Murray Sidman, Law & Hayes [@pAsreFDD/5Zx7PLlN] state *"understanding how to foster healthy perspective-taking seems central to establishing self-direction, independence, and values-based actions (Foody et al., 2015)"*, which inaccurately characterizes the nature of the failed replication and the general nature of the study and its possible conclusions, which were not related to self-direction, independence, or values-based action. Unfortunately, recent research has demonstrated that such inaccurate and biased citations are surprisingly common in the psychology literature, with roughly 9% of all citations checked grossly misrepresenting the original work [@132].
+
+Even replication studies, which might be expected to be more aware of the importance of citing failed replications, fall into this pattern. Gomide et al. [@27163] cite Foody et al. (2013) favorably, without interrogating the strength of the evidence it provided and without citing the failed replication by Foody et al. (2015).
+
+Of course, it is possible to find examples of more critical readings of Foody et al. (2013). For example, Godbee & Kangas [@29181] are more circumspect, stating *"Although the differences between hierarchical \[Self-as-Context\] ("I am more than my experiences") and distinction \[Self-as-Context\] ("I am not my experiences") have been researched, there is limited evidence that one type is more effective than the other (Atkins & Styles, 2016; Foody et al., 2013; Foody et al., 2015)."*
+
+Is such a critical reading of the results of Foody et al. (2013) necessary? In the next section, I briefly summarize Foody et al.'s (2013) purpose, design, results and conclusions. I then provided critiques of the evidence it presents. Lastly, I present a re-analysis of the results of both Foody et al. (2013) and Foody et al. (2015) to assess whether these studies can provide robust evidence for their claims.
+
+# Summary of Foody et al. (2013)
+
+## Stated relevance 
+
+Foody et al. (2013) stated the relevance of their study as follows: *"The current study is among the first to attempt to target specific relational frames in the context of ACT exercises. In doing so, it fits the broader research agenda of scientific bridge building between ACT and RFT, while recognizing the difficulties inherent in the use of middle level terms, such as self as context and defusion. One of the central ways forward in dealing with middle level terms is to replace them with more functionally sound, empirically tested concepts, such as replacing the terms self as context with distinction or hierarchical deictic relations. Although the present study is only one small step in that direction, it does suggest that RFT concepts may have more clinical application than might have been previously recognized."* (Foody et al., 2013, p. 387).
+
+## 
+
+## Social Impact & Responsibility
+
+The studies reanalysed here inform clinical practice: Acceptance and Commitment Therapy is a widely disseminated psychotherapy, and the claim that hierarchical framing relieves distress better than distinction framing has influenced clinical training and practice, with patients in distress as the indirectly affected and vulnerable party. The social value of this reanalysis lies in helping such training and practice rest on credible evidence. These findings concern the credibility of a specific empirical claim, not clinical guidance; decisions about practice rest on the broader evidence base and clinical judgement. It is equally important to bound the claim. I do not show that ACT is ineffective, that self-as-context is invalid, or that those who report benefiting from these exercises are mistaken, only that the specific data in Foody et al. (2013, 2015) do not support the specific claim examined. These studies form just one line of inquiry into using RFT to inform ACT.
+
+## Design and method
+
+Foody et al. (2013) employed a 3 (within: baseline, post distress induction, post ACT intervention) X 2 (between: "hierarchical self as context" vs. "distinction self as context" intervention) mixed between-within design. Three primary outcome measures were assessed at each time point: three single-item visual analogue scales (VAS) *"were used as distress ratings and assessed discomfort, anxiety, and stress"* (Foody et al., 2013, p. 376). Each visual analogue scale required participants to indicated *"their level of distress on each scale by placing an X on a printed line that ranged from 0% (e.g., no discomfort) to 100% (e.g., very much discomfort)."* (Foody et al., 2013, p. 376). Other measures (i.e., the Acceptance and Action Questionnaire II, delivered only at baseline, and a Reactions Questionnaire that served as a manipulation check) are not considered here. Participants completed the VAS at baseline, then completed a distress induction task, then were assessed again (post distress induction), then completed an ACT intervention (randomized to either a "hierarchical self as context" or "distinction self as context" exercise), and then completed the assessments again (post intervention). The analyses included 18 participants per intervention group after exclusions.
+
+Foody et al. (2015) replicate and extend the original study. In addition to the self-focused distinction and hierarchy conditions present in the first study, they add a variation of each that is other-focused to create four conditions (self-distinction, self-hierarchy, object-distinction, and object-hierarchy). In addition to this, participants each received two cycles of baseline measurement, distress induction, post induction measurement, intervention, and post intervention measurement. The study reports twelve participants per condition after exclusions. Data was analyzed both between the four conditions, and also by collapsing the self and other conditions to make a general distinction-hierarchy comparison. The direct replication of the first study would be comparison between self-distinction versus self-hierarchy conditions during the first induction and intervention cycle only, although this analysis is not reported.
+
+## Hypothesis and claims
+
+Foody et al. (2013) compared the efficacy of two interventions in relieving experimentally induced distress. Their stated claim was that the "hierarchical self as context" intervention is more effective than the "distinction self as context" intervention at reducing distress, and they state that they therefore conceptually replicated the results of the original study by Luciano et al. (2011). The key statistical results they provide to support this claim are the interaction effects between time point and group on the 3 X 2 RM-ANOVAs. A statistically significant result was found for one of the three outcome measures (stress, *p* = .04; anxiety, *p* = .45, discomfort, *p* = .33). No statistical tests compared the groups at specific time points.
+
+In their own words, they summarize their key findings as follows: *"The findings demonstrated superiority of the intervention that focused on hierarchical, rather than distinction, deictic relations in terms of reducing distress."* (Foody et al., 2013, p. 373); *"The hierarchical intervention only resulted in a reduction in all three dependent measures, including a significant reduction in stress."* (p. 385); and *"the hierarchical intervention was significantly effective only in the context of stress, and not in discomfort or anxiety (although both of these were also reduced)."* (p. 385). This implies that all three outcomes showed descriptive differences in the expected direction, although only stress was statistically significant.
+
+Foody et al. (2015) are inconsistent in their claims about successful replication and extension, and indeed do not use the phrase replication despite there being very strong overlaps with Foody et al. (2013) and arguably weak overlaps between Foody et al. (2013) and Luciano et al. (2011). I return to this status as a replication later.
+
+Foody et al. (2015) state in their discussion that their study "found little or no differences between the hierarchical and distinction interventions on discomfort and anxiety. However, the results suggest that the hierarchical interventions are of more benefit with regard to the stress measure." (Foody et al., 2015, p. 241). In this sense, the claim is the same as that stated in Foody et al. (2013), i.e., effects are only found on the stress outcome measure. However, as I discuss later, these claims are not compatible with the reported statistical results from the RM-ANOVAs, which were all non-significant. I return to this point later.
+
+# 
+
+# Critique of the original method & analyses
+
+## Status as a replication
+
+Foody et al. (2013) state that "the research was a replication of a previous study by Luciano et al. (2011)" (p. 384). In order to assess whether "replication" is an appropriate to label for Foody et al.'s (2013) study or not -- a distinction which influences the evidentiary value it represents for the underlying claim -- it is therefore useful to examine the overlap between Foody et al. (2013) and Luciano et al. (2011).
+
+Foody et al. (2013) do acknowledge one important difference between their work and Luciano et al. (2011) when self-identifying the work as a replication: *"the research was a replication ... except that we were able to use less intensive interventions with our non-clinical sample"* (p. 384). However, many other differences between the study exist but were not acknowledged in Foody et al. (2013), including the sample, design, number of follow up periods, outcome measures, and analytic strategy (see Table 1).
+
+There is no single universally accepted definition of a replication, and there is ongoing debate about what nomenclature and taxonomy is useful in distinguishing between subtypes such as conceptual versus direct replications [e.g., @36093]. Regardless of the specific framework used, the very low overlap in the details of the design, method and analyses of Luciano et al. [@117] and Foody et al. (2013) suggests that the latter cannot be confidently described as a replication of the same underlying claim.
+
+## 
+
+## Inconsistent descriptions of the methods
+
+Both Foody et al. (2013) and Foody et al. (2015) report results from a Reactions Questionnaire that includes references to a car accident, e.g., "Please rate how vivid your thoughts and images were of the car accident" (p. 383, p. 420, respectively). However, neither study's method section includes any reference to a car accident. The distress induction procedure in both is stated to be requiring the participant to write out a negative self-referential thought. One possibility is that text from a different study was erroneously copy-pasted into the wrong manuscripts. For example, a previous publication by Foody et al. (2012) compared two versions of a different distress induction procedure that involved having the participant write the sentence "I hope \[participants' loved one\] is in a car accident" (p. 128). Another possibility is that the induction did not occur as stated in the texts of Foody et al. (2013, 2015), and did in fact use the car crash induction from Foody et al. (2012). It is unfortunate that these unexplained references to car accidents got through peer review at two different journals apparently without being detected or corrected.
+
+Table 1. Comparisons between Luciano et al. (2011) and Foody et al. (2013)
+
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+|                                               | **Luciano et al. (2011)**                                                               | **Foody et al. (2013)**                                                                                        |
++===============================================+=========================================================================================+================================================================================================================+
+| Component of the ACT hexaflex model           | Cognitive fusion                                                                        | Self-as-context                                                                                                |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Relational responses targeted by intervention | Deictic (here/there) vs. hierarchical (containment)                                     | Distinction (different from) vs. hierarchical (containment)                                                    |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Sample                                        | Adolescent clinical                                                                     | Adult healthy                                                                                                  |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Design                                        | Quasi-experiment                                                                        | Laboratory analogue study                                                                                      |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Randomization                                 | No, assignment based on baseline severity                                               | Yes                                                                                                            |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Control condition                             | No                                                                                      | No                                                                                                             |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Distress induction                            | No                                                                                      | Yes                                                                                                            |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Timepoints                                    | 5 therapy sessions over 4 months                                                        | Single experimental session                                                                                    |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Follow up period                              | 2 weeks and 4 months                                                                    | Single experimental session                                                                                    |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Outcome variables                             | Spanish Avoidance and Fusion Questionnaire (AFQ-S)                                      | Single-item Visual Analogue Scales for discomfort, anxiety, and stress (ad hoc measures created for the study) |
+|                                               |                                                                                         |                                                                                                                |
+|                                               | Accepting without Judgment Scale of the Kentucky Inventory of Mindfulness Skills (KIMS) |                                                                                                                |
+|                                               |                                                                                         |                                                                                                                |
+|                                               | Impulsive Behavior Inventory (IBI)                                                      |                                                                                                                |
+|                                               |                                                                                         |                                                                                                                |
+|                                               | Emotional Behavior Inventory (EBI)                                                      |                                                                                                                |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+| Primary analysis                              | Mann-Whitney *U* tests                                                                  | RM-ANOVAs                                                                                                      |
++-----------------------------------------------+-----------------------------------------------------------------------------------------+----------------------------------------------------------------------------------------------------------------+
+
+## 
+
+## No control condition
+
+Both Foody et al. (2013) and Foody et al. (2015) are seriously undermined by the lack of a control condition that did not receive an intervention. Control conditions are of course needed to determine causality within an experimental approach. Even more than usual, however, the need for a control condition becomes especially obvious when studying effects that are due to short term manipulations of mood, as in Foody et al.'s work. Mood inductions tend to produce very short-lasting effects, and mood tends to return to baseline levels within a very short period of time. As such, in order to be able to differentiate between any change in mood due to the intervention vs. due to natural improvement over time, a negative control condition is needed (i.e., where participants are given no intervention).
+
+This is not a case of "hindsight is 20/20" or a post hoc call for rigor: the authors of Foody et al. (2013, 2015) developed their distress induction procedure from work that demonstrated this natural return to baseline levels over a short period of time (e.g., 2 minutes). In an article they published the previous year which compared versions of distress induction procedures, Foody et al. (2012) cited work by Rachman et al. [@124] and van den Hout et al. [@123]. Like both Foody et al. (2013) and Foody et al. [@29185], these studies recorded anxiety scores using a Visual Analogue Scale, and measured affect at baseline and after a distress induction procedure. However, they also included no-intervention conditions to study the natural recovery of baseline mood. Both studies demonstrated that mood returned to baseline after a short delay (two minutes) in the absence of any intervention (Rachman et al., 1996: Hedges' $g_{s}$ = 3.24, 95% CI \[2.51, 3.97\]; van den Hout et al., 2002: $g_{s}$ = 1.17, 95% CI \[0.69, 1.64\]). I extracted the summary statistics from Rachman et al. (1996) and van den Hout et al. (2002) and present them in Figure 1.
+
+**Figure 1.** Results from no-intervention negative control conditions reported in previous distress induction studies. Points represent means, error bars represent 95% Confidence Intervals.
+
+![](figures/media/image1.emf){width="2.716292650918635in" height="2.1632185039370078in"}
+
+Note the pattern of effect across timepoints can be seen: participants demonstrate low anxiety at baseline; anxiety was higher at postinduction, and at post-delay it returns nearly to baseline. However, these two studies involved no intervention: the reduction in distress after the delay was spontaneous. Foody et al. (2013) did not include any such control condition where no intervention was provided, and did not discuss the highly plausible possibility that any reductions in distress after intervention were merely due to spontaneous recovery rather than due to their intervention. At the same time, it is plausible that Foody and colleagues were aware of this possibility given that they cited both Rachman et al. (1996) and van den Hout et al. (2002) in their earlier publication (Foody et al., 2012). As such, in the absence of a control condition, it would be erroneous to conclude from Foody et al.'s (2013, 2015) results that the interventions caused reductions in distress between timepoints.
+
+## How to interpret the results 
+
+Note that, for brevity, I report only the original articles' *p* values throughout the current article. Full test statistics extracted from the original articles are available in the Supplementary Materials ([osf.io/6wz3p](https://osf.io/6wz3p)).
+
+### Original results represent weak support
+
+We can reasonably assume that these claims were based on the statistical significance of the interaction effects in three mixed within-between RM-ANOVAs that employed the outcome measures as dependent variables (in separate models), time point as within-subjects independent variable, and condition as between-groups independent variable (p. 381-382), as no other set of results in the article followed this pattern (i.e., of one significant result and two non-significant results between outcomes) or has the same degree of relevance to the claim. They reported that the interaction effects were significant for stress ("*p* = .04") but not discomfort ("*p* = .45") or anxiety ("*p* = .33"; pp. 381-382).
+
+Foody et al. (2015) reported interaction effects for 6X2 RM-ANOVAs that included additional timepoints but are the closest analogue of the results presented in Foody et al. (2013), all of which were non-significant: discomfort ("*p* = .94"), anxiety ("*p* = .67"), and stress ("*p* = .47"; pp. 236-238).
+
+### Applying multiple testing corrections produces null results
+
+Foody et al. (2013) stated that their *"findings demonstrated superiority of the intervention that focused on hierarchical, rather than distinction, deictic relations in terms of reducing distress."* (Foody et al., 2013, p. 373). However, a few paragraphs later they stated that the effect *"was significantly effective only in the context of stress, and not in discomfort or anxiety"* (Foody et al., 2013, p. 385), that is, significant results were obtained for only one of the three outcome measures, without the use of any familywise error corrections. Foody et al. (2013) therefore make a disjoint claim, where the alternative hypothesis is accepted on the basis of one or more positive results among multiple tests (whereas a joint claim would require positive results on every test).
+
+For individual tests, the false positive rate is equal to the alpha value (e.g., 5%) when the test's assumptions are met. However, disjoint claims suffer from increased false positive rates, because even a single false positive will cause an incorrect claim. With three outcome measures and an alpha value of 5%, the familywise false positive rate for the general claim can be as high as 14.3% (i.e., when tests are fully independent).
+
+$$\begin{array}{r}
+FPR = 1 - \ (1 - \alpha)^{k}\ \#(1)
+\end{array}$$
+
+If one is willing to accept the alternative hypothesis on the basis of *any* result across multiple outcome measures being statistically significant (i.e., a disjoint claim), each of which has a risk of false positives, some form of familywise alpha correction is necessary to keep the long run false positive rate within the nominal alpha value (e.g., 5%). Foody et al. (2013) do not employ any alpha corrections, but they can be applied post hoc to the reported RM-ANOVAs' *p* values.
+
+Applying even a relatively liberal correction method such as Holm corrections (implemented using R's p.adjust function) to Foody et al.'s (2013) interaction effects produces three non-significant adjusted *p* values (i.e., discomfort: *p*~adj~ = .66, anxiety: *p*~adj~ = .66, stress: *p*~adj~ = .12). Results of Foody et al.'s (2015) interaction effects are already non-significant. As such, using the results of their own statistical models with appropriate alpha corrections applied to their results, Foody et al.'s (2013) results therefore do not support their conclusion that the hierarchy intervention more effectively relieves distress than the distinction intervention.
+
+### The RM-ANOVAs are not suitable to testing the original claim 
+
+Regardless of the results obtained (i.e., even if all results had been statistically significant), I argue that the RM-ANOVAs cannot by themselves support the claims made about the superiority of the hierarchy condition. By including the baseline scores, the interaction effects do not test the hypothesis that the interventions produce differential effects, because interaction effects could be driven by one or more of the baseline, post induction or post intervention time points. That is, a very different pattern of results that does not represent the superiority of the hierarchy condition in reducing experimentally induced distress could nonetheless produce significant *p* values for the interaction effect.
+
+In order to support their claim, an elaborated or alternative analytic strategy would be needed. For example, post hoc contrasts could have been used to test for differences in means between the groups at each time points; or to differences in means at the post-intervention time point could have simply been assessed via a *t*-test; or an ANCOVA could have been used to compare differences in means at the post-intervention time point while controlling for differences at baseline. However, Foody et al. (2013) do not report any such results. As such, in summary, Foody et al. (2013) suffers from an absence of appropriate analyses to test their stated claim that the hierarchical condition is superior to the distinction condition.
+
+# Reanalysis 
+
+In this section, I report the results of a reanalysis that sought to provide a direct test of Foody et al.'s (2013) central aim, i.e., *"The primary aim of the current study was to compare the relative utility of the two self-based interventions (distinction versus hierarchical relations) in reducing participants' discomfort, anxiety, and stress after exposure to the distress induction task."* (Foody et al., 2013, p. 381). Specifically, I aimed to compare distress between the two groups at the post intervention time point using independent Welch's *t*-tests with Hedges' *g* standardized effect sizes (i.e., Cohen's *d* with correction for small sample sizes).
+
+Of course, data analysis involves multiple decisions, each of which may have more than one plausible and defendable choice. In order to understand the robustness of conclusions across multiple plausible choices, I employed a multiverse analyses [aka specification curves: @514; @3135]. I will return to this analysis after first explaining how results were extracted from the articles.
+
+## 
+
+## Transparency and data availability
+
+All data and code for data processing and analyses are available ([osf.io/ztd8n](https://osf.io/ztd8n/)). All analyses were conducted in R. None of the analyses reported in this article were preregistered. Supplementary Materials include full test statistics from the original studies' RM-ANOVAs (see [osf.io/6wz3p](https://osf.io/6wz3p)). This research was not supported by funding. No AI was used in the writing of this article.
+
+## 
+
+## Attempts to obtain the original data
+
+In the first instance, I attempted to obtain the original data. I contacted all authors of Foody et al. (2013) requesting the data. Unfortunately, the first author informed me that the dataset no longer exists. Luckily, however, such tests could be conducted or at least closely approximated based on the summary statistics presented in the original article.
+
+## Low statistical power
+
+It is worth noting that the sample size employed (*n* = 18 in each of two groups) is very small, and the statistical power they provide to test the hypotheses is therefore likely low. If we followed the logic that the authors have powered the study to observe their smallest effect size of interest, 18 participants per group and a two-sided test would provide 80% power to detect Cohen's *d* = 0.96 between the groups at the post time point. Given that this comparison is a difference in efficacy between two active intervention conditions, there is good a priori reason to believe that differential efficacy is unlikely to reach nearly a Cohen's *d* of one. In one sense, the informativeness of the study could be critiqued on this grounds alone.
+
+## 
+
+## Extraction of summary statistics 
+
+Independent Welch's *t*-tests and Hedges' *g* effect sizes were constructed from summary statistics without access to the raw data, specifically from the sample size (*n*), mean (*M*) and standard deviation (*SD*) for each condition and outcome variable at each time point. Results for both the distinction and hierarchy conditions were extracted from Foody et al. (2013). I also extracted results for the same two conditions that were replicated in Foody et al. (2015). The two additional conditions included in Foody et al. (2015: i.e., object-distinction and object-hierarchy) were not extracted, as I focused only on the effects that were replicated. Similarly, although Foody et al. (2015) employed a second cycle of distress induction and intervention, I examined only the first phase of distress induction and intervention that replicated what was done in Foody et al. (2013).
+
+Sample sizes after exclusions for both conditions were reported in text: "Participants were allocated randomly across two conditions denoted as distinction self as context (N= 18) and hierarchical self as context (N= 18)." (Foody et al., 2013, p. 375); "self distinction (N =12); self hierarchy (N =12)" (Foody et al., 2015, p. 233).
+
+For the original study reported in Foody et al. (2013), means for each time point were not reported in text, only approximate values for the baseline time point (e.g., "\<11"). However, (a) change scores for both conditions between the time points were reported in text (Foody et al., 2013, pp. 381-383) and (b) means were plotted in Figures 1 to 3. Means for the post intervention time point were therefore calculated in two different ways to validate them against one another: using the mean for that time point extracted from the plots using WebPlotDigitizer [@29148]; and using the mean for the baseline time point adding the change scores between time points reported in text. Both results produced estimates that were all less than ±0.6 (on a 0 to 100 scale), suggesting that the extracted estimates are very close to the values used to generate the plots. Given their extremely high similarity and the fewer number of steps involved in the latter (and therefore fewer opportunities for errors to be introduced, for example via rounding), I employed the estimates extracted from the plots for the reanalyses.
+
+Standard Deviations for Foody et al. (2013) were recalculated from the Standard Error intervals reported in their Figures 1 to 3 and their sample sizes using Equation 2. Data extraction was much simpler for Foody et al. (2015) as all means and SDs were reported in Table 2.
+
+$$\begin{array}{r}
+{SD}_{SEM} = \ \frac{interval\ width}{2} \times \sqrt{n}\ \#(2)
+\end{array}$$
+
+### 
+
+### Hypothesis tests for each outcome variable
+
+The means, Standard Deviations, and sample sizes were then used to calculate independent Welch's *t*-tests. This was done by calculating the Standard Errors of the differences in means (SE), *t* values (*t*), and degrees of freedom (df) using Equations 3-5 (two-sided tests).
+
+$$\begin{array}{r}
+SE = \ \sqrt{\frac{{SD}_{1}^{2}}{n_{1}} + \frac{{SD}_{2}^{2}}{n_{2}}}\#(3)
+\end{array}$$
+
+$$\begin{array}{r}
+t = \ \frac{M_{1} - \ M_{2}}{SE}\#(4)
+\end{array}$$
+
+$$\begin{array}{r}
+df = \ \frac{\left( \frac{{SD}_{1}^{2}}{n_{1}} + \frac{{SD}_{2}^{2}}{n_{2}} \right)^{2}}{\frac{{SD}_{1}^{2}}{n_{1} - 1} + \frac{{SD}_{2}^{2}}{n_{2} - 1}}\#(5)
+\end{array}$$
+
+Hedges' *g* effect size, a version of Cohen's *d* with a bias correction for small sample sizes, was calculated using Equation 6. Positive values represent greater reductions in distress in the hierarchical condition then the distinction condition.
+
+$$\begin{array}{r}
+g = \ \frac{M_{1} - M_{2}}{\sqrt{\frac{{SD}_{1}^{2} + \ {SD}_{2}^{2}}{2}}}\  \times \ \ \left( 1 - \ \left( \frac{3}{4 \times \left( n_{1} + n_{2} - 2 \right) - 1} \right) \right)\#(6)
+\end{array}$$
+
+### *p* values and multiple testing corrections
+
+When performing multiple tests of a more general hypothesis using multiple correlated outcome measures, as here where measures of anxiety, discomfort, and stress are used to make conclusions about distress more generally, researchers are typically advised to maintain the severity of their hypothesis test (i.e., their false positive rate) using familywise error corrections. Although not doing so provides a weaker test, this may still represent a legitimate choice between researchers (i.e., some may be more willing to provide a weaker test). I therefore calculated both *p* values (using *t* and *df*) and Bonferroni-corrected *p* values. For Hedges' g effect sizes, I calculated both 95% Confidence Intervals and 98.33% Confidence Intervals, which correspond to the correct Bonferroni adjustment for three outcome variables (i.e., 1 -- \[0.05 / 3\]). Both intervals were employed in the multiverse analysis to assess the robustness of conclusions to this analytic choice.
+
+### Hypothesis tests using a pooled outcome measure of distress
+
+As discussed previously, Foody et al. (2013) make claims in their abstract and discussion regarding the superiority of the hierarchical intervention over the distinction intervention with regard to decreasing "distress" *in general* rather than with regards to their three component outcome measures (discomfort, anxiety, and stress). Whether or not it is appropriate from a measurement perspective to treat these three ad hoc measures as valid measures of a latent "distress" variable cannot be answered without access to the original data (or possibly via new data collection). Nonetheless, it is possible to calculate a single pooled outcome measure to test this more general claim. This would also serve to avoid any potential issues with regard to how to interpret a mix of significant and non-significant results between outcome measures, as observed in Foody et al. (2013), where significant results were found for only one of three outcome measures ("stress") but the authors made more conclusions about "distress". I therefore calculated pooled means for each condition by averaging them, and pooled Standard Deviations using the following formula. These were used to calculate a further set of Welch's *t*-tests and effect sizes for both the original study and the replication using Equation 7.
+
+$$\begin{array}{r}
+{SD}_{pooled} = \ \sqrt{\frac{{SD}_{1}^{2} + {SD}_{2}^{2} + {SD}_{3}^{2}}{3}}\#(7)
+\end{array}$$
+
+Note that because the pooled effect size provides a single test of the hypothesis, no Bonferroni-adjusted version of the Confidence Intervals was corrected. All four outcome measures (anxiety, discomfort, stress, and the pooled outcome measure) were employed in the multiverse analysis in order to attempt to understand the robustness of conclusions to the choice of outcome measure.
+
+## 
+
+**\
+**
+
+Figure 2. Multiverse plot for the original study (Foody et al., 2013). Error bars represent 95% or 98.33% Confidence Intervals depending on the use of Bonferroni corrections.
+
+![](figures/media/image2.emf){width="3.993718285214348in" height="3.5499715660542432in"}
+
+Figure 3. Multiverse plot for the replication study's direct replication (Foody et al., 2015). Error bars represent 95% or 98.33% Confidence Intervals depending on the use of Bonferroni corrections.
+
+![](figures/media/image3.emf){width="4.000606955380578in" height="3.5560958005249343in"}
+
+**Figure 4.** Flow chart for the interpretation of results from Foody et al. (2013) and Foody et al. (2015)
+
+![A diagram of a flowchart Description automatically generated](figures/media/image4.png){width="4.340425415573053in" height="5.0732928696412944in"}
+
+# 
+
+### Controlling for baseline
+
+A common analytic decision that must be made when analyzing differences between conditions after an intervention is whether or not to control for baseline differences [@141]. Given only access to the summary statistics and not the original data (i.e., in order to estimate the correlation between time points), it was nonetheless possible to use Morris corrections [@141] to control for these differences (i.e., corrected Hedges' $g_{corrected}$ = Hedges' $g_{postintervention}$ -- Hedges' $g_{baseline}$). Both Hedges' *g* (not correcting for baseline scores) and Hedges' $g_{corrected}$ (corrected for baseline scores) were entered into the multiverse analysis in order to assess the robustness of conclusions to this analytic choice.
+
+## 
+
+## Results 
+
+Multiverse analyses involve calculating a metric under all permutations of analytic choices using data from a given underlying dataset. In this case, the outcome metric was Hedges' *g* (including its variation controlling for baseline scores), and the analytic choices were 1) the outcome measure (anxiety, discomfort, stress, and pooled), 2) whether baseline scores were controlled for or not, and 3) whether corrections for familywise error rate were used to choose the width of the Confidence Interval (95% vs. 98.33%, corresponding to a Bonferroni correction for the three correlated outcomes). This produces 14 different sets of analytic choices: 4 outcomes \* 2 baseline control \* 2 familywise error corrections, where the familywise corrections are never applied to the pooled outcome given that a single pooled outcome involves only one test and does not need to be corrected.
+
+Figure 2 presents the results of the first multiverse analysis for the data extracted from original study by Foody et al. (2013). The upper panel presents the distribution of Hedges' *g* effect sizes arranged from lowest to highest values. These plots should be interpreted as follows: each vertical column between the upper and lower panels provides the effect size and its confidence intervals (upper panel) and the analytic choices that produced this effect size (lower panel). For example, the first column on the left of Figure 2 presents a Hedges' *g* = -0.22 under the analytic choices of the anxiety outcome, controlling for baseline scores, without Bonferroni corrections. Across the columns, the pattern of effect sizes under different analytic choices can be seen. In this case, it demonstrates that statistically significant results (via the exclusion of the zero point from the confidence intervals) are not observed under any set of analytic choices. Figure 3 presents the results of the same multiverse analysis applied to data extracted from the replication study by Foody et al. (2015). As can be seen from the figures, specifically the failure of all Confidence Intervals to exclude the zero point, no significant differences were found between the distinction and hierarchy conditions at the post-intervention time point under any set of analytic choices in either the original study or the replication. That is, the results very robustly fail to support the original conclusion that *"The findings demonstrated superiority of the intervention that focused on hierarchical, rather than distinction, deictic relations in terms of reducing distress."* (Foody et al., 2013, p. 373*)*. This result of the reanalysis does not support the conclusion reached by Foody et al. (2013).
+
+# 
+
+# Discussion
+
+The combined results of the critiques and reanalyses are presented as a decision chart in Figure 4. Starting from the top left, the reader can make one analytic decision at a time: starting with whether the results of Foody et al.'s (2013) RM-ANOVAs should simply be accepted on face value; if not, followed by whether merely correcting their results for multiple testing is sufficient; and if not, followed by which form of between groups effect size should be calculated. In summary, no set of analytic choices for Foody et al. (2013) followed by applying the same choice to the replication study in Foody et al. (2015) produce (a) a replicable result, and (b) all choices other than accepting Foody et al.'s (2013) RM-ANOVA results provide null results for all tests in both studies. Even for that exception, support for the hypothesis is limited to one out of three outcome measures, undermining Foody et al.'s (2013) general claim. This is remarkable given the way that the results of Foody et al. (2013) are referred to in other work, that is, as evidence for the utility of RFT to ACT, and support for the ACT model of psychotherapy [e.g., @29203; @29197; @29175; @29177].
+
+The literature (currently) presents the results of Foody et al. (2013) as supportive of the claim that interventions to promote hierarchical relations with mental content produce superior therapeutic outcomes to distinction relations; therefore contributing to ACT's model of self-as-context and the claim that ACT benefits from its close links to basic RFT research. Closer reinspection suggests that the first link in this evidential chain is not the case, which should therefore undermine all subsequent links in the belief chain. However, correcting these erroneous beliefs in clinicians and scientists will likely be far from trivial.
+
+The results of this reanalysis are agnostic to whether new, large, well-designed studies are likely to generate evidence for or against the claim that hierarchical relations produce better efficacy than distinction relations, and whether either can out perform a control condition to account for regression to the mean (see Figure 1). These analyses consider only the credibility of the claim with regard to existing data in the paper cited for this claim: currently, there is no credible evidence for the claim based on the data presented by Foody et al. (2013) or Foody et al. (2015).
+
+Other work attempting to tie RFT principles to ACT practices, such as the use of metaphor in therapy, have also been presented [@1037] but have also failed to replicate [@468; for a series of replies, in order of publication, see: @140; @4626; @451].
+
+## 
+
+## An isolated case?
+
+The collective rendering by the ACT/RFT literature of Foody et al.'s (2013, 2015) results into an incorrect but widely believed scientific claim should give us pause for thought. Some may be quick to suggest that this is a single unfortunate example. It may be worth recalling that similar appeals to exceptionalism were made early in the replication crisis, and yet the problems kept spreading to new areas of work people previously argued to be unaffected. We must be careful to avoid hubris here too, and instead be open to the possibility that many areas of our work are built on shaky foundations. Only large scale assessment of the credibility and trustworthiness of highly cited or influential work can determine the prevalence of such cases [@31579; @36090; @33468; @34313].
+
+# CRediT Contributorship Statement
+
+IH was responsible for all aspects of this research.
+
+# 
+
+# Conflict of Interest
+
+Prof Dermot Barnes-Holmes, one of the authors of Foody et al. (2013), was my PhD supervisor between 2010 and 2015. I have not actively collaborated with Prof Barnes-Holmes since 2015. Articles led by third parties of which we were both co-authors were published up to 2018. I declare that I have no other conflicts of interest associated with the publication of this manuscript. I declare that I share a coauthorship with editor of the Journal of Replication Research: the Replication Database, a Big Team Science project with over 100 authors [@38008]."
+
+# References
+
+[^1]: Ian Hussey, University of Bern, <ian.hussey@unibe.ch>, ORCID [0000-0001-8906-7559](https://orcid.org/0000-0001-8906-7559)
+

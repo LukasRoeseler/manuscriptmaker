@@ -1,0 +1,39 @@
+# =====================================================================
+#  Editor-owned registry metadata for this article.
+#  Quarto auto-merges any _metadata.yml into every document in the folder,
+#  so research assistants can edit article.qmd (prose) while editors own
+#  these publication fields here — no merge conflicts.
+# =====================================================================
+date: 2025-01-15
+
+r2:
+  volume: 1
+  year: 2025
+  article-id: "R2.2025.001"
+  doi: "10.15626/R2.2025.001"
+  article-type: "Editorial"
+  discipline: "Multidisciplinary"
+  running-head: "Inaugural Editorial of Replication Research (R2)"
+
+  lay-summary: >
+    Science depends on checking whether published findings hold up when
+    they are repeated. Yet studies that reproduce or replicate earlier
+    work are rarely published, even though they are essential for trust
+    in research. Replication Research (R2) is a new, free-to-publish and
+    free-to-read journal dedicated to these repeated studies across all
+    fields, with open peer review and strong transparency standards.
+
+  recommended-citation: >
+    Röseler, L., Wallrich, L., Adler, S., Oppong Boakye, P., Rhys Evans,
+    T. R., Goltermann, J., Horstmann, J., Korbmacher, M., Verheyen, S.,
+    Visser, I., & Azevedo, F. (2025). Inaugural editorial of Replication
+    Research (R2). *Replication Research (R2)*, *1*, R2.2025.001.
+    https://doi.org/10.15626/R2.2025.001
+
+  # Earned open-science badges (set true to display).
+  badges:
+    open-data: true
+    open-code: true
+    open-materials: true
+    preregistered: false
+    codecheck: false
