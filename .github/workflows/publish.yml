@@ -1,8 +1,11 @@
 name: Publish article (on merge)
 
 # When a manuscript change lands on main, (re)build it and publish the final
-# galleys to GitHub Pages under /articles/<id>/. The OJS native-import package
-# is attached as a build artifact for the editor to upload into OJS.
+# galleys under docs/articles/<id>/ — GitHub Pages for this repo is
+# configured to serve from main:/docs (Settings > Pages), not a gh-pages
+# branch, so publishing means committing the built output straight into
+# that folder. The OJS native-import package is also attached as a build
+# artifact for the editor to upload into OJS.
 on:
   push:
     branches: [main]
@@ -61,28 +64,39 @@ jobs:
           changed=$(git diff --name-only "$base" HEAD -- 'manuscripts/**' \
                     | awk -F/ 'NF>=3 && $2 !~ /^_/ {print $1"/"$2}' | sort -u)
           [ -z "$changed" ] && changed=$(ls -d manuscripts/*/ | sed 's#/$##' | grep -v '/_')
-          mkdir -p _publish
+          mkdir -p _build_out
           for d in $changed; do
             echo "::group::Publishing $d"; engine/scripts/build_all.sh "$d"
-            id=$(basename "$d"); out="_publish/articles/$id"; mkdir -p "$out"
+            id=$(basename "$d"); out="_build_out/$id"; mkdir -p "$out"
             cp "$d/article.html" "$out/index.html"
             cp "$d/article.pdf" "$out/$id.pdf" 2>/dev/null || true
             cp "$d/article.xml" "$out/$id.xml" 2>/dev/null || true
             cp "$d"/ojs/*.xml "$out/" 2>/dev/null || true
             echo "::endgroup::"
           done
-          # Landing site (docs/) is copied to the gh-pages root.
-          cp -r docs/* _publish/ 2>/dev/null || true
+          echo "BUILT_IDS=$(ls _build_out)" >> "$GITHUB_ENV"
 
       - name: Upload OJS import packages
         uses: actions/upload-artifact@v4
         with:
           name: ojs-import-packages
-          path: _publish/articles/**/*_ojs_import.xml
+          path: _build_out/**/*_ojs_import.xml
 
-      - name: Deploy published articles to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: _publish
-          keep_files: true
+      - name: Commit published articles into docs/articles/ on main
+        run: |
+          mkdir -p docs/articles
+          for id in $BUILT_IDS; do
+            rm -rf "docs/articles/$id"
+            mkdir -p "docs/articles/$id"
+            cp -r "_build_out/$id/." "docs/articles/$id/"
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/articles
+          if git diff --cached --quiet; then
+            echo "No article output changed — nothing to commit."
+          else
+            git commit -m "Publish: $BUILT_IDS [skip ci]"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi

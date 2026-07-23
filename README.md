@@ -75,7 +75,8 @@ and `ojs/<id>_ojs_import.xml`.
 See **[docs/author-guide.md](docs/author-guide.md)**. In short: copy
 `manuscripts/_TEMPLATE/` to `manuscripts/<article-id>/`, drop the accepted file
 in `source/`, fill in `_metadata.yml`, and open a Pull Request. The bot replies
-with a live preview and downloadable galleys.
+with downloadable HTML/PDF/JATS/OJS galleys built from your PR (as workflow
+artifacts — no live preview URL, see the note in `build-manuscript.yml`).
 
 ## Adapting this to another journal
 

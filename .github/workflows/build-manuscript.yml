@@ -1,8 +1,15 @@
 name: Build manuscript (PR preview)
 
 # When a PR adds or changes anything under manuscripts/, build every changed
-# article to HTML + PDF + JATS + an OJS package, attach the files as artifacts,
-# deploy a live HTML preview to GitHub Pages, and post one sticky PR comment.
+# article to HTML + PDF + JATS + an OJS package and attach the files as
+# artifacts, then post one sticky PR comment linking to them.
+#
+# This repo's GitHub Pages is configured to serve from main:/docs (Settings
+# > Pages), not a gh-pages branch or an Actions-based deployment — so there
+# is no live-URL preview target available for in-flight PRs without either
+# committing throwaway builds into main (messy) or changing that Pages
+# source (a repo-settings decision, not a workflow one). Artifacts-only
+# keeps PR builds from ever touching main.
 on:
   pull_request:
     paths:
@@ -13,7 +20,6 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  contents: write          # deploy preview to the gh-pages branch
   pull-requests: write     # post the sticky comment
 
 concurrency:
@@ -91,15 +97,7 @@ jobs:
 
       - name: Stage outputs
         id: stage
-        run: |
-          id=$(basename "${{ matrix.dir }}")
-          echo "id=$id" >> "$GITHUB_OUTPUT"
-          out="_preview/$id"
-          mkdir -p "$out"
-          cp "${{ matrix.dir }}/article.html" "$out/index.html"
-          cp "${{ matrix.dir }}/article.pdf"  "$out/$id.pdf"  2>/dev/null || true
-          cp "${{ matrix.dir }}/article.xml"  "$out/$id.xml"  2>/dev/null || true
-          cp "${{ matrix.dir }}"/ojs/*.xml     "$out/"         2>/dev/null || true
+        run: echo "id=$(basename "${{ matrix.dir }}")" >> "$GITHUB_OUTPUT"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -111,38 +109,15 @@ jobs:
             ${{ matrix.dir }}/article.xml
             ${{ matrix.dir }}/ojs/*.xml
 
-      - name: Deploy HTML preview to GitHub Pages
-        if: github.event.pull_request.head.repo.full_name == github.repository
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: _preview
-          destination_dir: preview/pr-${{ github.event.pull_request.number }}
-          keep_files: true
-
       - name: Post sticky PR comment
-        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           header: preview-${{ steps.stage.outputs.id }}
           message: |
             ### 📄 `${{ steps.stage.outputs.id }}` — galleys built
 
-            | Output | Link |
-            |---|---|
-            | 🌐 HTML preview | https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/preview/pr-${{ github.event.pull_request.number }}/${{ steps.stage.outputs.id }}/ |
-            | 📕 PDF / 🗂️ JATS / 📦 OJS package | see the **Artifacts** of [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+            Download the HTML, PDF, JATS and OJS package from the **Artifacts**
+            of [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
             Built from `${{ matrix.dir }}` · commit ${{ github.event.pull_request.head.sha }}.
             Re-push to rebuild. ✅ checks must pass before merge.
-
-      - name: Fork PR notice (no Pages write)
-        if: github.event.pull_request.head.repo.full_name != github.repository
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: preview-${{ steps.stage.outputs.id }}
-          message: |
-            ### 📄 `${{ steps.stage.outputs.id }}` — galleys built (fork PR)
-            This PR is from a fork, so a live Pages preview can't be deployed.
-            Download the HTML, PDF, JATS and OJS package from the **Artifacts**
-            of [this run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).

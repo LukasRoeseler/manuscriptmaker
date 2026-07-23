@@ -47,15 +47,16 @@ page, the JATS, and the OJS package.
 ## 4. Open a Pull Request
 
 Commit on a new branch and open a PR. Within a few minutes the **R2 bot**
-comments with:
+comments with a link to the workflow run's **Artifacts**, containing:
 
-- 🌐 a **live HTML preview** link,
-- 📕 the **PDF**, 🗂️ the **JATS XML**, and 📦 the **OJS import package** as
-  downloadable artifacts.
+- 🌐 the built **HTML**, 📕 the **PDF**, 🗂️ the **JATS XML**, and 📦 the
+  **OJS import package**.
 
+(There's no live preview URL — download the HTML artifact and open it locally,
+or use the [instant preview tool](preview/) for a quick look before submitting.)
 Push more commits to rebuild. The PR is also where **typesetting / proofreading**
-happens: reviewers comment inline on the rendered preview, the RA pushes fixes,
-the preview updates.
+happens: reviewers download the HTML/PDF, comment inline on the PR, the RA
+pushes fixes, the artifacts update.
 
 ## 5. Publish
 
