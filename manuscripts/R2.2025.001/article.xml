@@ -1,0 +1,1020 @@
+<?xml version="1.0" ?><!DOCTYPE article  PUBLIC '-//NLM//DTD JATS (Z39.96) Journal Archiving and Interchange DTD v1.2 20190208//EN'  'JATS-archivearticle1.dtd'><article xmlns:mml="http://www.w3.org/1998/Math/MathML" xmlns:xlink="http://www.w3.org/1999/xlink" dtd-version="1.2" article-type="editorial">
+
+<front>
+
+
+<article-meta><article-id pub-id-type="doi">10.15626/R2.2025.001</article-id>
+
+
+<article-categories><subj-group subj-group-type="heading"><subject>Editorial</subject></subj-group><subj-group subj-group-type="subject"><subject>Multidisciplinary</subject></subj-group></article-categories><title-group>
+<article-title>Inaugural Editorial of <italic>Replication Research
+(R2)</italic></article-title>
+</title-group>
+
+<contrib-group>
+<contrib contrib-type="author" corresp="yes">
+<contrib-id contrib-id-type="orcid">0000-0002-6446-1901</contrib-id>
+<name>
+<surname>Röseler</surname>
+<given-names>Lukas</given-names>
+</name>
+<string-name>Lukas Röseler</string-name>
+
+<email>lukas.roeseler@uni-muenster.de</email>
+<xref ref-type="aff" rid="muenster">a</xref>
+<xref ref-type="corresp" rid="cor-1">*</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0003-2121-5177</contrib-id>
+<name>
+<surname>Wallrich</surname>
+<given-names>Lukas</given-names>
+</name>
+<string-name>Lukas Wallrich</string-name>
+
+<xref ref-type="aff" rid="birkbeck">b</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0002-3211-6871</contrib-id>
+<name>
+<surname>Adler</surname>
+<given-names>Susanne</given-names>
+</name>
+<string-name>Susanne Adler</string-name>
+
+<xref ref-type="aff" rid="lmu">c</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0009-0003-5447-8034</contrib-id>
+<name>
+<surname>Oppong Boakye</surname>
+<given-names>Prince</given-names>
+</name>
+<string-name>Prince Oppong Boakye</string-name>
+
+<xref ref-type="aff" rid="muenster">a</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0002-6670-0718</contrib-id>
+<name>
+<surname>Evans</surname>
+<given-names>Thomas Rhys</given-names>
+</name>
+<string-name>Thomas Rhys Evans</string-name>
+
+<xref ref-type="aff" rid="greenwich">d</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0003-3087-1002</contrib-id>
+<name>
+<surname>Goltermann</surname>
+<given-names>Janik</given-names>
+</name>
+<string-name>Janik Goltermann</string-name>
+
+<xref ref-type="aff" rid="charite">e</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0001-8047-2232</contrib-id>
+<name>
+<surname>Horstmann</surname>
+<given-names>Jan</given-names>
+</name>
+<string-name>Jan Horstmann</string-name>
+
+<xref ref-type="aff" rid="hamburg">f</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0002-8113-2560</contrib-id>
+<name>
+<surname>Korbmacher</surname>
+<given-names>Max</given-names>
+</name>
+<string-name>Max Korbmacher</string-name>
+
+<xref ref-type="aff" rid="haukeland">g</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0002-6778-6744</contrib-id>
+<name>
+<surname>Verheyen</surname>
+<given-names>Steven</given-names>
+</name>
+<string-name>Steven Verheyen</string-name>
+
+<xref ref-type="aff" rid="erasmus">h</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0003-3855-2778</contrib-id>
+<name>
+<surname>Visser</surname>
+<given-names>Ingmar</given-names>
+</name>
+<string-name>Ingmar Visser</string-name>
+
+<xref ref-type="aff" rid="amsterdam">i</xref>
+</contrib>
+<contrib contrib-type="author">
+<contrib-id contrib-id-type="orcid">0000-0001-9000-8513</contrib-id>
+<name>
+<surname>Azevedo</surname>
+<given-names>Flavio</given-names>
+</name>
+<string-name>Flavio Azevedo</string-name>
+
+<xref ref-type="aff" rid="utrecht">j</xref>
+</contrib>
+</contrib-group>
+<aff id="muenster">
+<institution-wrap>
+<institution>University of Münster</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="birkbeck">
+<institution-wrap>
+<institution>Birkbeck, University of London</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="lmu">
+<institution-wrap>
+<institution>Ludwig-Maximilians-Universität München</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="greenwich">
+<institution-wrap>
+<institution>University of Greenwich</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="charite">
+<institution-wrap>
+<institution>Charité – Universitätsmedizin Berlin</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="hamburg">
+<institution-wrap>
+<institution>University of Hamburg</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="haukeland">
+<institution-wrap>
+<institution>Haukeland University Hospital</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="erasmus">
+<institution-wrap>
+<institution>Erasmus University Rotterdam</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="amsterdam">
+<institution-wrap>
+<institution>University of Amsterdam</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<aff id="utrecht">
+<institution-wrap>
+<institution>Utrecht University</institution>
+</institution-wrap>
+
+
+
+
+
+
+
+</aff>
+<author-notes>
+<corresp id="cor-1">lukas.roeseler@uni-muenster.de</corresp>
+</author-notes>
+
+
+
+
+
+
+
+
+
+<history/>
+
+
+<abstract>
+<p>Reproducibility and replicability are vital for trustworthy,
+cumulative research, yet remain undervalued in most areas of academic
+publishing. Replication Research (R2) is a Diamond Open Access journal
+dedicated to publishing high-quality reproductions, replications, and
+related methodological work across disciplines. With robust standards
+for transparency, open peer review, and social responsibility, R2 offers
+practical guidance and support for authors. We aim to rebalance research
+culture by valuing diligence and robustness alongside innovation,
+thereby increasing confidence in research findings. We invite
+researchers to contribute to and benefit from an open, community-driven
+journal designed to elevate the status and impact of replications
+(repeated tests of published findings with different data) and
+reproductions (repeated tests of published findings with the same data).
+In this editorial, we introduce the aims, policies, and scope of
+Replication Research, outlining how the journal will operate and the
+values that guide it.</p>
+</abstract>
+<abstract abstract-type="summary"><title>Lay Summary</title><p>Science depends on checking whether published findings hold up when they are repeated. Yet studies that reproduce or replicate earlier work are rarely published, even though they are essential for trust in research. Replication Research (R2) is a new, free-to-publish and free-to-read journal dedicated to these repeated studies across all fields, with open peer review and strong transparency standards.</p></abstract><kwd-group kwd-group-type="author">
+<kwd>reproduction</kwd>
+<kwd>replication</kwd>
+<kwd>metascience</kwd>
+<kwd>open science</kwd>
+<kwd>open access</kwd>
+</kwd-group>
+
+
+
+
+<volume>1</volume><elocation-id>R2.2025.001</elocation-id><permissions><license xlink:href="https://creativecommons.org/licenses/by/4.0/"><license-p>Published under the CC-BY 4.0 license.</license-p></license></permissions><custom-meta-group><custom-meta><meta-name>open-science-badges</meta-name><meta-value>open-data, open-code, open-materials</meta-value></custom-meta><custom-meta><meta-name>recommended-citation</meta-name><meta-value>Röseler, L., Wallrich, L., Adler, S., Oppong Boakye, P., Rhys Evans, T. R., Goltermann, J., Horstmann, J., Korbmacher, M., Verheyen, S., Visser, I., &amp; Azevedo, F. (2025). Inaugural editorial of Replication Research (R2). *Replication Research (R2)*, *1*, R2.2025.001. https://doi.org/10.15626/R2.2025.001</meta-value></custom-meta></custom-meta-group></article-meta>
+
+</front>
+
+<body>
+<disp-quote>
+  <p>“And what we find today we shall strike out from the record
+  tomorrow, and only write it in again when we have once more discovered
+  it.”</p>
+  <p>—
+  (<xref alt="Brecht, 1974" rid="ref-Brecht1974-gk" ref-type="bibr">Brecht,
+  1974</xref>)</p>
+</disp-quote>
+<p>Scientific knowledge is built on trust, yet the foundations of that
+trust are often neglected. Continuously reiterating and reexamining
+scientific claims is necessary for research to be trustworthy and to
+facilitate cumulative science. While we strongly acknowledge the need
+for innovation and novelty, over reliance on these values has led to a
+neglect of a systematic evaluation of knowledge claims
+(<xref alt="Makel et al., 2012" rid="ref-Makel2012ReplicationsPsychology" ref-type="bibr">Makel
+et al., 2012</xref>). Specifically, we believe that more efforts should
+be made to support the repeated investigation of previously made claims,
+also called <italic>repetitive research</italic>
+(<xref alt="Schöch, 2023" rid="ref-Schoech2023RepetitiveResearch" ref-type="bibr">Schöch,
+2023</xref>). An overemphasis on innovation and novelty at the cost of
+repeated investigation of past findings can endanger scientific accuracy
+by allowing false-positive findings to persist and risks decreasing
+public trust in science. Furthermore, it leads to inefficient resource
+allocation when trying to build on allegedly known findings with weak
+evidence. Calls for more scientific rigor and criticism of the current
+academic system are widespread (e.g.,
+(<xref alt="King, 1995" rid="ref-king1995replication" ref-type="bibr">King,
+1995</xref>;
+<xref alt="Munafò et al., 2017" rid="ref-Munafo2017ManifestoReproducibleScience" ref-type="bibr">Munafò
+et al., 2017</xref>)), and so is the idea of providing <italic>academic
+journals for replications</italic>
+(<xref alt="Grunow et al., 2018" rid="ref-Grunow2018LackReproducibility" ref-type="bibr">Grunow
+et al., 2018</xref>). Yet, no cross-disciplinary journal dedicated to
+replications and reproductions across disciplines exists to date — a
+crucial gap we aim to fill with this new dedicated <italic>Replication
+Research</italic> journal.</p>
+<sec id="a-community-based-solution-for-rigorous-research">
+  <title>A Community-Based Solution for Rigorous Research</title>
+  <p>With <italic>Replication Research</italic>, we want to support
+  reproduction and replication studies across multiple disciplines. R2’s
+  core objectives include the following:</p>
+  <p><bold>Providing an interdisciplinary dedicated outlet for
+  repetitive research:</bold> Despite the increasing recognition of the
+  necessity and value of replication studies, only a limited number of
+  journals accept replication studies. A dedicated journal for
+  repetitive research allows a strong focus on rigor irrespective of
+  novelty and facilitates the findability of replications and
+  reproductions
+  (<xref alt="Reed et al., 2025" rid="ref-Reed2025NoRoomInn" ref-type="bibr">Reed
+  et al., 2025</xref>). The journals that currently focus on repetitive
+  research (e.g., <italic>Journal of Comments and Replications in
+  Economics</italic>) are domain-specific; as an interdisciplinary
+  journal, R2 provides an opportunity to publish replications and
+  reproductions to researchers from all fields.</p>
+  <p><bold>Increasing the number of replications:</bold> The share of
+  replications in the published literature is still very low (e.g.,
+  (<xref alt="Perry et al., 2022" rid="ref-Perry2022DecadeReplicationEducation" ref-type="bibr">Perry
+  et al., 2022</xref>;
+  <xref alt="Pridemore et al., 2018" rid="ref-Pridemore2018ReplicationCriminology" ref-type="bibr">Pridemore
+  et al., 2018</xref>)), and methods that structurally examine
+  replicability and reproducibility have only recently been developed
+  (e.g.,
+  (<xref alt="Heyard et al., 2025" rid="ref-Heyard2025ScopingReproducibilityMetrics" ref-type="bibr">Heyard
+  et al., 2025</xref>)). Nevertheless, replication rates are growing
+  (<xref alt="Clarke et al., 2023" rid="ref-Clarke2023PrevalenceDirectReplication" ref-type="bibr">Clarke
+  et al., 2023</xref>;
+  <xref alt="Reed et al., 2025" rid="ref-Reed2025NoRoomInn" ref-type="bibr">Reed
+  et al., 2025</xref>). R2 aims to support that trend and increase the
+  prevalence, visibility and recognition of repetitive research.</p>
+  <p><bold>Incentivizing high-quality replications and
+  reproductions:</bold> Publications remain the currency for career
+  progression and research assessments in many disciplines. Therefore, a
+  dedicated high-quality journal is essential. We support authors to
+  increase the transparency and reproducibility of their findings. All
+  accepted quantitative articles will undergo checks for numerical
+  reproducibility to help the authors achieve field-specific best
+  sharing practices and peer review reports will be published.
+  Submissions are evaluated based on research quality and not on the
+  novelty of their findings or their expected impact.</p>
+  <p><bold>Supporting transparency:</bold> R2 requires authors to first
+  post their preprints online and embraces open peer review, in which
+  all correspondence between authors, reviewers, and editors is made
+  public.</p>
+  <p><bold>Sustainable Diamond Open Access:</bold> R2 is a Diamond Open
+  Access journal – that is, it is free to publish in and free to read
+  and authors retain copyrights to their articles. All content is
+  published under a CC-BY licence, ensuring it is free to reuse. It is
+  sustained via institutional infrastructure and all articles are
+  long-time archived.</p>
+  <p><bold>Community-governed journal:</bold> Rather than shaped by
+  commercial pressures or institutions, R2 has been created through open
+  discussions in a diverse community, such as a symposium to shape the
+  journal (e.g.,
+  (<xref alt="Röseler, Moser, et al., 2025" rid="ref-Roseler2025bR2SBook" ref-type="bibr">Röseler,
+  Moser, et al., 2025</xref>)). Ownership and decision-making are
+  transparently described in the journal constitution
+  (<xref alt="Röseler, Wallrich, Adler, et al., 2025" rid="ref-Roseler2025R2Constitution" ref-type="bibr">Röseler,
+  Wallrich, Adler, et al., 2025</xref>). We are committed to running
+  this service until at least early 2028 and will then review the
+  journal success based on pre-determined success criteria
+  (<xref alt="Röseler, Wallrich, &amp; Azevedo, 2025" rid="ref-Roseler2025R2DiscontinuedConditions" ref-type="bibr">Röseler,
+  Wallrich, &amp; Azevedo, 2025</xref>).</p>
+  <p><bold>Contributing to the creation of a sustainable, non-commercial
+  publishing ecosystem:</bold> Many existing journals must follow
+  commercial imperatives that are not always aligned with scientific
+  ideals. This includes the necessity to achieve target impact metrics
+  regardless of research quality
+  (<xref alt="Brembs, 2018" rid="ref-brembs2018prestigious" ref-type="bibr">Brembs,
+  2018</xref>), the rising costs for open access publishing
+  (<xref alt="Grossmann &amp; Brembs, 2021" rid="ref-Grossmann2021MarketRates" ref-type="bibr">Grossmann
+  &amp; Brembs, 2021</xref>), or the emergence of predatory journals
+  (e.g.,
+  (<xref alt="Beall, 2017" rid="ref-Beall2017PredatoryPublishers" ref-type="bibr">Beall,
+  2017</xref>)). We think that scientific knowledge, made possible by
+  public funding, is a public good that should be free to publish and
+  free to read for everyone, which is why we have declared in our
+  constitution that R2 is and will forever be a diamond open-access
+  journal.</p>
+</sec>
+<sec id="what-does-r2-publish">
+  <title>What does R2 publish?</title>
+  <p>We envision R2 as a hub for researchers who are interested in
+  rigorous and robust repetitive research. We welcome
+  <bold>reproductions</bold> (repeated investigation of previous
+  findings using <italic>the same</italic> data),
+  <bold>replications</bold> (repeated investigation of previous findings
+  using <italic>different</italic> data), and <bold>related
+  contributions</bold> such as methods for replication research,
+  meta-analyses of replications, multi- or many-analyst studies,
+  tutorials, comments, or reviews of replications. Submitted articles
+  may also consist of single studies that have been part of
+  meta-articles (e.g.,
+  (<xref alt="Open Science Collaboration, 2015" rid="ref-open2015estimating" ref-type="bibr">Open
+  Science Collaboration, 2015</xref>)) as long as they have not been
+  published individually, meet our standards for openness, and declare
+  transparently that they have been included in a meta-article. At
+  launch, we accept submissions from numerous disciplines such as
+  quantitative and qualitative social sciences (an up-to-date list is
+  available at
+  <ext-link ext-link-type="uri" xlink:href="https://replicationresearch.org/">replicationresearch.org</ext-link>).
+  Submissions from other disciplines are welcome and may be considered
+  depending on the availability of an ad hoc editor.</p>
+  <sec id="transparency-is-the-norm">
+    <title>Transparency is the norm</title>
+    <p>R2 has high standards for transparency and openness: Studies
+    should report whether they were preregistered and need to disclose
+    all differences between the preregistration and the final report. In
+    addition, analysis plans, materials, study protocols, code, and data
+    should be shared and complete per disciplinary best-practices (e.g.,
+    PRISMA for meta-analyses;
+    (<xref alt="Page et al., 2021" rid="ref-Page2021PRISMA2020" ref-type="bibr">Page
+    et al., 2021</xref>)). We badge Open Data/Code/Materials,
+    Preregistration, Computational Reproducibility and perform link
+    checks prior to sending articles for review.</p>
+  </sec>
+</sec>
+<sec id="guidance-for-authors">
+  <title>Guidance for authors</title>
+  <p>For reproductions and replications, we expect authors to justify
+  their choice of the target study, explain their decision for the type
+  of reproduction or replication, disclose deviations from the original
+  study, provide readers with a differentiated judgment of success or
+  failure, and discuss possible reasons for consistencies and
+  discrepancies between the original and repetition’s results in a
+  constructive and factual manner. We recommend evaluation of
+  reproduction or replication success based on a predetermined criterion
+  (<xref alt="Heyard et al., 2025" rid="ref-Heyard2025ScopingReproducibilityMetrics" ref-type="bibr">Heyard
+  et al., 2025</xref>). Editors judge the manuscript based on its
+  potential to meet R2’s standards and see it as their and the
+  reviewers’ task to help the authors achieve that potential. We
+  acknowledge that many disciplines do not yet have clear standards on
+  what constitutes a good replication, which is why we provide guidance
+  in multiple ways.</p>
+  <list list-type="order">
+    <list-item>
+      <p>We convened a team of 13 researchers who have conducted
+      numerous reproductions and replications as part of their research,
+      in collaborations, and as student projects, who have published an
+      open handbook on conducting reproductions and replications
+      ((<xref alt="Röseler, Wallrich, Hartmann, et al., 2025" rid="ref-Roseler2025HandbookReplication" ref-type="bibr">Röseler,
+      Wallrich, Hartmann, et al., 2025</xref>);
+      <ext-link ext-link-type="uri" xlink:href="https://forrt.org/replication_guide">https://forrt.org/replication_guide</ext-link>).
+      For robustness reproductions, we further recommend the protocol by
+      Ankel-Peters et al.
+      (<xref alt="2025" rid="ref-AnkelPeters2025StructuredRobustness" ref-type="bibr">2025</xref>)
+      and the Guide for Accelerating Computational Reproducibility in
+      the Social Sciences
+      (<xref alt="Berkeley Initiative for Transparency in the Social Sciences, 2020" rid="ref-BITSS2020ACRE" ref-type="bibr">Berkeley
+      Initiative for Transparency in the Social Sciences,
+      2020</xref>).</p>
+    </list-item>
+    <list-item>
+      <p>Based on multiple guides and our experience with the Framework
+      for Open and Reproducible Research Training (FORRT) Replication
+      Database
+      (<xref alt="Röseler et al., 2024" rid="ref-roseler2024replicationdatabase" ref-type="bibr">Röseler
+      et al., 2024</xref>), we have created manuscript templates for
+      reproduction and replication studies that authors can optionally
+      use
+      ((<xref alt="Röseler, Hein, et al., 2025" rid="ref-Roseler2025aStaRT" ref-type="bibr">Röseler,
+      Hein, et al., 2025</xref>);
+      <ext-link ext-link-type="uri" xlink:href="https://osf.io/brxtd">https://osf.io/brxtd</ext-link>).</p>
+    </list-item>
+    <list-item>
+      <p>Authors interested in replications from their field may use the
+      FORRT Replication Database, with over 1000 replication studies, to
+      search for examples from their field
+      (<ext-link ext-link-type="uri" xlink:href="https://forrt.org/apps/fred_explorer.html">https://forrt.org/apps/fred_explorer.html</ext-link>).</p>
+    </list-item>
+  </list>
+</sec>
+<sec id="social-impact-responsibility">
+  <title>Social Impact &amp; Responsibility</title>
+  <p>We criticize the lack of rigor in the current academic system and
+  argue that replication and reproduction rates are too low. These
+  arguments can be used to discredit researchers, their findings, and
+  research in general. Calls for scientific rigor or <italic>sound
+  science</italic> have in the past been used to block policymakers from
+  regulating industry
+  (<xref alt="Baba et al., 2005" rid="ref-baba2005legislating" ref-type="bibr">Baba
+  et al., 2005</xref>). While we have created R2 to support repetitive
+  research and motivate researchers to conduct high quality reproduction
+  and replication studies, we refute the call to disregard research
+  findings that do not meet a high standard since “demanding perfect
+  evidence before action can be taken is often a way to avoid using
+  evidence at all”
+  (<xref alt="Center for Open Science, 2025" rid="ref-COS2025RestoringGoldStandardScience" ref-type="bibr">Center
+  for Open Science, 2025</xref>).</p>
+</sec>
+<sec id="conclusion">
+  <title>Conclusion</title>
+  <p>We invite researchers, students, and institutions to strengthen the
+  foundations of scientific knowledge by submitting their replication
+  and reproduction studies to R2. Together, we can reshape publishing
+  practices and foster more robust, reliable research.</p>
+</sec>
+<sec id="declarations">
+  <title>Declarations</title>
+  <sec id="author-contributions">
+    <title>Author Contributions</title>
+    <list list-type="bullet">
+      <list-item>
+        <p>LR: Writing – first draft</p>
+      </list-item>
+      <list-item>
+        <p>All authors: Writing – review and editing</p>
+      </list-item>
+    </list>
+  </sec>
+  <sec id="acknowledgments">
+    <title>Acknowledgments</title>
+    <p>We thank participants from the “Road to R2” online discussion
+    sessions, contributors from the Replication Research Symposium,
+    members of the R2 Advisory Board, and contributors from our open
+    community call.</p>
+  </sec>
+  <sec id="funding">
+    <title>Funding</title>
+    <p>This research was supported by the Landesinitiative
+    openaccess.nrw
+    (<ext-link ext-link-type="uri" xlink:href="https://osf.io/a82fe">https://osf.io/a82fe</ext-link>)
+    and the University of Münster Topical Program
+    (<ext-link ext-link-type="uri" xlink:href="https://osf.io/wqe7n">https://osf.io/wqe7n</ext-link>).
+    We gratefully acknowledge the financial support provided by both
+    organizations.</p>
+  </sec>
+  <sec id="potential-conflicts-of-interest">
+    <title>Potential conflicts of interest</title>
+    <p>All members of the R2 editorial board are actively engaged in
+    repetitive research in various professional capacities (e.g.,
+    conducting, publishing, or advocating for such work). As such, they
+    have professional and intellectual interests in the visibility and
+    uptake of related research, and several authors’ prior publications
+    are cited in the reference list of this article. These relationships
+    constitute non-financial competing interests that could be perceived
+    as favoring the amplification of replication-related work. The
+    authors declare no financial competing interests related to this
+    editorial.</p>
+  </sec>
+  <sec id="declaration-of-ai-use">
+    <title>Declaration of AI use</title>
+    <p>Parts of the initial draft of the abstract had been AI generated
+    from the text. Moreover, we used ChatGPT 5 to check for consistency
+    of references, convert references from plain text to .bib format and
+    to generate suggestions to improve the text.</p>
+  </sec>
+  <sec id="author-contact">
+    <title>Author Contact</title>
+    <p>Correspondence concerning this article should be addressed to
+    Lukas Röseler: <email>lukas.roeseler@uni-muenster.de</email></p>
+  </sec>
+</sec>
+</body>
+
+<back>
+<ref-list>
+  <title>References</title>
+  <ref id="ref-Schoech2023RepetitiveResearch">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Schöch</surname><given-names>C.</given-names></name>
+      </person-group>
+      <article-title>Repetitive research: A conceptual space and terminology of replication, reproduction, revision, reanalysis, reinvestigation and reuse in digital humanities</article-title>
+      <source>International Journal of Digital Humanities</source>
+      <year iso-8601-date="2023">2023</year>
+      <volume>5</volume>
+      <issue>2–3</issue>
+      <pub-id pub-id-type="doi">10.1007/s42803-023-00073-y</pub-id>
+      <fpage>373</fpage>
+      <lpage>403</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-king1995replication">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>King</surname><given-names>Gary</given-names></name>
+      </person-group>
+      <article-title>Replication, replication</article-title>
+      <source>PS: Political Science &amp; Politics</source>
+      <publisher-name>Cambridge University Press</publisher-name>
+      <year iso-8601-date="1995">1995</year>
+      <volume>28</volume>
+      <issue>3</issue>
+      <pub-id pub-id-type="doi">10.2307/420301</pub-id>
+      <fpage>444</fpage>
+      <lpage>452</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-open2015estimating">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <string-name>Open Science Collaboration</string-name>
+      </person-group>
+      <article-title>Estimating the reproducibility of psychological science</article-title>
+      <source>Science</source>
+      <publisher-name>American Association for the Advancement of Science</publisher-name>
+      <year iso-8601-date="2015">2015</year>
+      <volume>349</volume>
+      <issue>6251</issue>
+      <pub-id pub-id-type="doi">10.1126/science.aac4716</pub-id>
+      <fpage>aac4716</fpage>
+      <lpage/>
+    </element-citation>
+  </ref>
+  <ref id="ref-brembs2018prestigious">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Brembs</surname><given-names>Björn</given-names></name>
+      </person-group>
+      <article-title>Prestigious science journals struggle to reach even average reliability</article-title>
+      <source>Frontiers in Human Neuroscience</source>
+      <year iso-8601-date="2018">2018</year>
+      <volume>Volume 12 - 2018</volume>
+      <issn>1662-5161</issn>
+      <uri>https://www.frontiersin.org/journals/human-neuroscience/articles/10.3389/fnhum.2018.00037</uri>
+      <pub-id pub-id-type="doi">10.3389/fnhum.2018.00037</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Pridemore2018ReplicationCriminology">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Pridemore</surname><given-names>W. A.</given-names></name>
+        <name><surname>Makel</surname><given-names>M. C.</given-names></name>
+        <name><surname>Plucker</surname><given-names>J. A.</given-names></name>
+      </person-group>
+      <article-title>Replication in criminology and the social sciences</article-title>
+      <source>Annual Review of Criminology</source>
+      <year iso-8601-date="2018">2018</year>
+      <volume>1</volume>
+      <pub-id pub-id-type="doi">10.1146/annurev-criminol-032317-091849</pub-id>
+      <fpage>19</fpage>
+      <lpage>38</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Perry2022DecadeReplicationEducation">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Perry</surname><given-names>T.</given-names></name>
+        <name><surname>Morris</surname><given-names>R.</given-names></name>
+        <name><surname>Lea</surname><given-names>R.</given-names></name>
+      </person-group>
+      <article-title>A decade of replication study in education? A mapping review (2011–2020)</article-title>
+      <source>Educational Research and Evaluation</source>
+      <year iso-8601-date="2022">2022</year>
+      <volume>27</volume>
+      <issue>1–2</issue>
+      <pub-id pub-id-type="doi">10.1080/13803611.2021.2022315</pub-id>
+      <fpage>12</fpage>
+      <lpage>34</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-baba2005legislating">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Baba</surname><given-names>Annamaria</given-names></name>
+        <name><surname>Cook</surname><given-names>Daniel M</given-names></name>
+        <name><surname>McGarity</surname><given-names>Thomas O</given-names></name>
+        <name><surname>Bero</surname><given-names>Lisa A</given-names></name>
+      </person-group>
+      <article-title>Legislating “sound science”: The role of the tobacco industry</article-title>
+      <source>American Journal of Public Health</source>
+      <publisher-name>American Public Health Association</publisher-name>
+      <year iso-8601-date="2005">2005</year>
+      <volume>95</volume>
+      <issue>S1</issue>
+      <pub-id pub-id-type="doi">10.2105/AJPH.2004.050963</pub-id>
+      <fpage>S20</fpage>
+      <lpage>S27</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-COS2025RestoringGoldStandardScience">
+    <element-citation publication-type="webpage">
+      <person-group person-group-type="author">
+        <string-name>Center for Open Science</string-name>
+      </person-group>
+      <article-title>COS statement on &quot;restoring gold standard science&quot; executive order</article-title>
+      <publisher-name>Center for Open Science</publisher-name>
+      <year iso-8601-date="2025-05-29">2025</year><month>05</month><day>29</day>
+      <date-in-citation content-type="access-date"><year iso-8601-date="2025-10-08">2025</year><month>10</month><day>08</day></date-in-citation>
+      <uri>https://web.archive.org/web/20250818092037/https://www.cos.io/about/news/cos-statement-on-restoring-gold-standard-science-executive-order</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-Grunow2018LackReproducibility">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Grunow</surname><given-names>M.</given-names></name>
+        <name><surname>Schneider</surname><given-names>H.</given-names></name>
+        <name><surname>Wagner</surname><given-names>G. G.</given-names></name>
+        <name><surname>Wagner</surname><given-names>J.</given-names></name>
+      </person-group>
+      <article-title>Lack of reproducibility is seriously undermining the credibility of science as a whole [editorial]</article-title>
+      <source>International Journal for Re-Views in Empirical Economics</source>
+      <year iso-8601-date="2018">2018</year>
+      <volume>2</volume>
+      <issue>2018-2</issue>
+      <pub-id pub-id-type="doi">10.18718/81781.6</pub-id>
+      <fpage>1</fpage>
+      <lpage>6</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Heyard2025ScopingReproducibilityMetrics">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Heyard</surname><given-names>R.</given-names></name>
+        <name><surname>Pawel</surname><given-names>S.</given-names></name>
+        <name><surname>Frese</surname><given-names>J.</given-names></name>
+        <name><surname>Voelkl</surname><given-names>B.</given-names></name>
+        <name><surname>Würbel</surname><given-names>H.</given-names></name>
+        <name><surname>McCann</surname><given-names>S.</given-names></name>
+        <etal/>
+      </person-group>
+      <article-title>A scoping review on metrics to quantify reproducibility: A multitude of questions leads to a multitude of metrics</article-title>
+      <source>Royal Society Open Science</source>
+      <year iso-8601-date="2025">2025</year>
+      <volume>12</volume>
+      <issue>7</issue>
+      <pub-id pub-id-type="doi">10.1098/rsos.242076</pub-id>
+      <fpage>242076</fpage>
+      <lpage/>
+    </element-citation>
+  </ref>
+  <ref id="ref-Clarke2023PrevalenceDirectReplication">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Clarke</surname><given-names>B.</given-names></name>
+        <name><surname>Lee</surname><given-names>P. Y.</given-names></name>
+        <name><surname>Schiavone</surname><given-names>S. R.</given-names></name>
+        <name><surname>Rhemtulla</surname><given-names>M.</given-names></name>
+        <name><surname>Vazire</surname><given-names>S.</given-names></name>
+      </person-group>
+      <article-title>The prevalence of direct replication articles in top-ranking psychology journals</article-title>
+      <year iso-8601-date="2023-12-16">2023</year><month>12</month><day>16</day>
+      <pub-id pub-id-type="doi">10.1037/amp0001385</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Reed2025NoRoomInn">
+    <element-citation publication-type="report">
+      <person-group person-group-type="author">
+        <name><surname>Reed</surname><given-names>W. R.</given-names></name>
+        <name><surname>Röseler</surname><given-names>L.</given-names></name>
+        <name><surname>Saam</surname><given-names>M.</given-names></name>
+        <name><surname>Wallrich</surname><given-names>L.</given-names></name>
+      </person-group>
+      <article-title>No room at the inn? The case for specialized replication journals</article-title>
+      <publisher-name>WiSo-HH Working Paper Series</publisher-name>
+      <year iso-8601-date="2025">2025</year>
+      <uri>https://www.econstor.eu/handle/10419/319083</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-BITSS2020ACRE">
+    <element-citation>
+      <person-group person-group-type="author">
+        <string-name>Berkeley Initiative for Transparency in the Social Sciences</string-name>
+      </person-group>
+      <article-title>Guide for accelerating computational reproducibility in the social sciences</article-title>
+      <year iso-8601-date="2020">2020</year>
+      <date-in-citation content-type="access-date"><year iso-8601-date="2025-08-01">2025</year><month>08</month><day>01</day></date-in-citation>
+      <uri>https://bitss.github.io/ACRE</uri>
+    </element-citation>
+  </ref>
+  <ref id="ref-roseler2024replicationdatabase">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Röseler</surname><given-names>Lukas</given-names></name>
+        <name><surname>Kaiser</surname><given-names>Leonard</given-names></name>
+        <name><surname>Doetsch</surname><given-names>Christopher</given-names></name>
+        <name><surname>Klett</surname><given-names>Noah</given-names></name>
+        <name><surname>Seida</surname><given-names>Christian</given-names></name>
+        <name><surname>Schütz</surname><given-names>Astrid</given-names></name>
+        <name><surname>Aczel</surname><given-names>Balazs</given-names></name>
+        <name><surname>Adelina</surname><given-names>Nadia</given-names></name>
+        <name><surname>Agostini</surname><given-names>Valeria</given-names></name>
+        <name><surname>Alarie</surname><given-names>Samuel</given-names></name>
+        <etal/>
+      </person-group>
+      <article-title>The replication database: Documenting the replicability of psychological science</article-title>
+      <source>Journal of Open Psychology Data</source>
+      <year iso-8601-date="2024">2024</year>
+      <volume>12</volume>
+      <fpage>8</fpage>
+      <lpage/>
+    </element-citation>
+  </ref>
+  <ref id="ref-AnkelPeters2025StructuredRobustness">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Ankel-Peters</surname><given-names>J.</given-names></name>
+        <name><surname>Brodeur</surname><given-names>A.</given-names></name>
+        <name><surname>Dreber</surname><given-names>A.</given-names></name>
+        <name><surname>Johannesson</surname><given-names>M.</given-names></name>
+        <name><surname>Neubauer</surname><given-names>F.</given-names></name>
+        <name><surname>Rose</surname><given-names>J.</given-names></name>
+      </person-group>
+      <article-title>A protocol for structured robustness reproductions and replicability assessments</article-title>
+      <source>Q Open</source>
+      <year iso-8601-date="2025">2025</year>
+      <volume>5</volume>
+      <issue>3</issue>
+      <pub-id pub-id-type="doi">10.1093/qopen/qoaf004</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Roseler2025aStaRT">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Röseler</surname><given-names>L.</given-names></name>
+        <name><surname>Hein</surname><given-names>M.</given-names></name>
+        <name><surname>Oppong Boakye</surname><given-names>P.</given-names></name>
+      </person-group>
+      <article-title>Standardized reproduction and replication templates (StaRT)</article-title>
+      <year iso-8601-date="2025-07-25">2025</year><month>07</month><day>25</day>
+      <pub-id pub-id-type="doi">10.17605/OSF.IO/BRXTD</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Roseler2025bR2SBook">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Röseler</surname><given-names>L.</given-names></name>
+        <name><surname>Moser</surname><given-names>V.</given-names></name>
+        <name><surname>Schüller</surname><given-names>S.</given-names></name>
+        <name><surname>Förster</surname><given-names>C.</given-names></name>
+      </person-group>
+      <article-title>Replication research symposium: Book of abstracts. Replication research symposium (R2S), münster, germany</article-title>
+      <year iso-8601-date="2025">2025</year>
+      <pub-id pub-id-type="doi">10.5281/zenodo.15487804</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Grossmann2021MarketRates">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Grossmann</surname><given-names>A.</given-names></name>
+        <name><surname>Brembs</surname><given-names>B.</given-names></name>
+      </person-group>
+      <article-title>Current market rates for scholarly publishing services</article-title>
+      <source>F1000Research</source>
+      <year iso-8601-date="2021">2021</year>
+      <volume>10</volume>
+      <pub-id pub-id-type="doi">10.12688/f1000research.27468.2</pub-id>
+      <fpage>20</fpage>
+      <lpage/>
+    </element-citation>
+  </ref>
+  <ref id="ref-Beall2017PredatoryPublishers">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Beall</surname><given-names>J.</given-names></name>
+      </person-group>
+      <article-title>What i learned from predatory publishers</article-title>
+      <source>Biochemia medica</source>
+      <year iso-8601-date="2017">2017</year>
+      <volume>27</volume>
+      <issue>2</issue>
+      <pub-id pub-id-type="doi">10.11613/BM.2017.029</pub-id>
+      <fpage>273</fpage>
+      <lpage>278</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Roseler2025HandbookReplication">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Röseler</surname><given-names>L.</given-names></name>
+        <name><surname>Wallrich</surname><given-names>L.</given-names></name>
+        <name><surname>Hartmann</surname><given-names>H.</given-names></name>
+        <name><surname>Hüffmeier</surname><given-names>J.</given-names></name>
+        <name><surname>Goltermann</surname><given-names>J.</given-names></name>
+        <name><surname>Pennington</surname><given-names>C. R.</given-names></name>
+        <name><surname>Boyce</surname><given-names>V.</given-names></name>
+        <name><surname>Field</surname><given-names>S. M.</given-names></name>
+        <name><surname>Pittelkow</surname><given-names>M.-M.</given-names></name>
+        <name><surname>Silverstein</surname><given-names>P.</given-names></name>
+        <name><surname>Ravenzwaaij</surname><given-names>D. van</given-names></name>
+        <name><surname>Azevedo</surname><given-names>F.</given-names></name>
+      </person-group>
+      <article-title>Handbook for reproduction and replication studies</article-title>
+      <year iso-8601-date="2025">2025</year>
+      <uri>https://forrt.org/replication_handbook</uri>
+      <pub-id pub-id-type="doi">10.5281/zenodo.16990114</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Makel2012ReplicationsPsychology">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Makel</surname><given-names>Matthew C</given-names></name>
+        <name><surname>Plucker</surname><given-names>Jonathan A</given-names></name>
+        <name><surname>Hegarty</surname><given-names>Boyd</given-names></name>
+      </person-group>
+      <article-title>Replications in psychology research: How often do they really occur?</article-title>
+      <source>Perspectives on Psychological Science</source>
+      <publisher-name>Sage Publications Sage CA: Los Angeles, CA</publisher-name>
+      <year iso-8601-date="2012">2012</year>
+      <volume>7</volume>
+      <issue>6</issue>
+      <fpage>537</fpage>
+      <lpage>542</lpage>
+    </element-citation>
+  </ref>
+  <ref id="ref-Munafo2017ManifestoReproducibleScience">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Munafò</surname><given-names>M. R.</given-names></name>
+        <name><surname>Nosek</surname><given-names>B. A.</given-names></name>
+        <name><surname>Bishop</surname><given-names>D. V.</given-names></name>
+        <name><surname>Button</surname><given-names>K. S.</given-names></name>
+        <name><surname>Chambers</surname><given-names>C. D.</given-names></name>
+        <name><surname>Percie du Sert</surname><given-names>N.</given-names></name>
+        <name><surname>Ioannidis</surname><given-names>J. P.</given-names></name>
+      </person-group>
+      <article-title>A manifesto for reproducible science</article-title>
+      <source>Nature Human Behaviour</source>
+      <year iso-8601-date="2017">2017</year>
+      <volume>1</volume>
+      <issue>1</issue>
+      <pub-id pub-id-type="doi">10.1038/s41562-016-0021</pub-id>
+      <fpage>0021</fpage>
+      <lpage/>
+    </element-citation>
+  </ref>
+  <ref id="ref-Roseler2025R2Constitution">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Röseler</surname><given-names>L.</given-names></name>
+        <name><surname>Wallrich</surname><given-names>L.</given-names></name>
+        <name><surname>Adler</surname><given-names>S.</given-names></name>
+        <name><surname>Evans</surname><given-names>T. R.</given-names></name>
+        <name><surname>Goltermann</surname><given-names>J.</given-names></name>
+        <name><surname>Gut</surname><given-names>U.</given-names></name>
+        <name><surname>Korbmacher</surname><given-names>M.</given-names></name>
+        <name><surname>Oppong Boakye</surname><given-names>P.</given-names></name>
+        <name><surname>Verheyen</surname><given-names>S.</given-names></name>
+        <name><surname>Visser</surname><given-names>I.</given-names></name>
+        <name><surname>Azevedo</surname><given-names>F.</given-names></name>
+      </person-group>
+      <article-title>Replication research constitution (R2 launch)</article-title>
+      <year iso-8601-date="2025">2025</year>
+      <pub-id pub-id-type="doi">10.5281/zenodo.17279413</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Roseler2025R2DiscontinuedConditions">
+    <element-citation>
+      <person-group person-group-type="author">
+        <name><surname>Röseler</surname><given-names>L.</given-names></name>
+        <name><surname>Wallrich</surname><given-names>L.</given-names></name>
+        <name><surname>Azevedo</surname><given-names>F.</given-names></name>
+      </person-group>
+      <article-title>Conditions under which R2 will be discontinued after a runtime of 26 months</article-title>
+      <year iso-8601-date="2025">2025</year>
+      <pub-id pub-id-type="doi">10.5281/zenodo.17206100</pub-id>
+    </element-citation>
+  </ref>
+  <ref id="ref-Page2021PRISMA2020">
+    <element-citation publication-type="article-journal">
+      <person-group person-group-type="author">
+        <name><surname>Page</surname><given-names>M. J.</given-names></name>
+        <name><surname>McKenzie</surname><given-names>J. E.</given-names></name>
+        <name><surname>Bossuyt</surname><given-names>P. M.</given-names></name>
+        <name><surname>Boutron</surname><given-names>I.</given-names></name>
+        <name><surname>Hoffmann</surname><given-names>T. C.</given-names></name>
+        <name><surname>Mulrow</surname><given-names>C. D.</given-names></name>
+        <name><surname>Moher</surname><given-names>D.</given-names></name>
+      </person-group>
+      <article-title>The PRISMA 2020 statement: An updated guideline for reporting systematic reviews</article-title>
+      <source>BMJ</source>
+      <year iso-8601-date="2021">2021</year>
+      <volume>372</volume>
+      <pub-id pub-id-type="doi">10.1136/bmj.n71</pub-id>
+      <fpage>n71</fpage>
+      <lpage/>
+    </element-citation>
+  </ref>
+  <ref id="ref-Brecht1974-gk">
+    <element-citation publication-type="book">
+      <person-group person-group-type="author">
+        <name><surname>Brecht</surname><given-names>Bertolt</given-names></name>
+      </person-group>
+      <source>Life of Galileo</source>
+      <publisher-name>Methuen Publishing</publisher-name>
+      <publisher-loc>York, England</publisher-loc>
+      <year iso-8601-date="1974-06">1974</year><month>06</month>
+    </element-citation>
+  </ref>
+</ref-list>
+</back>
+
+
+</article>
