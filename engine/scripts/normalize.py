@@ -32,9 +32,9 @@ author:
     email: ""
     corresponding: true
     affiliations: [{{ ref: aff1 }}]
-    # No `orcid:` key when unknown — leave it OUT rather than "". Pandoc's
-    # $if(...)$ treats an empty string as "set" (true), so `orcid: ""`
-    # renders as a literal, invalid `\\orcidlink{true}` in the PDF template.
+    # No orcid key when unknown - leave it OUT rather than blank. Pandoc's
+    # conditional treats an empty string as set, so a blank value renders
+    # as a literal, invalid orcidlink command in the PDF template.
 affiliations:
   - {{ id: aff1, name: "TODO: affiliation" }}
 abstract: >
