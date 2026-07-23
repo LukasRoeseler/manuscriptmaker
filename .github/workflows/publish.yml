@@ -106,6 +106,11 @@ jobs:
             echo "No article output changed — nothing to commit."
           else
             git commit -m "Publish: $BUILT_IDS [skip ci]"
-            git pull --rebase origin main
+            # --autostash: build byproducts left in the working tree outside
+            # docs/articles (intermediate .tex/.aux, _build_out/, etc.) are
+            # untracked/modified but never staged, which makes a plain
+            # `pull --rebase` refuse to run — autostash shelves them for the
+            # rebase and restores them after.
+            git pull --rebase --autostash origin main
             git push origin HEAD:main
           fi
