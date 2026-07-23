@@ -14,7 +14,11 @@ on:
       - "_extensions/**"
       - "themes/**"
       - "engine/**"
-      - "docs/**"
+      # NOT docs/** - that's the Pages site (preview tool, landing page, and
+      # this workflow's own docs/articles/ output). Triggering on it would
+      # make any edit to the site - even deleting a published article -
+      # rebuild-and-republish every manuscript right back (a feedback loop
+      # hit in practice: see the "rebuild everything" fallback below).
   workflow_dispatch: {}   # manual re-run, e.g. after a workflow-only fix that
                           # doesn't itself touch a path above
 
@@ -63,14 +67,26 @@ jobs:
         run: |
           chmod +x engine/scripts/build_all.sh
           base="${{ github.event.before }}"
-          changed=""
-          # github.event.before is unset for workflow_dispatch (no prior push
-          # to diff against) - only try the diff when it's a real push event.
-          if [ -n "$base" ] && git cat-file -e "$base" 2>/dev/null; then
-            changed=$(git diff --name-only "$base" HEAD -- 'manuscripts/**' \
-                      | awk -F/ 'NF>=3 && $2 !~ /^_/ {print $1"/"$2}' | sort -u)
+          event="${{ github.event_name }}"
+          all_manuscripts() { ls -d manuscripts/*/ | sed 's#/$##' | grep -v '/_'; }
+          if [ "$event" = "workflow_dispatch" ] || [ -z "$base" ] || ! git cat-file -e "$base" 2>/dev/null; then
+            # No prior commit to diff against (manual dispatch, or an
+            # unexpected push event) - can't tell what changed, so rebuild
+            # every manuscript rather than guess.
+            changed=$(all_manuscripts)
+          else
+            touched=$(git diff --name-only "$base" HEAD)
+            if echo "$touched" | grep -qE '^(_extensions|themes|engine)/'; then
+              # The rendering engine/theme changed - every manuscript's
+              # output is potentially affected, so republish all of them.
+              changed=$(all_manuscripts)
+            else
+              # Only specific manuscripts changed (or nothing did) - touch
+              # just those, so an unrelated push can't republish everything.
+              changed=$(echo "$touched" | grep '^manuscripts/' \
+                        | awk -F/ 'NF>=3 && $2 !~ /^_/ {print $1"/"$2}' | sort -u)
+            fi
           fi
-          [ -z "$changed" ] && changed=$(ls -d manuscripts/*/ | sed 's#/$##' | grep -v '/_')
           mkdir -p _build_out
           for d in $changed; do
             echo "::group::Publishing $d"; engine/scripts/build_all.sh "$d"
