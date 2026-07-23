@@ -107,6 +107,21 @@
   .empty { color:#999; text-align:center; padding:4rem 1rem; }
   .warn { background:#fff7e6; border-left:3px solid #e0a800; padding:.5rem .7rem; font-size:.82rem; margin:.6rem 0; }
 
+  /* ---- saved drafts (IndexedDB, this browser only) ---- */
+  dialog#drafts { border:1px solid #e6e4db; border-radius:8px; padding:0; max-width:440px; width:90vw; }
+  dialog#drafts::backdrop { background:rgba(0,0,0,.35); }
+  dialog#drafts .dhead { padding:.7rem 1rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; }
+  dialog#drafts .dhead b { font-size:.95rem; }
+  dialog#drafts .dhead button { padding:.2rem .55rem; }
+  dialog#drafts .dlist { max-height:50vh; overflow-y:auto; padding:.4rem; }
+  dialog#drafts .ditem { display:flex; align-items:center; gap:.5rem; padding:.5rem .6rem; border-radius:6px; }
+  dialog#drafts .ditem:hover { background:#f4f2ea; }
+  dialog#drafts .ditem .dname { flex:1; font-size:.87rem; font-weight:600; cursor:pointer; line-height:1.35; }
+  dialog#drafts .ditem .dwhen { font-size:.72rem; font-weight:400; color:#888; }
+  dialog#drafts .ditem button { padding:.25rem .55rem; font-size:.78rem; white-space:nowrap; }
+  dialog#drafts .dempty { padding:1.6rem 1rem; text-align:center; color:#999; font-size:.85rem; }
+  dialog#drafts .dfoot { padding:.55rem 1rem; border-top:1px solid #eee; font-size:.74rem; color:#666; }
+
   /* ---- print / PDF export ------------------------------------------
      @page margin:0 suppresses the browser's own date/title/URL/page-number
      furniture. A <table> with thead/tfoot spacers (built at export time)
@@ -219,18 +234,25 @@
     </details>
 
     <div class="actions">
+      <button id="save-draft" class="ghost">💾 Save for later</button>
+      <button id="open-drafts" class="ghost">📂 Saved <span id="draft-count"></span></button>
+    </div>
+    <div class="actions">
       <button id="pdf">🖨 Export PDF</button>
       <button id="docx" class="ghost">📝 Export .docx</button>
       <button id="dl" class="ghost">⬇ Download preview HTML</button>
       <button id="reset" class="ghost">Reset</button>
     </div>
-    <p class="note">100% in your browser — nothing is uploaded. This is a layout
-      preview. The authoritative PDF, JATS XML and OJS package are produced by
-      the GitHub Actions pipeline when you open a Pull Request
-      (<a href="../author-guide.html">how to submit</a>). Citations like
-      <code>[@key]</code> resolve there, not here. The <strong>.docx export</strong>
-      is a separate, fully editable copy for manual polishing — edits made to it
-      do not flow back into the pipeline.</p>
+    <p class="note">100% in your browser — nothing is uploaded, and nothing is
+      stored anywhere else. This is a layout preview. The authoritative PDF,
+      JATS XML and OJS package are produced by the GitHub Actions pipeline
+      when you open a Pull Request (<a href="../author-guide.html">how to
+      submit</a>). Citations like <code>[@key]</code> resolve there, not here.
+      The <strong>.docx export</strong> is a separate, fully editable copy for
+      manual polishing — edits made to it do not flow back into the pipeline.
+      <strong>Save for later</strong> keeps a draft in this browser only
+      (IndexedDB) so you can close the tab and resume — clearing your browser
+      data removes it, and it never leaves your machine.</p>
   </aside>
 
   <!-- ---------------- live article preview ---------------- -->
@@ -291,6 +313,13 @@
 <!-- Hidden storage: render() keeps the current footer text here; the PDF
      export copies it into the per-page runner it builds at print time. -->
 <div id="printfoot"></div>
+
+<!-- Saved drafts (IndexedDB, this browser only — see #save-draft) -->
+<dialog id="drafts">
+  <div class="dhead"><b>Saved drafts</b><button type="button" id="drafts-close" class="ghost">✕</button></div>
+  <div class="dlist" id="drafts-list"></div>
+  <div class="dfoot">Stored only in this browser (IndexedDB) — never uploaded anywhere.</div>
+</dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
@@ -853,6 +882,93 @@ ${holder.innerHTML}
 });
 
 $("#reset").addEventListener("click", () => location.reload());
+
+/* ---------- save-for-later (IndexedDB, this browser only) ----------
+   Nothing here ever leaves the machine: no fetch, no server, just the
+   browser's own local database. Lets someone pause mid-edit and resume
+   later without re-uploading or re-typing metadata. */
+const DRAFT_FIELDS = ["m-title","m-authors","m-orcids","m-affils","m-abstract","m-keywords","m-lay",
+  "m-accent","m-journal","m-type","m-discipline","m-volume","m-year","m-id","m-doi","m-citation"];
+const DRAFT_CHECKS = ["b-open-data","b-open-code","b-open-materials","b-preregistered","b-codecheck"];
+
+function openDraftsDB(){
+  return new Promise((resolve,reject)=>{
+    const req = indexedDB.open("r2-preview-drafts", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("drafts", { keyPath:"id" });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function idbRequest(req){
+  return new Promise((resolve,reject)=>{ req.onsuccess = () => resolve(req.result); req.onerror = () => reject(req.error); });
+}
+async function withDrafts(mode, fn){
+  const db = await openDraftsDB();
+  const tx = db.transaction("drafts", mode);
+  const result = await fn(tx.objectStore("drafts"));
+  return new Promise((resolve,reject)=>{ tx.oncomplete = () => resolve(result); tx.onerror = () => reject(tx.error); });
+}
+function collectDraft(){
+  const fields = {}; DRAFT_FIELDS.forEach(id => fields[id] = $("#"+id).value);
+  const checks = {}; DRAFT_CHECKS.forEach(id => checks[id] = $("#"+id).checked);
+  return { id: Date.now(), name: $("#m-title").value.trim() || "Untitled draft",
+    savedAt: new Date().toISOString(), srcfmt: $("#srcfmt").textContent,
+    fileinfo: $("#fileinfo").innerHTML, bodyHtml, fields, checks };
+}
+function restoreDraft(d){
+  Object.entries(d.fields||{}).forEach(([id,val]) => { const el = $("#"+id); if (el) el.value = val; });
+  Object.entries(d.checks||{}).forEach(([id,val]) => { const el = $("#"+id); if (el) el.checked = val; });
+  document.documentElement.style.setProperty("--accent", $("#m-accent").value || "#009CCF");
+  bodyHtml = d.bodyHtml || "";
+  $("#srcfmt").textContent = d.srcfmt || "";
+  $("#fileinfo").innerHTML = d.fileinfo || "";
+  warn(""); setStatus(""); render();
+}
+async function refreshDraftCount(){
+  try {
+    const all = await withDrafts("readonly", store => idbRequest(store.getAll()));
+    $("#draft-count").textContent = all.length ? `(${all.length})` : "";
+  } catch(e){ /* IndexedDB unavailable, e.g. private-browsing lockdown */ }
+}
+$("#save-draft").addEventListener("click", async () => {
+  if ($("#article").hidden) { warn("Load a manuscript first."); return; }
+  const draft = collectDraft();
+  const name = prompt("Save this draft as:", draft.name);
+  if (name === null) return;
+  draft.name = name.trim() || draft.name;
+  try {
+    await withDrafts("readwrite", store => idbRequest(store.put(draft)));
+    await refreshDraftCount();
+    setStatus(`💾 Saved "${draft.name}" — stored only in this browser.`);
+    setTimeout(()=>setStatus(""), 3000);
+  } catch(e){ warn("Could not save: " + e.message); }
+});
+async function renderDraftsList(){
+  const list = $("#drafts-list");
+  let all = [];
+  try { all = await withDrafts("readonly", store => idbRequest(store.getAll())); } catch(e){}
+  all.sort((a,b) => b.id - a.id);
+  if (!all.length) { list.innerHTML = `<div class="dempty">No saved drafts yet.</div>`; return; }
+  list.innerHTML = all.map(d => `
+    <div class="ditem" data-id="${d.id}">
+      <span class="dname">${esc(d.name)}<br><span class="dwhen">${new Date(d.savedAt).toLocaleString()}</span></span>
+      <button type="button" class="ghost load">Load</button>
+      <button type="button" class="ghost del">Delete</button>
+    </div>`).join("");
+  list.querySelectorAll(".ditem").forEach(row => {
+    const id = Number(row.dataset.id);
+    const open = () => { const d = all.find(x=>x.id===id); if (d){ restoreDraft(d); $("#drafts").close(); } };
+    row.querySelector(".dname").addEventListener("click", open);
+    row.querySelector(".load").addEventListener("click", open);
+    row.querySelector(".del").addEventListener("click", async () => {
+      await withDrafts("readwrite", store => idbRequest(store.delete(id)));
+      await refreshDraftCount(); renderDraftsList();
+    });
+  });
+}
+$("#open-drafts").addEventListener("click", async () => { await renderDraftsList(); $("#drafts").showModal(); });
+$("#drafts-close").addEventListener("click", () => $("#drafts").close());
+refreshDraftCount();
 
 /* ---------- PDF export (browser print → save as PDF) ----------
    Wraps #paper in a table whose thead/tfoot spacers repeat on every
