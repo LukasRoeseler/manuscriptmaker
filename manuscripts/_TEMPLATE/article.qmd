@@ -2,6 +2,9 @@
 # Authored content. (Editors: publication fields live in _metadata.yml.)
 # If you submit a .docx/.tex instead, this file is generated for you — delete it.
 title: "Your article title"
+# No ORCID for an author? Delete their `orcid:` line entirely — do not set
+# it to "" (an empty-but-present value renders as a literal, invalid
+# \orcidlink{true} in the PDF).
 author:
   - name: { given: First, family: Author }
     orcid: 0000-0000-0000-0000

@@ -94,6 +94,11 @@
 \usepackage[american]{babel}
 \usepackage{amsmath}
 \usepackage{amssymb}
+% calc: Pandoc's grid-table -> longtable output sizes columns with
+% (\columnwidth - N\tabcolsep) * \real{0.xxxx} expressions, which need the
+% calc package's dimension arithmetic (distinct from \usetikzlibrary{calc}
+% above, which only affects TikZ coordinates).
+\usepackage{calc}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
@@ -215,7 +220,7 @@ $endfor$
   \fancyhf{}
   \fancyheadoffset[L]{\TitleHeadExtra}
   \fancyheadoffset[R]{\TitleHeadExtra}
-  \setlength{\headwidth}{\textwidth\TitleHeadExtra}
+  \setlength{\headwidth}{\textwidth+\TitleHeadExtra}
   \fancyhead[L]{%
     \vspace*{-\TitleHeaderRaise}%
     \parbox[b][\headheight][c]{\TitleLeftBoxW}{%

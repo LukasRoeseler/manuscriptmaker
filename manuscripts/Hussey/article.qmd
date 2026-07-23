@@ -2,7 +2,6 @@
 title: "TODO: article title"
 author:
   - name: { given: TODO, family: TODO }
-    orcid: ""
     email: ""
     corresponding: true
     affiliations: [{ ref: aff1 }]

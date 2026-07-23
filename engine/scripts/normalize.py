@@ -29,10 +29,12 @@ FRONT_MATTER_SKELETON = """---
 title: "TODO: article title"
 author:
   - name: {{ given: TODO, family: TODO }}
-    orcid: ""
     email: ""
     corresponding: true
     affiliations: [{{ ref: aff1 }}]
+    # No `orcid:` key when unknown — leave it OUT rather than "". Pandoc's
+    # $if(...)$ treats an empty string as "set" (true), so `orcid: ""`
+    # renders as a literal, invalid `\\orcidlink{true}` in the PDF template.
 affiliations:
   - {{ id: aff1, name: "TODO: affiliation" }}
 abstract: >
