@@ -74,7 +74,9 @@ jobs:
             cp "$d"/ojs/*.xml "$out/" 2>/dev/null || true
             echo "::endgroup::"
           done
-          echo "BUILT_IDS=$(ls _build_out)" >> "$GITHUB_ENV"
+          # Space-joined on one line: $GITHUB_ENV's plain KEY=value form
+          # cannot hold a multi-line value (which `ls` on 2+ ids would be).
+          echo "BUILT_IDS=$(ls _build_out | tr '\n' ' ')" >> "$GITHUB_ENV"
 
       - name: Upload OJS import packages
         uses: actions/upload-artifact@v4
