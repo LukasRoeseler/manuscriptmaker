@@ -867,6 +867,23 @@ async function loadFile(file){
         `${pp.emf} figure${pp.emf>1?"s are":" is"} embedded as EMF/WMF (a Word vector format browsers can't show) — shown as placeholders here. The publishing pipeline converts them automatically for the final PDF/HTML.`);
   }
   render();
+  warnLowResImages();   // async, fire-and-forget - images need a tick to load before natural size is known
+}
+/* A figure whose natural pixel size is smaller than the size it's actually
+   displayed at will look soft/blurry once printed - flag it so it can be
+   swapped for a higher-resolution source before submission. */
+async function warnLowResImages(){
+  const imgs = [...document.querySelectorAll("#r2-body img")].filter(img => !img.classList.contains("r2-pdf-math"));
+  if (!imgs.length) return;
+  await Promise.all(imgs.map(img => img.complete ? Promise.resolve() :
+    new Promise(res => { img.onload = res; img.onerror = res; })));
+  const lowRes = imgs.filter(img => {
+    const dispW = img.getBoundingClientRect().width;
+    return img.naturalWidth && dispW && img.naturalWidth < dispW * 1.3;
+  });
+  if (lowRes.length)
+    warn(($("#warnbox").textContent ? $("#warnbox").innerHTML + " " : "") +
+      `${lowRes.length} figure${lowRes.length>1?"s look":" looks"} low-resolution at the size shown here and may print blurry — check the original image quality before submitting.`);
 }
 
 /* ---------- format helpers ---------- */
