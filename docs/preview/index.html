@@ -107,6 +107,12 @@
   /* References: APA hanging indent */
   .r2-refs p { padding-left:1.5em; text-indent:-1.5em; margin:.45rem 0; }
 
+  /* Footnotes (mammoth appends these as a plain <ol> - style it so it reads
+     as footnote apparatus, not just more body text) */
+  #r2-body ol:has(li[id^="footnote"]) { font-size:.82rem; color:#444; margin-top:2rem;
+    padding-left:1.4em; border-top:1px solid #eee; padding-top:.8rem; }
+  #r2-body ol:has(li[id^="footnote"]) a[href^="#footnote-ref"] { text-decoration:none; margin-left:.3em; }
+
   /* ---- final page block (matches the published R2 design) ---- */
   .r2-final { margin:2.5rem 0 0; text-align:center; font-size:.82rem; color:#333; }
   /* Rule between the article body (References) and this block. */
@@ -508,10 +514,15 @@ async function getPdfJs(){
 function classifyPdfFont(name){
   if (!name) return "normal";
   const n = name.toLowerCase();
-  if (/cmmi|cmsy|cmex|msam|msbm|eufm|rsfs|wasy|stmary|cmbsy|lasy/.test(n)) return "math";
+  // cmmi/cmsy/... = classic Computer Modern math; lmmath... = Latin Modern,
+  // a drop-in replacement that's the actual default in most current LaTeX
+  // installs (lmodern is auto-loaded by many document classes) - easy to
+  // miss since the naming doesn't overlap with "cm" at all.
+  if (/cmmi|cmsy|cmex|msam|msbm|eufm|rsfs|wasy|stmary|cmbsy|lasy|lmmath/.test(n)) return "math";
   if (/sftt|cmtt|courier|consolas|mono/.test(n)) return "code";
   return "normal";
 }
+function isBoldPdfFont(name){ return /bold/i.test(name||""); }
 /* Real word-spacing from glyph positions: a gap wider than ~1/5 of an em
    between two items is a word boundary; anything tighter is just kerning
    within a run pdf.js happened to split (e.g. at a style change). */
@@ -654,17 +665,46 @@ async function convertPdfToHtml(file, progressCb){
       str: it.str, x: it.transform[4], y: it.transform[5],
       w: it.width, h: it.height || Math.abs(it.transform[3]) || 10,
       size: Math.abs(it.transform[3]) || Math.abs(it.transform[0]) || 10,
-      cls: classifyPdfFont(fontMap[it.fontName])
+      cls: classifyPdfFont(fontMap[it.fontName]),
+      bold: isBoldPdfFont(fontMap[it.fontName])
     }));
     const lines = raw.length ? groupPdfLines(raw, page.view[2] - page.view[0]) : [];
     pages.push({ lines, page, canvas:null, canvasPromise:null });
   }
 
-  // A running header repeats its first line verbatim across most pages - drop it.
+  // Peer-review manuscript submissions are very often continuously
+  // line-numbered in the margin - each numbered line otherwise contaminates
+  // whatever real text follows it (and a numeral-first line can even get
+  // mistaken for a numbered section heading like "2 Research Question").
+  // The number is reliably set in a distinctly smaller font than the text
+  // it precedes, which a genuine numeral starting a sentence never is - and
+  // this is checked document-wide so an occasional real numeral-led line
+  // elsewhere doesn't get caught by mistake.
+  const isLineNumberPrefix = (line) => {
+    if (line.length < 2) return false;
+    const first = line[0], second = line[1];
+    return /^\d{1,4}$/.test(first.str.trim()) && first.size < second.size * 0.75;
+  };
+  let numberedLines = 0, multiItemLines = 0;
+  pages.forEach(pg => pg.lines.forEach(line => {
+    if (line.length < 2) return;
+    multiItemLines++;
+    if (isLineNumberPrefix(line)) numberedLines++;
+  }));
+  const hadLineNumbers = multiItemLines > 0 && numberedLines / multiItemLines > 0.3;
+  if (hadLineNumbers)
+    pages.forEach(pg => pg.lines.forEach(line => { if (isLineNumberPrefix(line)) line.shift(); }));
+
+  // A running header repeats its first line across most pages - drop it.
+  // Compared after normalizing away the trailing page number (which makes
+  // each page's copy differ) and a leading "Running head:" label (APA's
+  // convention of only spelling that out on page 1, not the rest) - so it's
+  // recognized as the same repeating line even though it's not byte-identical.
+  const normalizeHeader = t => t.replace(/\s*\d{1,4}\s*$/, "").replace(/^running head:\s*/i, "").trim().toLowerCase();
   const counts = new Map();
-  pages.forEach(pg => { const t = pg.lines[0] ? pdfLineText(pg.lines[0]).trim() : ""; if (t) counts.set(t, (counts.get(t)||0)+1); });
+  pages.forEach(pg => { const t = pg.lines[0] ? normalizeHeader(pdfLineText(pg.lines[0])) : ""; if (t) counts.set(t, (counts.get(t)||0)+1); });
   const header = [...counts.entries()].find(([t,c]) => c >= Math.max(2, Math.ceil(numPages*0.4)));
-  if (header) pages.forEach(pg => { if (pg.lines[0] && pdfLineText(pg.lines[0]).trim() === header[0]) pg.lines.shift(); });
+  if (header) pages.forEach(pg => { if (pg.lines[0] && normalizeHeader(pdfLineText(pg.lines[0])) === header[0]) pg.lines.shift(); });
 
   // A lone short numeric line at the very top/bottom of a page is a page
   // number. Re-check the bottom AFTER a possible top removal so the index
@@ -695,10 +735,18 @@ async function convertPdfToHtml(file, progressCb){
       const domSize = pdfDominantSize(line);
       const allCode = line.every(it => it.cls === "code");
       const allMath = line.every(it => it.cls === "math") && /[a-zA-Z0-9]/.test(text);
+      // APA-style headings ("Method", "Results", "References", ...) are
+      // bold + centered but the SAME font size as body text, so size alone
+      // misses them entirely - a line that's almost entirely bold, short,
+      // and doesn't trail off into a sentence is the other strong signal.
+      const totalChars = line.reduce((s,it) => s + it.str.length, 0);
+      const boldChars = line.reduce((s,it) => s + (it.bold ? it.str.length : 0), 0);
+      const isBoldLine = totalChars > 0 && boldChars/totalChars > 0.6;
       const heading = !allCode && !allMath && (
         domSize > bodySize*1.15 ||
         (/^\d+(\.\d+)*\s+[A-Z]/.test(text) && text.length < 90) ||
-        (text === text.toUpperCase() && /[A-Z]/.test(text) && text.length < 60));
+        (text === text.toUpperCase() && /[A-Z]/.test(text) && text.length < 60) ||
+        (isBoldLine && text.length < 100 && !/[.!?]$/.test(text) && /[A-Za-z]/.test(text)));
 
       if (allCode){
         flushPara();
@@ -730,7 +778,7 @@ async function convertPdfToHtml(file, progressCb){
     return `<p>${b.html}</p>`;
   }).join("\n");
 
-  return { html, truncated: doc.numPages > PDF_MAX_PAGES };
+  return { html, truncated: doc.numPages > PDF_MAX_PAGES, hadLineNumbers };
 }
 
 async function loadFile(file){
@@ -775,7 +823,7 @@ async function loadFile(file){
     } else if (ext === ".pdf") {
       setStatus("⏳ Extracting .pdf… (0%)");
       try {
-        const { html, truncated } = await convertPdfToHtml(file, (p, total) => setStatus(`⏳ Extracting .pdf… (page ${p}/${total})`));
+        const { html, truncated, hadLineNumbers } = await convertPdfToHtml(file, (p, total) => setStatus(`⏳ Extracting .pdf… (page ${p}/${total})`));
         const fm = extractDocxFront(html);
         bodyHtml = fm.bodyHtml || html;
         const setIf = (id,v) => { if (v && !$(id).value) $(id).value = v; };
@@ -788,6 +836,7 @@ async function loadFile(file){
           "are rebuilt from font/position clues, and formulas — which can't be reliably turned back into a live equation " +
           "from a PDF — are shown as small images cropped straight from the page instead. Figures/tables aren't extracted. " +
           "Click into the preview text to fix anything by hand." +
+          (hadLineNumbers ? " Detected reviewer line numbers in the margin and removed them from the text." : "") +
           (truncated ? " Only the first " + PDF_MAX_PAGES + " pages were processed (large file)." : ""));
       } catch(err){
         bodyHtml = "";
@@ -845,9 +894,18 @@ function extractDocxFront(html){
   let root;
   try { root = new DOMParser().parseFromString("<div id='r'>"+html+"</div>","text/html").getElementById("r"); }
   catch(e){ return fb; }
-  const blocks = root ? [...root.children] : [];
+  let blocks = root ? [...root.children] : [];
   if (!blocks.length) return fb;
   const T = el => (el.textContent||"").replace(/\s+/g," ").trim();
+
+  // Some templates (registered-report / replication-study submission forms,
+  // e.g. StaRT) print bare section labels "Title" and "Author(s)" as their
+  // own line right before the real content - drop the labels so all the
+  // logic below, which expects blocks[0]/[1] to already BE the title/author
+  // text, sees exactly that.
+  if (/^title$/i.test(T(blocks[0]))) blocks = blocks.slice(1);
+  if (blocks.length > 1 && /^authors?$/i.test(T(blocks[1]))) blocks = [blocks[0], ...blocks.slice(2)];
+
   const isHeading = el => /^H[1-6]$/.test(el.tagName) ||
         (el.tagName==="P" && el.querySelector("strong") && T(el)===T(el.querySelector("strong")) && T(el).length<140);
 
@@ -866,13 +924,35 @@ function extractDocxFront(html){
   // Fallback for preprint-style fronts without an "Author Note"/"Abstract"
   // heading: title possibly split over two heading lines, then a short
   // author line like "Ian Hussey[1]", then short affiliation lines.
-  if (!authors){
-    const authorRx = /^[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?(?:\s*(?:,|and|&)\s*[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?)*$/;
+  const authorRx = /^[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?(?:\s*(?:,|and|&)\s*[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?)*$/;
+  // Enter the more careful scan below not just when the naive guess above
+  // found nothing, but also when it found something that doesn't actually
+  // look like an author list - e.g. when "Abstract" is found much further
+  // down, blocks.slice(1, frontEnd) can span several heading-styled lines
+  // that are really a wrapped title continuation, not a title+authors pair.
+  if (!authors || (isHeading(blocks[1]) && !authorRx.test(authors))){
     let j = 1;
-    // second heading line = continuation of a two-line title
-    if (j < blocks.length && isHeading(blocks[j]) && T(blocks[j]).length < 180 &&
-        j+1 < blocks.length && authorRx.test(T(blocks[j+1]))){
-      title = title.replace(/[:;,\s]+$/, "") + ": " + T(blocks[j]); j++;
+    // additional heading lines = continuation of a multi-line title (a long
+    // title often wraps across 2-3 short lines). Only commit once an
+    // author-looking line is actually found right after them, so a genuine
+    // one-line title with no authors below never gets swallowed by mistake.
+    const extraTitleLines = [];
+    let k = j;
+    while (k < blocks.length && extraTitleLines.length < 4 && isHeading(blocks[k]) &&
+           T(blocks[k]).length < 180 && !authorRx.test(T(blocks[k]))){
+      extraTitleLines.push(T(blocks[k])); k++;
+    }
+    if (extraTitleLines.length){
+      // a corresponding-author marker (*, ∗, †, a bare footnote digit, ...)
+      // can sit between the title and the real author line right after it -
+      // skip over it before checking, so it doesn't break the lookahead
+      // confirmation below. LaTeX's \ast renders as U+2217, not a plain "*".
+      let m = k;
+      while (m < blocks.length && /^[*∗†‡§¶\d]{1,3}$/.test(T(blocks[m]))) m++;
+      if (m < blocks.length && authorRx.test(T(blocks[m]))){
+        title = [title.replace(/[:;,\s]+$/, ""), ...extraTitleLines].join(" ");
+        j = m;
+      }
     }
     if (j < blocks.length && T(blocks[j]).length < 90 && authorRx.test(T(blocks[j]))){
       authors = T(blocks[j]).replace(/\s*\[\d+\]/g, ""); j++;
@@ -925,6 +1005,25 @@ function postProcessBody(html){
   catch(e){ return { html, emf:0, linked:0 }; }
   if (!root) return { html, emf:0, linked:0 };
 
+  // --- 0. Promote bold-only short paragraphs to real headings -------
+  // Very common in submitted manuscripts: "Introduction"/"Method"/"Results"
+  // typed as manually-bolded body text rather than through Word's actual
+  // Heading styles, so mammoth has no style to map and they'd otherwise be
+  // visually indistinguishable from ordinary prose. A paragraph promotes to
+  // a heading only if its ENTIRE text is bold (excludes table cells, which
+  // are commonly bold too but aren't section headings).
+  root.querySelectorAll("p").forEach(p => {
+    if (p.closest("table")) return;
+    const text = (p.textContent||"").trim();
+    if (!text || text.length > 100 || /[.!?]$/.test(text)) return;
+    const strongText = [...p.querySelectorAll("strong,b")].map(s=>s.textContent).join("").trim();
+    if (strongText && strongText === text) {
+      const h = document.createElement("h2");
+      h.innerHTML = p.innerHTML;
+      p.replaceWith(h);
+    }
+  });
+
   // --- 1. EMF/WMF placeholders -------------------------------------
   let emf = 0;
   root.querySelectorAll("img").forEach(img => {
@@ -940,7 +1039,7 @@ function postProcessBody(html){
     }
   });
 
-  // --- 2. References section: ids + hanging indent ------------------
+  // --- 2. References section: merge wrapped lines, ids + hanging indent --
   const blocks = [...root.children];
   const refHeadIdx = blocks.findIndex(b => /^references$/i.test((b.textContent||"").trim()));
   const refIndex = new Map();               // "surname|year" -> anchor id
@@ -948,17 +1047,47 @@ function postProcessBody(html){
     const wrap = document.createElement("div");
     wrap.className = "r2-refs";
     blocks[refHeadIdx].after(wrap);
-    blocks.slice(refHeadIdx+1).forEach((b, i) => {
+    for (const b of blocks.slice(refHeadIdx+1)){
+      // mammoth appends its footnote list (an <ol>) at the very end of the
+      // document regardless of heading structure, so it can land right
+      // after "References" - that's not a reference entry, and everything
+      // from here on isn't either, so stop rather than swallow it. Likewise
+      // a following heading (e.g. "Appendix") ends the reference list -
+      // without this, appendix tables/sections get swallowed as if they
+      // were bibliography entries.
+      if (/^(OL|UL)$/.test(b.tagName)) break;
+      if (/^H[1-6]$/.test(b.tagName)) break;
+      wrap.appendChild(b);
+    }
+
+    // A PDF's reference list often arrives as one paragraph per physical
+    // (wrapped) line rather than one per entry - merge a paragraph into the
+    // previous one unless it looks like the start of a new entry (APA
+    // references begin "Surname, Initial..."). Guarded: if almost nothing
+    // matches that pattern (a non-APA reference style), merging would
+    // collapse the whole list into one entry, so bail and leave it split.
+    const NEW_ENTRY = /^[A-ZÀ-Þ][\w'’.\-]*,/;
+    const paras = [...wrap.children].filter(el => (el.textContent||"").trim());
+    const merged = [];
+    paras.forEach(el => {
+      const t = el.textContent.trim();
+      if (merged.length && !NEW_ENTRY.test(t)) merged[merged.length-1].innerHTML += " " + el.innerHTML;
+      else merged.push(el);
+    });
+    const finalEntries = merged.length >= Math.max(1, paras.length * 0.3) ? merged : paras;
+    wrap.innerHTML = "";
+    let n = 0;
+    finalEntries.forEach(b => {
       const t = (b.textContent||"").trim();
-      if (t){
-        b.id = "ref-" + (i+1);
-        const surname = (t.match(/^([A-Za-zÀ-ÿ'’\-]+)/) || [,""])[1].toLowerCase();
-        if (surname)
-          [...t.matchAll(/\b(\d{4}[a-z]?)\b/g)].forEach(m => {
-            const key = surname + "|" + m[1];
-            if (!refIndex.has(key)) refIndex.set(key, b.id);
-          });
-      }
+      if (!t) return;
+      n++;
+      b.id = "ref-" + n;
+      const surname = (t.match(/^([A-Za-zÀ-ÿ'’\-]+)/) || [,""])[1].toLowerCase();
+      if (surname)
+        [...t.matchAll(/\b(\d{4}[a-z]?)\b/g)].forEach(m => {
+          const key = surname + "|" + m[1];
+          if (!refIndex.has(key)) refIndex.set(key, b.id);
+        });
       wrap.appendChild(b);
     });
   }
@@ -1053,31 +1182,69 @@ function parseLatex(tex){
     while (j<tex.length && d){ if(tex[j]==="{")d++; else if(tex[j]==="}")d--; j++; }
     return tex.slice(s, j-1);
   };
+  // Every \name{...} (optionally preceded by [...]) in the document, with
+  // brace-depth-aware matching of the {...} content - unlike a naive
+  // [^}]* regex, this doesn't break the moment the content itself contains
+  // a nested brace group, which is routine (e.g. \author{Jane
+  // Doe\orcidlink{0000-...}} - a plain [^}]* match stops at orcidlink's own
+  // closing brace and mangles everything from there on).
+  const balancedAll = name => {
+    const out = [];
+    const re = new RegExp("\\\\"+name+"(?:\\[([^\\]]*)\\])?\\{", "g");
+    let m;
+    while ((m = re.exec(tex))){
+      let j = m.index + m[0].length, d = 1; const s = j;
+      while (j<tex.length && d){ if(tex[j]==="{")d++; else if(tex[j]==="}")d--; j++; }
+      out.push({ optArg: m[1]||"", content: tex.slice(s, j-1) });
+      re.lastIndex = j;
+    }
+    return out;
+  };
   meta.title = clean(grab(/\\title\{([^}]*)\}/));
-  meta.abstract = clean(balanced("RtwoAbstract"));
+  // \RtwoAbstract{} is R2's own macro; a manuscript authored outside this
+  // template almost certainly uses the standard abstract environment instead.
+  meta.abstract = clean(balanced("RtwoAbstract")) ||
+    clean((tex.match(/\\begin\{abstract\}([\s\S]*?)\\end\{abstract\}/)||[,""])[1]);
   const kw = clean(balanced("keywords")); if (kw) meta.keywords = kw.split(/[,;]/).map(s=>s.trim());
   meta.r2["recommended-citation"] = clean(balanced("recommendedcitation"));
-  const authorMatches = [...tex.matchAll(/\\author(?:\[([^\]]*)\])?\{([^}]*)\}/g)];
-  const authors = authorMatches.map(m => clean(m[2].replace(/\\orcidlink\{[^}]*\}/g,""))).filter(Boolean);
+  const authorMatches = balancedAll("author");
+  const authors = authorMatches.map(m => clean(m.content.replace(/\\orcidlink\{[^}]*\}/g,""))).filter(Boolean);
   if (authors.length) {
     meta.author = authors;
-    meta.orcids = authorMatches.map(m => (m[2].match(/\\orcidlink\{([^}]*)\}/) || [,""])[1].trim());
+    meta.orcids = authorMatches.map(m => (m.content.match(/\\orcidlink\{([^}]*)\}/) || [,""])[1].trim());
     // \author[1,2]{Name} already gives the affiliation numbers directly.
     meta.authorLines = authorMatches.map((m,i) => {
-      const nums = (m[1]||"").replace(/\s+/g,"");
+      const nums = (m.optArg||"").replace(/\s+/g,"");
       return nums ? `${authors[i]}${nums}` : authors[i];
     });
   }
-  const affils = [...tex.matchAll(/\\affil(?:\[[^\]]*\])?\{([^}]*)\}/g)].map(m=>clean(m[1]));
+  const affils = balancedAll("affil").map(m => clean(m.content));
   if (affils.length) meta.affiliations = affils.map(name=>({name}));
   let body = (tex.match(/\\begin\{document\}([\s\S]*?)\\end\{document\}/)||[,tex])[1];
   return { meta, body: texBodyToHtml(body) };
 }
 function clean(s){ return (s||"").replace(/\\(textit|textbf|emph|texttt)\{([^}]*)\}/g,"$2").replace(/[{}]/g,"").replace(/\\,/g,"").replace(/\s+/g," ").trim(); }
+/* Removes \name{...} - the command AND its whole braced content, brace-depth
+   aware - not just the bare command keyword (which would leave the content
+   dangling as visible body text; harmless for macros with no argument, but
+   \RtwoAbstract{...}/\keywords{...} etc. all take one). */
+function stripBalancedMacro(str, name){
+  const re = new RegExp("\\\\"+name+"\\{");
+  let out = str, m;
+  while ((m = re.exec(out))){
+    let j = m.index + m[0].length, d = 1;
+    while (j<out.length && d){ if(out[j]==="{")d++; else if(out[j]==="}")d--; j++; }
+    out = out.slice(0, m.index) + out.slice(j);
+  }
+  return out;
+}
 function texBodyToHtml(b){
-  // strip the front-matter macros we've already captured
-  b = b.replace(/\\(maketitle|RtwoAbstract|keywords|recommendedcitation|laysummary|printbibliography|newpage|clearpage|tableofcontents|thispagestyle\{[^}]*\}|AddToShipoutPictureFG\{[\s\S]*?\})/g,"");
-  b = b.replace(/\\begin\{(abstract|center|flushright)\}|\\end\{(abstract|center|flushright)\}/g,"");
+  // strip the front-matter macros we've already captured (whole content,
+  // not just the command name - see stripBalancedMacro)
+  ["RtwoAbstract","keywords","recommendedcitation"].forEach(name => { b = stripBalancedMacro(b, name); });
+  b = b.replace(/\\begin\{abstract\}[\s\S]*?\\end\{abstract\}/g, "");   // standard environment: drop content too, not just the tags
+  b = b.replace(/\\(maketitle|laysummary|printbibliography|newpage|clearpage|tableofcontents|thispagestyle\{[^}]*\}|AddToShipoutPictureFG\{[\s\S]*?\})/g,"");
+  b = b.replace(/\\begin\{(center|flushright)\}|\\end\{(center|flushright)\}/g,"");
   b = b.replace(/\\section\*?\{([^}]*)\}/g,"\n\n## $1\n\n")
        .replace(/\\subsection\*?\{([^}]*)\}/g,"\n\n### $1\n\n")
        .replace(/\\textbf\{([^}]*)\}/g,"**$1**")
