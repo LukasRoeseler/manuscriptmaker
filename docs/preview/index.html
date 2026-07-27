@@ -233,8 +233,8 @@
           </datalist></div>
       </div>
       <div class="row">
-        <div><label>Volume</label><input id="m-volume" value="1" /></div>
-        <div><label>Year</label><input id="m-year" value="2025" /></div>
+        <div><label>Volume</label><input id="m-volume" value="2" /></div>
+        <div><label>Year</label><input id="m-year" value="2026" /></div>
       </div>
       <div class="row">
         <div><label>Article ID</label><input id="m-id" placeholder="R2.2025.000" /></div>
@@ -354,6 +354,17 @@
 const $ = s => document.querySelector(s);
 const md = window.markdownit({ html:true, linkify:true, typographer:true });
 let bodyHtml = "";
+
+/* Volume/year default to whatever year it actually is when the page loads
+   (R2 volume 1 = 2025, so volume = year - 2024) - the static HTML value
+   above is just a same-year fallback if this never runs. Setting it here,
+   before anything else touches the fields, means a manual edit afterwards
+   sticks: nothing later overwrites a non-empty value. */
+(() => {
+  const year = new Date().getFullYear();
+  $("#m-year").value = String(year);
+  $("#m-volume").value = String(year - 2024);
+})();
 
 /* ---------- file handling ---------- */
 const drop = $("#drop"), fileInput = $("#file");
