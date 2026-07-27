@@ -84,6 +84,14 @@
               padding:1.1rem 1rem; margin:1rem 0; text-align:center; color:#33707f; font-size:.88rem; }
   .r2-figph b { display:block; margin-bottom:.2rem; }
 
+  /* A figure extracted from a PDF - cropped straight from the rendered
+     page, so visually exact even though it's a picture, not a live image
+     asset. */
+  .r2-pdf-figure { margin:1.2rem 0; text-align:center; }
+  .r2-pdf-figure img.r2-pdf-fig { display:block; margin:0 auto; border-radius:4px; }
+  .r2-pdf-figure figcaption { font-size:.85rem; color:#444; margin-top:.5rem; text-align:left; }
+  .r2-pdf-figure figcaption p { margin:0; }
+
   /* Formulas: DOCX equations become live MathML (native browser rendering,
      selectable/resizable text). A PDF's math can't be reliably rebuilt into
      an equation from its glyphs (that's an unsolved problem in general), so
@@ -131,6 +139,17 @@
   .empty { color:#999; text-align:center; padding:4rem 1rem; }
   .warn { background:#fff7e6; border-left:3px solid #e0a800; padding:.5rem .7rem; font-size:.82rem; margin:.6rem 0; }
 
+  /* Structured extraction report: what was found/converted, at a glance,
+     instead of having to read a paragraph of prose to find out. */
+  .r2-report { margin:.6rem 0; font-size:.82rem; border:1px solid #e6e4db; border-radius:6px; background:#fff; }
+  .r2-report summary { cursor:pointer; font-weight:600; padding:.5rem .7rem; }
+  .r2-report ul { list-style:none; margin:0; padding:.2rem .7rem .7rem; }
+  .r2-report li { padding:.15rem 0; display:flex; gap:.4rem; }
+  .r2-report li.ok::before { content:"✓"; color:#2a8a4a; font-weight:700; }
+  .r2-report li.warn-row::before { content:"⚠"; color:#e0a800; }
+  .r2-report li .n { font-weight:600; }
+  .r2-report .unmatched-list { margin:.2rem 0 0 1.1rem; color:#666; }
+
   /* ---- saved drafts (IndexedDB, this browser only) ---- */
   dialog#drafts { border:1px solid #e6e4db; border-radius:8px; padding:0; max-width:440px; width:90vw; }
   dialog#drafts::backdrop { background:rgba(0,0,0,.35); }
@@ -175,6 +194,7 @@
     .print-runner-bottom .txt { position:absolute; right:0; top:4.6mm; text-align:right; }
     .print-runner-bottom a { color:var(--accent); text-decoration:none; }
     .r2-figph { break-inside:avoid; }
+    .r2-pdf-figure { break-inside:avoid; }
     .r2-math-block { break-inside:avoid; }
     #r2-body table { break-inside:avoid; }
     #r2-body h1, #r2-body h2, #r2-body h3 { break-after:avoid; }
@@ -336,6 +356,10 @@
         </div>
       </article>
       <div id="warnbox"></div>
+      <details class="r2-report" id="report" hidden>
+        <summary>Extraction report</summary>
+        <ul id="report-list"></ul>
+      </details>
     </div>
   </main>
 </div>
@@ -599,22 +623,76 @@ async function ensurePdfPageCanvas(pg){
   await pg.canvasPromise;
   return pg;
 }
+/* Crops a page-space rectangle out of the already-rendered page canvas -
+   shared by both math-run cropping and figure extraction below. */
+async function cropPdfRegion(pg, minX, minY, maxX, maxY){
+  await ensurePdfPageCanvas(pg);
+  const { canvas, viewport } = pg;
+  const [vx0, vy0] = viewport.convertToViewportPoint(minX, minY);
+  const [vx1, vy1] = viewport.convertToViewportPoint(maxX, maxY);
+  const left = Math.max(0, Math.min(vx0, vx1)), right = Math.min(canvas.width, Math.max(vx0, vx1));
+  const top = Math.max(0, Math.min(vy0, vy1)), bottom = Math.min(canvas.height, Math.max(vy0, vy1));
+  const cw = Math.max(1, Math.round(right-left)), ch = Math.max(1, Math.round(bottom-top));
+  const crop = document.createElement("canvas");
+  crop.width = cw; crop.height = ch;
+  crop.getContext("2d").drawImage(canvas, left, top, cw, ch, 0, 0, cw, ch);
+  return crop;
+}
 async function cropPdfMath(pg, runItems){
   try {
-    await ensurePdfPageCanvas(pg);
-    const { canvas, viewport } = pg;
     const minY = Math.min(...runItems.map(it=>it.y)) - 1, maxY = Math.max(...runItems.map(it=>it.y+it.h)) + 1;
     const minX = Math.min(...runItems.map(it=>it.x)) - 1.5, maxX = Math.max(...runItems.map(it=>it.x+it.w)) + 1.5;
-    const [vx0, vy0] = viewport.convertToViewportPoint(minX, minY);
-    const [vx1, vy1] = viewport.convertToViewportPoint(maxX, maxY);
-    const left = Math.max(0, Math.min(vx0, vx1)), right = Math.min(canvas.width, Math.max(vx0, vx1));
-    const top = Math.max(0, Math.min(vy0, vy1)), bottom = Math.min(canvas.height, Math.max(vy0, vy1));
-    const cw = Math.max(1, Math.round(right-left)), ch = Math.max(1, Math.round(bottom-top));
-    const crop = document.createElement("canvas");
-    crop.width = cw; crop.height = ch;
-    crop.getContext("2d").drawImage(canvas, left, top, cw, ch, 0, 0, cw, ch);
-    const cssH = Math.round(ch / 2.5);   // display near 1 CSS px per PDF point despite the 2.5x render scale
+    const crop = await cropPdfRegion(pg, minX, minY, maxX, maxY);
+    const cssH = Math.round(crop.height / 2.5);   // display near 1 CSS px per PDF point despite the 2.5x render scale
     return `<img class="r2-pdf-math" style="height:${cssH}px" src="${crop.toDataURL("image/png")}" alt="${esc(joinPdfItems(runItems))}">`;
+  } catch(e){ return null; }
+}
+/* Tracks the CTM through the page's raw operator list (save/restore/
+   transform) to recover exactly where each embedded raster image was
+   placed - a PDF always paints an image into the unit square and maps it
+   into place via a preceding "cm" transform, so replaying that same stack
+   gives back the placement rectangle in page space. */
+function extractPdfImageBoxes(opl, OPS){
+  const mul = (m1, m2) => [
+    m1[0]*m2[0] + m1[1]*m2[2], m1[0]*m2[1] + m1[1]*m2[3],
+    m1[2]*m2[0] + m1[3]*m2[2], m1[2]*m2[1] + m1[3]*m2[3],
+    m1[4]*m2[0] + m1[5]*m2[2] + m2[4], m1[4]*m2[1] + m1[5]*m2[3] + m2[5],
+  ];
+  const apply = (m,x,y) => [m[0]*x + m[2]*y + m[4], m[1]*x + m[3]*y + m[5]];
+  let stack = [], ctm = [1,0,0,1,0,0];
+  const boxes = [];
+  const { fnArray, argsArray } = opl;
+  for (let i = 0; i < fnArray.length; i++){
+    const fn = fnArray[i];
+    if (fn === OPS.save) stack.push(ctm);
+    else if (fn === OPS.restore) ctm = stack.pop() || ctm;
+    else if (fn === OPS.transform) ctm = mul(argsArray[i], ctm);
+    else if (fn === OPS.paintImageXObject){
+      const args = argsArray[i];
+      const natW = args[1], natH = args[2];
+      const corners = [[0,0],[1,0],[0,1],[1,1]].map(([x,y]) => apply(ctm, x, y));
+      const xs = corners.map(c=>c[0]), ys = corners.map(c=>c[1]);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+      // skip degenerate/hairline placements (decorative rules, tiny icons
+      // mis-tagged as XObjects) too small to be a real figure
+      if ((maxX-minX) > 20 && (maxY-minY) > 20)
+        boxes.push({ minX, maxX, minY, maxY, natW, natH });
+    }
+  }
+  return boxes;
+}
+async function cropPdfFigure(pg, box){
+  try {
+    const crop = await cropPdfRegion(pg, box.minX, box.minY, box.maxX, box.maxY);
+    const cssW = Math.round(crop.width / 2.5);
+    // Compare the image's REAL embedded pixel width (not the crop's canvas
+    // pixel count, which just reflects our own render scale) against the
+    // size it's actually shown at - the same low-res check as a DOCX image,
+    // just against the true source resolution instead of a re-rendered one.
+    const lowRes = !!(box.natW && box.natW < cssW * 1.3);
+    const html = `<img class="r2-pdf-fig"${lowRes ? ' data-lowres="1"' : ""} style="max-width:100%;width:${cssW}px" src="${crop.toDataURL("image/png")}" alt="Figure">`;
+    return { html, lowRes };
   } catch(e){ return null; }
 }
 /* Render one line as inline HTML: contiguous same-class runs become plain
@@ -644,6 +722,69 @@ async function pdfLineToInlineHtml(line, pg){
   });
   return out;
 }
+/* Detect a run of consecutive lines that share a consistent multi-column
+   structure (large, aligned gaps between "cells", the same shape repeated
+   row after row) and collapse it into one table marker row, so it becomes
+   real <table> markup instead of dissolving into disconnected fragments of
+   text (the single biggest visual failure mode for a table otherwise). */
+function detectPdfTables(lines){
+  const CELL_GAP = 12;   // pt: a gap this wide is a column break, not just word-spacing
+  const splitCells = (line) => {
+    const cells = []; let cur = [];
+    line.forEach((it, i) => {
+      if (i > 0 && (it.x - (line[i-1].x + line[i-1].w)) > CELL_GAP){ cells.push(cur); cur = []; }
+      cur.push(it);
+    });
+    if (cur.length) cells.push(cur);
+    return cells.map(c => ({ x: c[0].x, text: joinPdfItems(c) }));
+  };
+  const isMathOrCode = (line) => line.every(it => it.cls === "math" || it.cls === "code");
+
+  const out = [];
+  let i = 0;
+  while (i < lines.length){
+    const line = lines[i];
+    const cellsHere = (line.length && !isMathOrCode(line) && !(line.length===1 && (line[0].isImage||line[0].isTable)))
+      ? splitCells(line) : [];
+    if (cellsHere.length < 2){ out.push(line); i++; continue; }
+
+    // Look ahead for a run of lines with a compatible (not necessarily
+    // identical - a header row often merges cells) cell count.
+    const run = [{ line, cells: cellsHere }];
+    let j = i+1;
+    while (j < lines.length){
+      const lj = lines[j];
+      if (!lj.length || isMathOrCode(lj) || (lj.length===1 && (lj[0].isImage||lj[0].isTable))) break;
+      const c = splitCells(lj);
+      if (c.length < 2 || Math.abs(c.length - cellsHere.length) > Math.max(1, Math.floor(cellsHere.length*0.5))) break;
+      run.push({ line: lj, cells: c }); j++;
+    }
+
+    if (run.length >= 3){
+      // Cluster cell start-x-positions across the whole run into canonical
+      // column positions (nearby starts across different rows = one column).
+      const xs = run.flatMap(r => r.cells.map(c => c.x)).sort((a,b)=>a-b);
+      const cols = [];
+      xs.forEach(x => { if (!cols.length || x - cols[cols.length-1] > 10) cols.push(x); });
+      const colIdxFor = (x) => {
+        let best = 0, bestD = Infinity;
+        cols.forEach((c,idx) => { const d = Math.abs(x-c); if (d < bestD){ bestD = d; best = idx; } });
+        return best;
+      };
+      const grid = run.map(r => {
+        const row = new Array(cols.length).fill("");
+        r.cells.forEach(c => { row[colIdxFor(c.x)] = c.text; });
+        return row;
+      });
+      out.push([{ str:"", x:0, y:run[0].line[0].y, w:0, h:0, size:10, cls:"normal", bold:false,
+                  isTable:true, tableGrid: grid }]);
+      i = j;
+    } else {
+      out.push(line); i++;
+    }
+  }
+  return out;
+}
 async function convertPdfToHtml(file, progressCb){
   const pdfjsLib = await getPdfJs();
   const buf = await file.arrayBuffer();
@@ -654,7 +795,9 @@ async function convertPdfToHtml(file, progressCb){
   for (let p = 1; p <= numPages; p++){
     if (progressCb) progressCb(p, numPages);
     const page = await doc.getPage(p);
-    await page.getOperatorList();   // populates page.commonObjs with the real embedded font names
+    // Also locates embedded images (see extractPdfImageBoxes) - populates
+    // page.commonObjs with the real embedded font names either way.
+    const opl = await page.getOperatorList();
     const tc = await page.getTextContent();
     const fontMap = {};
     Object.keys(tc.styles).forEach(k => {
@@ -668,6 +811,14 @@ async function convertPdfToHtml(file, progressCb){
       cls: classifyPdfFont(fontMap[it.fontName]),
       bold: isBoldPdfFont(fontMap[it.fontName])
     }));
+    // Represent each figure as a fake solitary text item positioned at its
+    // own bounding box, so it flows through the exact same row-grouping and
+    // column assignment as real text (and lands in the right reading-order
+    // position) instead of needing separate handling.
+    extractPdfImageBoxes(opl, pdfjsLib.OPS).forEach(box => {
+      raw.push({ str:"", x: box.minX, y: box.maxY, w: box.maxX-box.minX, h: box.maxY-box.minY,
+                 size: box.maxY-box.minY, cls:"normal", bold:false, isImage:true, imgBox: box });
+    });
     const lines = raw.length ? groupPdfLines(raw, page.view[2] - page.view[0]) : [];
     pages.push({ lines, page, canvas:null, canvasPromise:null });
   }
@@ -716,6 +867,11 @@ async function convertPdfToHtml(file, progressCb){
     if (bottom && bottom.length <= 2 && /^\d{1,4}$/.test(pdfLineText(bottom).trim())) pg.lines.pop();
   });
 
+  // Table detection runs only now - after line numbers, the running header
+  // and page numbers are already stripped. Doing it any earlier would let a
+  // "line number, sentence start" pair (2 cells!) get mistaken for a table row.
+  pages.forEach(pg => { pg.lines = detectPdfTables(pg.lines); });
+
   // Dominant body-text size across the document, to tell headings from prose.
   const sizeHist = new Map();
   pages.forEach(pg => pg.lines.forEach(line => line.forEach(it => {
@@ -730,6 +886,22 @@ async function convertPdfToHtml(file, progressCb){
   for (const pg of pages){
     for (const line of pg.lines){
       if (!line.length) continue;
+      if (line.length === 1 && line[0].isImage){
+        flushPara();
+        const fig = await cropPdfFigure(pg, line[0].imgBox);
+        if (fig) blocks.push({ type:"figure", html: fig.html, lowRes: fig.lowRes });
+        prevY = line[0].y; prevSize = line[0].size;
+        continue;
+      }
+      if (line.length === 1 && line[0].isTable){
+        flushPara();
+        const grid = line[0].tableGrid;
+        const thead = `<thead><tr>${grid[0].map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead>`;
+        const tbody = `<tbody>${grid.slice(1).map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+        blocks.push({ type:"table", html: `<table>${thead}${tbody}</table>` });
+        prevY = line[0].y; prevSize = line[0].size;
+        continue;
+      }
       const text = pdfLineText(line).trim();
       if (!text) continue;
       const domSize = pdfDominantSize(line);
@@ -771,10 +943,35 @@ async function convertPdfToHtml(file, progressCb){
   }
   flushPara();
 
-  const html = blocks.map(b => {
+  // Pair each figure/table with an adjacent "Figure N."/"Table N." caption
+  // paragraph, if there is one, instead of leaving it as a disconnected
+  // paragraph - reading-order placement already put it right next to the
+  // thing it captions. A caption is often bold (so it may have been
+  // promoted to type "h" by the heading heuristic above) - accept either.
+  // Figure captions conventionally follow the figure; table captions
+  // conventionally precede the table - so prefer that direction for each,
+  // falling back to the other if that's where it actually landed.
+  const isCaptionFor = (kind) => b => b && (b.type === "p" || b.type === "h") &&
+    new RegExp(`^${kind}\\.?\\s*\\d+`, "i").test(b.html.replace(/<[^>]+>/g,"").trim());
+  const isFigCaption = isCaptionFor("fig(?:ure)?"), isTblCaption = isCaptionFor("table");
+  blocks.forEach((b, i) => {
+    if (b.type === "figure"){
+      const capIdx = isFigCaption(blocks[i+1]) ? i+1 : (isFigCaption(blocks[i-1]) ? i-1 : -1);
+      if (capIdx >= 0){ b.caption = blocks[capIdx].html; blocks[capIdx].type = "consumed"; }
+    } else if (b.type === "table"){
+      const capIdx = isTblCaption(blocks[i-1]) ? i-1 : (isTblCaption(blocks[i+1]) ? i+1 : -1);
+      if (capIdx >= 0){
+        b.html = b.html.replace(/^<table>/, `<table><caption>${blocks[capIdx].html}</caption>`);
+        blocks[capIdx].type = "consumed";
+      }
+    }
+  });
+  const html = blocks.filter(b => b.type !== "consumed").map(b => {
     if (b.type === "h") return `<h2>${b.html}</h2>`;
     if (b.type === "pre") return `<pre class="r2-code">${esc(b.html)}</pre>`;
     if (b.type === "mathblock") return `<div class="r2-math-block">${b.html}</div>`;
+    if (b.type === "figure") return `<figure class="r2-pdf-figure">${b.html}${b.caption ? `<figcaption>${b.caption}</figcaption>` : ""}</figure>`;
+    if (b.type === "table") return b.html;
     return `<p>${b.html}</p>`;
   }).join("\n");
 
@@ -834,7 +1031,9 @@ async function loadFile(file){
         setIf("#m-keywords", fm.keywords);
         warn("PDF preview is <strong>best-effort</strong>: a PDF has no real structure to read, so text, headings and code " +
           "are rebuilt from font/position clues, and formulas — which can't be reliably turned back into a live equation " +
-          "from a PDF — are shown as small images cropped straight from the page instead. Figures/tables aren't extracted. " +
+          "from a PDF — are shown as small images cropped straight from the page instead (figures are extracted the same " +
+          "way — a real image, not a live diagram). Tables are reconstructed from column alignment, which works well for " +
+          "simple tables but can misalign cells in narrow, heavily-wrapped ones — check any reconstructed table carefully. " +
           "Click into the preview text to fix anything by hand." +
           (hadLineNumbers ? " Detected reviewer line numbers in the margin and removed them from the text." : "") +
           (truncated ? " Only the first " + PDF_MAX_PAGES + " pages were processed (large file)." : ""));
@@ -859,31 +1058,96 @@ async function loadFile(file){
   } catch(err){ warn("Could not convert this file: " + err.message); bodyHtml = ""; }
 
   // Shared post-processing: EMF placeholders, linked citations, refs indent.
+  let unmatchedCitations = [];
   if (bodyHtml){
     const pp = postProcessBody(bodyHtml);
     bodyHtml = pp.html;
+    unmatchedCitations = pp.unmatchedCitations || [];
     if (pp.emf > 0)
       warn(($("#warnbox").textContent ? $("#warnbox").innerHTML + " " : "") +
         `${pp.emf} figure${pp.emf>1?"s are":" is"} embedded as EMF/WMF (a Word vector format browsers can't show) — shown as placeholders here. The publishing pipeline converts them automatically for the final PDF/HTML.`);
   }
   render();
-  warnLowResImages();   // async, fire-and-forget - images need a tick to load before natural size is known
+  renderExtractionReport(buildExtractionReport(unmatchedCitations, 0));
+  warnLowResImages().then(lowRes => renderExtractionReport(buildExtractionReport(unmatchedCitations, lowRes)));
 }
 /* A figure whose natural pixel size is smaller than the size it's actually
    displayed at will look soft/blurry once printed - flag it so it can be
-   swapped for a higher-resolution source before submission. */
+   swapped for a higher-resolution source before submission. Returns the count. */
 async function warnLowResImages(){
   const imgs = [...document.querySelectorAll("#r2-body img")].filter(img => !img.classList.contains("r2-pdf-math"));
-  if (!imgs.length) return;
+  if (!imgs.length) return 0;
   await Promise.all(imgs.map(img => img.complete ? Promise.resolve() :
     new Promise(res => { img.onload = res; img.onerror = res; })));
   const lowRes = imgs.filter(img => {
+    // A PDF figure is already flagged from its true embedded pixel size
+    // (see cropPdfFigure) - naturalWidth here would just be our own render
+    // scale, not the source resolution, so trust that flag instead.
+    if (img.dataset.lowres) return true;
     const dispW = img.getBoundingClientRect().width;
     return img.naturalWidth && dispW && img.naturalWidth < dispW * 1.3;
   });
   if (lowRes.length)
     warn(($("#warnbox").textContent ? $("#warnbox").innerHTML + " " : "") +
       `${lowRes.length} figure${lowRes.length>1?"s look":" looks"} low-resolution at the size shown here and may print blurry — check the original image quality before submitting.`);
+  return lowRes.length;
+}
+/* Structured summary of what was found/converted - a scannable checklist
+   instead of a paragraph of prose, computed generically from the rendered
+   DOM so it works the same regardless of source format. */
+function buildExtractionReport(unmatchedCitations, lowResCount){
+  const body = $("#r2-body");
+  const imgs = [...body.querySelectorAll("img")].filter(i => !i.classList.contains("r2-pdf-math"));
+  const links = [...body.querySelectorAll("a[href]")];
+  const brokenLinks = links.filter(a => {
+    const href = a.getAttribute("href")||"";
+    if (href.startsWith("#")) return !document.getElementById(href.slice(1));
+    return !href || href === "#" || /^javascript:/i.test(href);
+  }).length;
+  return {
+    headings: body.querySelectorAll("h1,h2,h3").length,
+    images: imgs.length,
+    lowResImages: lowResCount || 0,
+    figPlaceholders: body.querySelectorAll(".r2-figph").length,
+    tables: body.querySelectorAll("table").length,
+    equationsOk: body.querySelectorAll("math, img.r2-pdf-math").length,
+    equationsFailed: body.querySelectorAll(".r2-math-err").length,
+    codeBlocks: body.querySelectorAll("pre").length,
+    inlineCode: body.querySelectorAll("code").length,
+    footnotes: body.querySelectorAll("li[id^='footnote']").length,
+    citationsLinked: body.querySelectorAll("a.r2-cite").length,
+    citationsUnmatched: unmatchedCitations || [],
+    brokenLinks,
+  };
+}
+function renderExtractionReport(r){
+  if (!r || $("#article").hidden) { $("#report").hidden = true; return; }
+  const rows = [];
+  const row = (ok, html) => rows.push(`<li class="${ok?"ok":"warn-row"}">${html}</li>`);
+  if (r.headings) row(true, `<span class="n">${r.headings}</span> section heading${r.headings===1?"":"s"} detected`);
+  if (r.images || r.figPlaceholders)
+    row(r.lowResImages===0, `<span class="n">${r.images}</span> figure${r.images===1?"":"s"}` +
+      (r.lowResImages ? ` — <span class="n">${r.lowResImages}</span> look low-resolution` : ""));
+  if (r.figPlaceholders)
+    row(false, `<span class="n">${r.figPlaceholders}</span> figure${r.figPlaceholders===1?"":"s"} in a format that couldn't be shown here`);
+  if (r.tables) row(true, `<span class="n">${r.tables}</span> table${r.tables===1?"":"s"} detected`);
+  if (r.equationsOk || r.equationsFailed)
+    row(r.equationsFailed===0, `<span class="n">${r.equationsOk}</span> equation${r.equationsOk===1?"":"s"} converted` +
+      (r.equationsFailed ? `, <span class="n">${r.equationsFailed}</span> failed` : ""));
+  if (r.codeBlocks || r.inlineCode)
+    row(true, `<span class="n">${r.codeBlocks}</span> code block${r.codeBlocks===1?"":"s"}, <span class="n">${r.inlineCode}</span> inline code span${r.inlineCode===1?"":"s"}`);
+  if (r.footnotes) row(true, `<span class="n">${r.footnotes}</span> footnote${r.footnotes===1?"":"s"}`);
+  if (r.citationsLinked || r.citationsUnmatched.length){
+    row(r.citationsUnmatched.length===0, `<span class="n">${r.citationsLinked}</span> citation${r.citationsLinked===1?"":"s"} linked to references` +
+      (r.citationsUnmatched.length ? `, <span class="n">${r.citationsUnmatched.length}</span> without a matching reference` : ""));
+    if (r.citationsUnmatched.length)
+      rows.push(`<li class="unmatched-list">${r.citationsUnmatched.map(esc).join(", ")}</li>`);
+  }
+  if (r.brokenLinks) row(false, `<span class="n">${r.brokenLinks}</span> broken link${r.brokenLinks===1?"":"s"}`);
+
+  if (!rows.length){ $("#report").hidden = true; return; }
+  $("#report-list").innerHTML = rows.join("");
+  $("#report").hidden = false;
 }
 
 /* ---------- format helpers ---------- */
@@ -1110,7 +1374,12 @@ function postProcessBody(html){
   }
 
   // --- 3. Link in-text citations to their reference entry -----------
+  // Also track citations that look like citations but have no matching
+  // entry - only meaningful once a real reference list was actually found
+  // (refIndex.size), otherwise "unmatched" would just mean "no references
+  // section was detected at all" and flood the report with noise.
   let linked = 0;
+  const unmatched = new Map();   // "surname|year" -> "Surname (Year)" display label
   if (refIndex.size){
     // surname [+ et al. / & Name / and Name]* [,(] year
     const CITE = /([A-ZÀ-Þ][\w'’\-]+)((?:\s+(?:et al\.?|&|and)\s+[A-ZÀ-Þ][\w'’\-]+)*(?:\s+et al\.?)?)[\s,]*\(?\s*(\d{4}[a-z]?)/g;
@@ -1128,9 +1397,17 @@ function postProcessBody(html){
       let frag = null, last = 0, m;
       CITE.lastIndex = 0;
       while ((m = CITE.exec(text))){
-        const id = refIndex.get(m[1].toLowerCase() + "|" + m[3]) ||
-                   refIndex.get(m[1].toLowerCase() + "|" + m[3].replace(/[a-z]$/,""));
-        if (!id) continue;
+        // "Pickett's (2025)" - the possessive is part of the matched name
+        // (needed to recognize it as a name at all) but not part of the
+        // surname itself, so strip it before using it as a lookup key.
+        const surname = m[1].replace(/['’]s$/i, "").toLowerCase();
+        const key = surname + "|" + m[3];
+        const id = refIndex.get(key) ||
+                   refIndex.get(surname + "|" + m[3].replace(/[a-z]$/,""));
+        if (!id) {
+          if (!unmatched.has(key)) unmatched.set(key, `${m[1]} (${m[3]})`);
+          continue;
+        }
         let end = m.index + m[0].length;
         if (m[0].includes("(") && text[end] === ")") end++;   // keep parens balanced in link
         if (!frag) frag = document.createDocumentFragment();
@@ -1149,7 +1426,7 @@ function postProcessBody(html){
     });
   }
 
-  return { html: root.innerHTML, emf, linked };
+  return { html: root.innerHTML, emf, linked, unmatchedCitations: [...unmatched.values()] };
 }
 function applyMeta(meta){
   if (!meta || typeof meta !== "object") return;
