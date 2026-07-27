@@ -4,6 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Instant preview · Manuscript Maker</title>
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png" />
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/favicon-192.png" />
+<link rel="apple-touch-icon" href="../assets/favicon-180.png" />
 <style>
   :root { --accent:#009CCF; --card-bg:#FAFAFA; --card-border:#EAE8DF; }
   * { box-sizing:border-box; }
@@ -81,6 +84,21 @@
               padding:1.1rem 1rem; margin:1rem 0; text-align:center; color:#33707f; font-size:.88rem; }
   .r2-figph b { display:block; margin-bottom:.2rem; }
 
+  /* Formulas: DOCX equations become live MathML (native browser rendering,
+     selectable/resizable text). A PDF's math can't be reliably rebuilt into
+     an equation from its glyphs (that's an unsolved problem in general), so
+     it's cropped straight out of the rendered page instead - visually exact,
+     but a picture rather than a live formula. */
+  .r2-math-block { text-align:center; margin:1em 0; }
+  .r2-math-inline img, .r2-math-block img { vertical-align:middle; }
+  .r2-math-err { color:#b00020; font-style:italic; background:#fee2e2; padding:0 .3em; border-radius:3px; }
+
+  /* Everything in the body is directly editable - fixes to an imperfect
+     PDF/DOCX extraction (a mis-read word, a formula that failed to convert)
+     can be made right in the preview, then exported/saved. */
+  #r2-body[contenteditable="true"]{ outline:none; cursor:text; border-radius:4px; }
+  #r2-body[contenteditable="true"]:focus{ box-shadow:0 0 0 2px var(--accent) inset; }
+
   /* In-text citations linked to the reference list */
   a.r2-cite { color:var(--accent); text-decoration:none; }
   a.r2-cite:hover { text-decoration:underline; }
@@ -151,6 +169,7 @@
     .print-runner-bottom .txt { position:absolute; right:0; top:4.6mm; text-align:right; }
     .print-runner-bottom a { color:var(--accent); text-decoration:none; }
     .r2-figph { break-inside:avoid; }
+    .r2-math-block { break-inside:avoid; }
     #r2-body table { break-inside:avoid; }
     #r2-body h1, #r2-body h2, #r2-body h3 { break-after:avoid; }
   }
@@ -168,9 +187,9 @@
     <div id="drop">
       <strong>⬆ Drop a manuscript</strong>
       <small>or click to choose a file</small>
-      <input type="file" id="file" accept=".docx,.md,.markdown,.qmd,.rmd,.tex,.txt" hidden />
+      <input type="file" id="file" accept=".docx,.pdf,.md,.markdown,.qmd,.rmd,.tex,.txt" hidden />
     </div>
-    <div id="fileinfo">Supports <span class="fmt">.docx</span> <span class="fmt">.md</span>
+    <div id="fileinfo">Supports <span class="fmt">.docx</span> <span class="fmt">.pdf</span> <span class="fmt">.md</span>
       <span class="fmt">.qmd</span> <span class="fmt">.rmd</span> <span class="fmt">.tex</span></div>
     <div id="status" style="display:none; font-size:.85rem; color:var(--accent); font-weight:600; margin:.3rem 0;"></div>
 
@@ -248,18 +267,23 @@
       JATS XML and OJS package are produced by the GitHub Actions pipeline
       when you open a Pull Request (<a href="../author-guide.html">how to
       submit</a>). Citations like <code>[@key]</code> resolve there, not here.
-      The <strong>.docx export</strong> is a separate, fully editable copy for
-      manual polishing — edits made to it do not flow back into the pipeline.
-      <strong>Save for later</strong> keeps a draft in this browser only
-      (IndexedDB) so you can close the tab and resume — clearing your browser
-      data removes it, and it never leaves your machine.</p>
+      The article body is <strong>directly editable</strong> — click into it to
+      fix anything. <strong>Word equations</strong> become live formulas;
+      <strong>code-styled paragraphs</strong> become code blocks. A
+      <strong>PDF</strong> has no real structure to read, so its text is
+      best-effort and its formulas show as images cropped from the page
+      (not live equations) — fix by hand, then use <strong>.docx export</strong>
+      for a separate, fully editable copy (edits there don't flow back into
+      the pipeline). <strong>Save for later</strong> keeps a draft in this
+      browser only (IndexedDB) so you can close the tab and resume — clearing
+      your browser data removes it, and it never leaves your machine.</p>
   </aside>
 
   <!-- ---------------- live article preview ---------------- -->
   <main class="stage">
     <div class="stagebar"><span>Preview — R2 design</span><span id="srcfmt"></span></div>
     <div id="paper">
-      <div class="empty" id="empty">Drop a <strong>.docx</strong>, Markdown, or LaTeX file to see it
+      <div class="empty" id="empty">Drop a <strong>.docx</strong>, <strong>.pdf</strong>, Markdown, or LaTeX file to see it
         typeset in the Replication&nbsp;Research design.</div>
       <article id="article" hidden>
         <header>
@@ -321,6 +345,7 @@
   <div class="dfoot">Stored only in this browser (IndexedDB) — never uploaded anywhere.</div>
 </dialog>
 
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/dist/markdown-it.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
@@ -343,12 +368,18 @@ function setStatus(msg){ $("#status").textContent = msg || ""; $("#status").styl
 
 /* Convert .docx in a Web Worker so a pathological file can't freeze the tab,
    and so we can enforce a timeout (mammoth is CPU-bound and uninterruptible
-   on the main thread). */
-function convertDocxInWorker(buf, timeoutMs){
+   on the main thread). styleMap lets "code"-styled paragraphs come through
+   as <pre> instead of plain text (see extractDocxMath below for the other
+   half - math, which mammoth can't handle at all). */
+const DOCX_STYLE_MAP = [
+  "p[style-name='code'] => pre.r2-code:fresh",
+  "r[style-name='code Char'] => code"
+];
+function convertDocxInWorker(buf, timeoutMs, styleMap){
   return new Promise((resolve, reject) => {
     const src = `importScripts("https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js");
       self.onmessage = async (e) => {
-        try { const r = await mammoth.convertToHtml({arrayBuffer: e.data}); self.postMessage({html: r.value}); }
+        try { const r = await mammoth.convertToHtml({arrayBuffer: e.data.buf}, {styleMap: e.data.styleMap}); self.postMessage({html: r.value}); }
         catch(err){ self.postMessage({error: String(err)}); }
       };`;
     let w;
@@ -358,8 +389,337 @@ function convertDocxInWorker(buf, timeoutMs){
     w.onmessage = e => { clearTimeout(timer); w.terminate();
       e.data.error ? reject(new Error(e.data.error)) : resolve(e.data.html); };
     w.onerror = e => { clearTimeout(timer); w.terminate(); reject(new Error(e.message || "worker error")); };
-    w.postMessage(buf, [buf]);
+    w.postMessage({ buf, styleMap }, [buf]);
   });
+}
+
+/* ---------- DOCX formulas: OMML -> live MathML ----------
+   Mammoth has no support at all for Word's embedded equations (m:oMath) -
+   it silently drops them. Fix: unzip the docx ourselves, convert every
+   equation to MathML up front (omml2mathml - a small, dependency-bundled
+   port of Microsoft's own OMML2MML.xsl), swap each one out for a unique
+   text placeholder so mammoth carries it through in reading order, run
+   mammoth as usual, then splice the real MathML back into its HTML output. */
+const MNS = "http://schemas.openxmlformats.org/officeDocument/2006/math";
+const WNS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+let _omml2mathml = null;
+async function getOmml2Mathml(){
+  if (!_omml2mathml) _omml2mathml = (await import("https://cdn.jsdelivr.net/npm/omml2mathml@1.3.0/+esm")).default;
+  return _omml2mathml;
+}
+async function extractDocxMath(arrayBuffer){
+  const zip = await JSZip.loadAsync(arrayBuffer);
+  const entry = zip.file("word/document.xml");
+  if (!entry) return { buf: arrayBuffer, mathHtml: [] };
+  const xmlText = await entry.async("text");
+  const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+  if (doc.querySelector("parsererror")) return { buf: arrayBuffer, mathHtml: [] };
+
+  const paras = [...doc.getElementsByTagNameNS(MNS, "oMathPara")];
+  const allMath = [...doc.getElementsByTagNameNS(MNS, "oMath")];
+  const inlineMath = allMath.filter(n => !(n.parentNode && n.parentNode.namespaceURI === MNS && n.parentNode.localName === "oMathPara"));
+  if (!paras.length && !inlineMath.length) return { buf: arrayBuffer, mathHtml: [] };
+
+  const omml2mathml = await getOmml2Mathml();
+  const mathHtml = [];
+  const replaceWithPlaceholder = (node, block) => {
+    const idx = mathHtml.length;
+    let html;
+    try { html = omml2mathml(node).outerHTML; } catch(e){ html = null; }
+    mathHtml.push({ html, block });
+    const marker = (block ? "⟦R2MB" : "⟦R2MI") + idx + "⟧";
+    const r = doc.createElementNS(WNS, "w:r");
+    const t = doc.createElementNS(WNS, "w:t");
+    t.setAttribute("xml:space", "preserve");
+    t.textContent = marker;
+    r.appendChild(t);
+    node.parentNode.replaceChild(r, node);
+  };
+  paras.forEach(n => replaceWithPlaceholder(n, true));
+  inlineMath.forEach(n => replaceWithPlaceholder(n, false));
+
+  const newXml = new XMLSerializer().serializeToString(doc);
+  zip.file("word/document.xml", newXml);
+  const buf = await zip.generateAsync({ type: "arraybuffer" });
+  return { buf, mathHtml };
+}
+function spliceMathPlaceholders(html, mathHtml){
+  let failures = 0;
+  mathHtml.forEach((m, i) => {
+    const marker = (m.block ? "⟦R2MB" : "⟦R2MI") + i + "⟧";
+    let replacement;
+    if (m.html) replacement = m.block ? `<div class="r2-math-block">${m.html}</div>` : `<span class="r2-math-inline">${m.html}</span>`;
+    else { replacement = `<span class="r2-math-err">[equation]</span>`; failures++; }
+    html = html.split(marker).join(replacement);
+  });
+  return { html, failures };
+}
+/* mammoth emits one <pre> per "code"-styled paragraph with no separator
+   between them (":fresh" keeps them from silently merging into one run of
+   concatenated text) - stitch adjacent ones back into a single block with
+   real newlines between the original lines. */
+function mergeAdjacentPre(html, selector){
+  const holder = document.createElement("div");
+  holder.innerHTML = html;
+  holder.querySelectorAll(selector).forEach(pre => {
+    let next = pre.nextElementSibling;
+    while (next && next.matches(selector)) {
+      pre.appendChild(document.createTextNode("\n"));
+      while (next.firstChild) pre.appendChild(next.firstChild);
+      const toRemove = next;
+      next = next.nextElementSibling;
+      toRemove.remove();
+    }
+  });
+  return holder.innerHTML;
+}
+
+/* ---------- PDF import ----------
+   A PDF has no semantic structure at all - just positioned glyphs - so this
+   rebuilds paragraphs/headings from font size and line spacing, the same way
+   a human eye would. Math and code are identified by their embedded font:
+   LaTeX's Computer Modern math/symbol fonts (CMMI/CMSY/...) and typewriter
+   fonts (CMTT/"SFTT") are unmistakable once you know their names. Code text
+   is genuinely recovered (its ToUnicode mapping is normally fine); math is
+   NOT reliably recoverable as text at all (LaTeX PDFs are well known for
+   giving you garbled glyphs if you copy-paste a formula) - so instead of
+   guessing, a math run is cropped as a pixel-exact image straight out of the
+   rendered page. Real, correct, but a picture rather than an editable formula. */
+const PDF_MAX_PAGES = 80;   // safety cap for pathologically large PDFs
+let _pdfjsLib = null;
+async function getPdfJs(){
+  if (!_pdfjsLib){
+    _pdfjsLib = await import("https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs");
+    _pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+  }
+  return _pdfjsLib;
+}
+function classifyPdfFont(name){
+  if (!name) return "normal";
+  const n = name.toLowerCase();
+  if (/cmmi|cmsy|cmex|msam|msbm|eufm|rsfs|wasy|stmary|cmbsy|lasy/.test(n)) return "math";
+  if (/sftt|cmtt|courier|consolas|mono/.test(n)) return "code";
+  return "normal";
+}
+/* Real word-spacing from glyph positions: a gap wider than ~1/5 of an em
+   between two items is a word boundary; anything tighter is just kerning
+   within a run pdf.js happened to split (e.g. at a style change). */
+function joinPdfItems(items, mapper){
+  let out = "", prevEnd = null, prevSize = null;
+  items.forEach(it => {
+    if (prevEnd !== null && (it.x - prevEnd) > (prevSize||10) * 0.2) out += " ";
+    out += mapper ? mapper(it) : it.str;
+    prevEnd = it.x + it.w; prevSize = it.size;
+  });
+  return out;
+}
+function pdfLineText(line){ return joinPdfItems(line); }
+function pdfDominantSize(line){
+  const hist = new Map();
+  line.forEach(it => hist.set(Math.round(it.size), (hist.get(Math.round(it.size))||0) + it.str.length));
+  return [...hist.entries()].sort((a,b)=>b[1]-a[1])[0][0];
+}
+/* Group a page's text items into reading-order lines, detecting a two-column
+   layout along the way. Checking raw item counts on each side of the
+   midpoint doesn't work: a single full-width column has plenty of items on
+   both sides too, since most long lines straddle the midpoint by nature.
+   The real signal is per LINE: in a genuine two-column layout almost every
+   line sits cleanly on one side or the other; in a single-column layout
+   almost every (full-width) line straddles both. So group into lines first,
+   then classify the page from how many lines straddle vs. sit on one side. */
+function groupPdfLines(items, pageWidth){
+  const mid = pageWidth/2;
+  const rows = [];
+  items.forEach(it => {
+    let row = rows.find(r => Math.abs(r.y - it.y) < 1.5);
+    if (!row){ row = { y: it.y, items: [] }; rows.push(row); }
+    row.items.push(it);
+  });
+  rows.forEach(r => r.items.sort((a,b)=>a.x-b.x));
+
+  let straddling = 0, sided = 0;
+  rows.forEach(r => {
+    const hasLeft = r.items.some(it => it.x + it.w/2 < mid - 10);
+    const hasRight = r.items.some(it => it.x + it.w/2 >= mid + 10);
+    if (hasLeft && hasRight) straddling++; else if (hasLeft || hasRight) sided++;
+  });
+  const isTwoCol = sided > 4 && straddling <= sided * 0.15;
+
+  if (!isTwoCol) return rows.sort((a,b)=>b.y-a.y).map(r => r.items);
+
+  const left = [], right = [];
+  rows.forEach(r => {
+    const hasLeft = r.items.some(it => it.x + it.w/2 < mid);
+    const hasRight = r.items.some(it => it.x + it.w/2 >= mid);
+    if (hasLeft && !hasRight) left.push(r);
+    else if (hasRight && !hasLeft) right.push(r);
+    else {
+      const leftCount = r.items.filter(it => it.x + it.w/2 < mid).length;
+      (leftCount >= r.items.length/2 ? left : right).push(r);
+    }
+  });
+  const lines = [];
+  left.sort((a,b)=>b.y-a.y).forEach(r => lines.push(r.items));
+  right.sort((a,b)=>b.y-a.y).forEach(r => lines.push(r.items));
+  return lines;
+}
+async function ensurePdfPageCanvas(pg){
+  if (pg.canvas) return pg;
+  if (!pg.canvasPromise){
+    pg.canvasPromise = (async () => {
+      const viewport = pg.page.getViewport({ scale: 2.5 });
+      const canvas = document.createElement("canvas");
+      canvas.width = viewport.width; canvas.height = viewport.height;
+      await pg.page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+      pg.canvas = canvas; pg.viewport = viewport;
+    })();
+  }
+  await pg.canvasPromise;
+  return pg;
+}
+async function cropPdfMath(pg, runItems){
+  try {
+    await ensurePdfPageCanvas(pg);
+    const { canvas, viewport } = pg;
+    const minY = Math.min(...runItems.map(it=>it.y)) - 1, maxY = Math.max(...runItems.map(it=>it.y+it.h)) + 1;
+    const minX = Math.min(...runItems.map(it=>it.x)) - 1.5, maxX = Math.max(...runItems.map(it=>it.x+it.w)) + 1.5;
+    const [vx0, vy0] = viewport.convertToViewportPoint(minX, minY);
+    const [vx1, vy1] = viewport.convertToViewportPoint(maxX, maxY);
+    const left = Math.max(0, Math.min(vx0, vx1)), right = Math.min(canvas.width, Math.max(vx0, vx1));
+    const top = Math.max(0, Math.min(vy0, vy1)), bottom = Math.min(canvas.height, Math.max(vy0, vy1));
+    const cw = Math.max(1, Math.round(right-left)), ch = Math.max(1, Math.round(bottom-top));
+    const crop = document.createElement("canvas");
+    crop.width = cw; crop.height = ch;
+    crop.getContext("2d").drawImage(canvas, left, top, cw, ch, 0, 0, cw, ch);
+    const cssH = Math.round(ch / 2.5);   // display near 1 CSS px per PDF point despite the 2.5x render scale
+    return `<img class="r2-pdf-math" style="height:${cssH}px" src="${crop.toDataURL("image/png")}" alt="${esc(joinPdfItems(runItems))}">`;
+  } catch(e){ return null; }
+}
+/* Render one line as inline HTML: contiguous same-class runs become plain
+   text, inline <code>, or (for math with actual letters/digits - plain
+   punctuation like a stray "·" is already correct as text) a cropped image. */
+async function pdfLineToInlineHtml(line, pg){
+  const runs = [];
+  line.forEach(it => {
+    const last = runs[runs.length-1];
+    if (last && last.cls === it.cls) last.items.push(it); else runs.push({ cls: it.cls, items: [it] });
+  });
+  const parts = [];
+  for (const run of runs){
+    const text = joinPdfItems(run.items);
+    if (run.cls === "math" && /[a-zA-Z0-9]/.test(text))
+      parts.push((await cropPdfMath(pg, run.items)) || `<span class="r2-math-err">[equation]</span>`);
+    else if (run.cls === "code") parts.push(`<code>${esc(text)}</code>`);
+    else parts.push(esc(text));
+  }
+  let out = "";
+  runs.forEach((run, i) => {
+    if (i>0){
+      const prev = runs[i-1].items[runs[i-1].items.length-1], next = run.items[0];
+      if ((next.x - (prev.x+prev.w)) > (prev.size||10)*0.2) out += " ";
+    }
+    out += parts[i];
+  });
+  return out;
+}
+async function convertPdfToHtml(file, progressCb){
+  const pdfjsLib = await getPdfJs();
+  const buf = await file.arrayBuffer();
+  const doc = await pdfjsLib.getDocument({ data: buf }).promise;
+  const numPages = Math.min(doc.numPages, PDF_MAX_PAGES);
+
+  const pages = [];
+  for (let p = 1; p <= numPages; p++){
+    if (progressCb) progressCb(p, numPages);
+    const page = await doc.getPage(p);
+    await page.getOperatorList();   // populates page.commonObjs with the real embedded font names
+    const tc = await page.getTextContent();
+    const fontMap = {};
+    Object.keys(tc.styles).forEach(k => {
+      const f = page.commonObjs.has(k) ? page.commonObjs.get(k) : null;
+      fontMap[k] = (f && f.name) || k;
+    });
+    const raw = tc.items.filter(it => it.str !== undefined && it.str.length).map(it => ({
+      str: it.str, x: it.transform[4], y: it.transform[5],
+      w: it.width, h: it.height || Math.abs(it.transform[3]) || 10,
+      size: Math.abs(it.transform[3]) || Math.abs(it.transform[0]) || 10,
+      cls: classifyPdfFont(fontMap[it.fontName])
+    }));
+    const lines = raw.length ? groupPdfLines(raw, page.view[2] - page.view[0]) : [];
+    pages.push({ lines, page, canvas:null, canvasPromise:null });
+  }
+
+  // A running header repeats its first line verbatim across most pages - drop it.
+  const counts = new Map();
+  pages.forEach(pg => { const t = pg.lines[0] ? pdfLineText(pg.lines[0]).trim() : ""; if (t) counts.set(t, (counts.get(t)||0)+1); });
+  const header = [...counts.entries()].find(([t,c]) => c >= Math.max(2, Math.ceil(numPages*0.4)));
+  if (header) pages.forEach(pg => { if (pg.lines[0] && pdfLineText(pg.lines[0]).trim() === header[0]) pg.lines.shift(); });
+
+  // A lone short numeric line at the very top/bottom of a page is a page
+  // number. Re-check the bottom AFTER a possible top removal so the index
+  // isn't stale (and a one-line page can't be double-processed).
+  pages.forEach(pg => {
+    const top = pg.lines[0];
+    if (top && top.length <= 2 && /^\d{1,4}$/.test(pdfLineText(top).trim())) pg.lines.shift();
+    const bottom = pg.lines[pg.lines.length-1];
+    if (bottom && bottom.length <= 2 && /^\d{1,4}$/.test(pdfLineText(bottom).trim())) pg.lines.pop();
+  });
+
+  // Dominant body-text size across the document, to tell headings from prose.
+  const sizeHist = new Map();
+  pages.forEach(pg => pg.lines.forEach(line => line.forEach(it => {
+    if (it.cls === "normal"){ const k = Math.round(it.size); sizeHist.set(k, (sizeHist.get(k)||0)+it.str.length); }
+  })));
+  const bodySize = sizeHist.size ? [...sizeHist.entries()].sort((a,b)=>b[1]-a[1])[0][0] : 10;
+
+  const blocks = [];
+  let curPara = null, prevY = null, prevSize = null;
+  const flushPara = () => { if (curPara && curPara.length) blocks.push({ type:"p", html: curPara.join("") }); curPara = null; };
+
+  for (const pg of pages){
+    for (const line of pg.lines){
+      if (!line.length) continue;
+      const text = pdfLineText(line).trim();
+      if (!text) continue;
+      const domSize = pdfDominantSize(line);
+      const allCode = line.every(it => it.cls === "code");
+      const allMath = line.every(it => it.cls === "math") && /[a-zA-Z0-9]/.test(text);
+      const heading = !allCode && !allMath && (
+        domSize > bodySize*1.15 ||
+        (/^\d+(\.\d+)*\s+[A-Z]/.test(text) && text.length < 90) ||
+        (text === text.toUpperCase() && /[A-Z]/.test(text) && text.length < 60));
+
+      if (allCode){
+        flushPara();
+        const last = blocks[blocks.length-1];
+        if (last && last.type === "pre") last.html += "\n" + text; else blocks.push({ type:"pre", html: text });
+      } else if (allMath){
+        flushPara();
+        const img = await cropPdfMath(pg, line);
+        blocks.push({ type:"mathblock", html: img || `<span class="r2-math-err">[equation]</span>` });
+      } else if (heading){
+        flushPara();
+        blocks.push({ type:"h", html: esc(text) });
+      } else {
+        const inline = await pdfLineToInlineHtml(line, pg);
+        const gap = prevY !== null ? prevY - line[0].y : 0;
+        if (curPara && gap > (prevSize||10)*1.35) flushPara();
+        if (!curPara) curPara = [];
+        curPara.push((curPara.length ? " " : "") + inline);
+      }
+      prevY = line[0].y; prevSize = domSize;
+    }
+  }
+  flushPara();
+
+  const html = blocks.map(b => {
+    if (b.type === "h") return `<h2>${b.html}</h2>`;
+    if (b.type === "pre") return `<pre class="r2-code">${esc(b.html)}</pre>`;
+    if (b.type === "mathblock") return `<div class="r2-math-block">${b.html}</div>`;
+    return `<p>${b.html}</p>`;
+  }).join("\n");
+
+  return { html, truncated: doc.numPages > PDF_MAX_PAGES };
 }
 
 async function loadFile(file){
@@ -374,16 +734,23 @@ async function loadFile(file){
         warn("Large file — in-browser conversion may be slow. The Pull-Request pipeline converts it reliably either way.");
       const buf = await file.arrayBuffer();
       try {
-        const raw = await convertDocxInWorker(buf, 25000);
+        let mathHtml = [], patchedBuf = buf, mathErr = null;
+        try { ({ buf: patchedBuf, mathHtml } = await extractDocxMath(buf)); }
+        catch(e){ mathErr = e; }   // fall back to the unpatched buffer - equations just won't render
+        const raw = await convertDocxInWorker(patchedBuf, 25000, DOCX_STYLE_MAP);
         if (raw) {
-          const fm = extractDocxFront(raw);
-          bodyHtml = fm.bodyHtml || raw;
+          const spliced = spliceMathPlaceholders(raw, mathHtml);
+          const html = mergeAdjacentPre(spliced.html, "pre.r2-code");
+          const fm = extractDocxFront(html);
+          bodyHtml = fm.bodyHtml || html;
           const setIf = (id,v) => { if (v && !$(id).value) $(id).value = v; };
           setIf("#m-title", fm.title || file.name.replace(/\.docx$/i,""));
           setIf("#m-authors", fm.authors);
           setIf("#m-affils", fm.affiliation);
           setIf("#m-abstract", fm.abstract);
           setIf("#m-keywords", fm.keywords);
+          if (mathErr) warn("Could not read this file's embedded equations (" + mathErr.message + ") — they will be missing from this preview only.");
+          else if (spliced.failures) warn(`${spliced.failures} equation${spliced.failures>1?"s":""} could not be converted and show as "[equation]" — everything else, including the rest of the maths, converted fine.`);
         } else { bodyHtml = ""; }
       } catch(err){
         bodyHtml = "";
@@ -394,6 +761,27 @@ async function loadFile(file){
     } else if (ext === ".doc") {
       warn("Legacy <code>.doc</code> can't be read in the browser. Save as .docx, or submit it through the pipeline (LibreOffice converts it server-side).");
       bodyHtml = "";
+    } else if (ext === ".pdf") {
+      setStatus("⏳ Extracting .pdf… (0%)");
+      try {
+        const { html, truncated } = await convertPdfToHtml(file, (p, total) => setStatus(`⏳ Extracting .pdf… (page ${p}/${total})`));
+        const fm = extractDocxFront(html);
+        bodyHtml = fm.bodyHtml || html;
+        const setIf = (id,v) => { if (v && !$(id).value) $(id).value = v; };
+        setIf("#m-title", fm.title || file.name.replace(/\.pdf$/i,""));
+        setIf("#m-authors", fm.authors);
+        setIf("#m-affils", fm.affiliation);
+        setIf("#m-abstract", fm.abstract);
+        setIf("#m-keywords", fm.keywords);
+        warn("PDF preview is <strong>best-effort</strong>: a PDF has no real structure to read, so text, headings and code " +
+          "are rebuilt from font/position clues, and formulas — which can't be reliably turned back into a live equation " +
+          "from a PDF — are shown as small images cropped straight from the page instead. Figures/tables aren't extracted. " +
+          "Click into the preview text to fix anything by hand." +
+          (truncated ? " Only the first " + PDF_MAX_PAGES + " pages were processed (large file)." : ""));
+      } catch(err){
+        bodyHtml = "";
+        warn("Could not extract this PDF: " + err.message);
+      } finally { setStatus(""); }
     } else if ([".md",".markdown",".qmd",".rmd"].includes(ext)) {
       const text = await file.text();
       const { meta, body } = splitFrontMatter(text);
@@ -756,6 +1144,13 @@ function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">
 /* live updates from the form */
 document.querySelectorAll("input,textarea,select").forEach(el => el.addEventListener("input", render));
 
+/* The body itself is directly editable - a mis-read word or a formula that
+   failed to convert can just be fixed by hand. Keep bodyHtml in sync with
+   whatever's actually in the DOM so a later metadata edit's render() doesn't
+   clobber those fixes by redrawing the stale pre-edit copy. */
+$("#r2-body").setAttribute("contenteditable", "true");
+$("#r2-body").addEventListener("input", () => { bodyHtml = $("#r2-body").innerHTML; });
+
 /* Accent color — customizable per journal; every rule/border/link in the
    design reads var(--accent), so changing it here updates the whole preview
    (and the print/PDF export, which inherits the same CSS custom property). */
@@ -876,6 +1271,11 @@ ${holder.innerHTML}
     const blob = htmlDocx.asBlob(html);
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
     a.download = ($("#m-id").value || "r2-preview") + ".docx"; a.click();
+    // html-docx-js only understands plain HTML/CSS - live MathML formulas
+    // (from a Word source) aren't part of that subset and are likely to be
+    // dropped. Formulas cropped from a PDF are plain <img>s and carry over fine.
+    if (bodyHtml.includes("<math"))
+      warn("This export may be missing live formulas — html-docx-js doesn't understand MathML. Check the downloaded file, or use <strong>Save for later</strong> to keep the fully-correct version in this browser.");
   } catch(err){
     warn("Could not build the .docx export: " + err.message);
   } finally { setStatus(""); }
