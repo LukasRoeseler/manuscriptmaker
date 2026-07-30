@@ -275,6 +275,8 @@
         <label><input type="checkbox" id="b-open-materials" /> Materials</label>
         <label><input type="checkbox" id="b-preregistered" /> Prereg.</label>
         <label><input type="checkbox" id="b-codecheck" /> Codecheck</label>
+        <label><input type="checkbox" id="b-reprocert-ai" /> Reproducibility Certified (AI)</label>
+        <label><input type="checkbox" id="b-reprocert-human" /> Reproducibility Certified (Human)</label>
       </div>
     </details>
 
@@ -1446,7 +1448,7 @@ function applyMeta(meta){
   if (r2.volume) set("#m-volume", r2.volume); if (r2.year) set("#m-year", r2.year);
   if (r2["article-type"]) $("#m-type").value = r2["article-type"];
   const b = r2.badges || {};
-  ["open-data","open-code","open-materials","preregistered","codecheck"].forEach(k=>{ if(b[k]) $("#b-"+k).checked=true; });
+  ["open-data","open-code","open-materials","preregistered","codecheck","reprocert-ai","reprocert-human"].forEach(k=>{ if(b[k]) $("#b-"+k).checked=true; });
 }
 /* Builds one "Name" or "Name1,2" line per author from Quarto-style metadata:
    author[].affiliations[].ref is matched against affiliations[].id (in
@@ -1594,7 +1596,8 @@ function render(){
   $("#r2-affils").hidden = !affils.length;
   // badges (codecheck is SVG for crispness)
   const bdef = {"open-data":"opendata.png","open-code":"opencode.png","open-materials":"openmaterial.png",
-                "preregistered":"preregestered.png","codecheck":"codecheck.svg"};
+                "preregistered":"preregestered.png","codecheck":"codecheck.svg",
+                "reprocert-ai":"reprocert_ai.svg","reprocert-human":"reprocert_human.svg"};
   $("#r2-badges").innerHTML = Object.entries(bdef).filter(([k])=>$("#b-"+k).checked)
     .map(([k,img])=>`<img src="../assets/badges/${img}" alt="${k}">`).join("");
   // cards
@@ -1688,7 +1691,8 @@ function buildWordHtml(){
   const affilsHtml = affils.map((a,i)=>`<sup>${i+1}</sup>&nbsp;${esc(a)}`).join("<br/>");
 
   const bdef = {"open-data":"opendata.png","open-code":"opencode.png","open-materials":"openmaterial.png",
-                "preregistered":"preregestered.png","codecheck":"codecheck.png"};   // raster (no SVG in Word)
+                "preregistered":"preregestered.png","codecheck":"codecheck.png",
+                "reprocert-ai":"reprocert_ai.png","reprocert-human":"reprocert_human.png"};   // raster (no SVG in Word)
   const badgeImgs = Object.entries(bdef).filter(([k])=>$("#b-"+k).checked)
     .map(([k,img])=>`<img src="../assets/badges/${img}" alt="${k}" height="34" style="margin:0 3px;">`).join("");
 
@@ -1761,7 +1765,7 @@ $("#reset").addEventListener("click", () => location.reload());
    later without re-uploading or re-typing metadata. */
 const DRAFT_FIELDS = ["m-title","m-authors","m-orcids","m-affils","m-abstract","m-keywords","m-lay",
   "m-accent","m-journal","m-type","m-discipline","m-volume","m-year","m-id","m-doi","m-citation"];
-const DRAFT_CHECKS = ["b-open-data","b-open-code","b-open-materials","b-preregistered","b-codecheck"];
+const DRAFT_CHECKS = ["b-open-data","b-open-code","b-open-materials","b-preregistered","b-codecheck","b-reprocert-ai","b-reprocert-human"];
 
 function openDraftsDB(){
   return new Promise((resolve,reject)=>{

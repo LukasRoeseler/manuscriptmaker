@@ -24,3 +24,5 @@ r2:
     open-materials: false
     preregistered: false
     codecheck: false
+    reprocert-ai: false
+    reprocert-human: false
