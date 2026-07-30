@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 210" width="100%" height="100%">
+  <defs>
+    <!-- Hexagon Shape Definition -->
+    <polygon id="hex" points="100,5 186.6,55 186.6,155 100,205 13.4,155 13.4,55" fill="#6B21A8" />
+
+    <!-- Simplified Gear Graphic -->
+    <g id="gear" fill="#FFFFFF">
+      <path d="M 100,60 
+               L 105,60 L 107,68 A 32,32 0 0,1 117,72 L 124,67 L 131,74 L 126,81 A 32,32 0 0,1 130,91 L 138,93 L 138,103 L 130,105 A 32,32 0 0,1 126,115 L 131,122 L 124,129 L 117,124 A 32,32 0 0,1 107,128 L 105,136 L 95,136 L 93,128 A 32,32 0 0,1 83,124 L 76,129 L 69,122 L 74,115 A 32,32 0 0,1 70,105 L 62,103 L 62,93 L 70,91 A 32,32 0 0,1 74,81 L 69,74 L 76,67 L 83,72 A 32,32 0 0,1 93,68 L 95,60 Z" />
+      <circle cx="100" cy="98" r="16" fill="#6B21A8" />
+    </g>
+
+    <!-- Human Bust Pictogram -->
+    <g id="bust" fill="#FFFFFF">
+      <!-- Head -->
+      <circle cx="141" cy="131" r="9" />
+      <!-- Shoulders/Bust -->
+      <path d="M 122,157 C 122,144 130,140 141,140 C 152,140 160,144 160,157 Z" />
+    </g>
+  </defs>
+
+  <!-- Gear + Bust -->
+  <g>
+    <use href="#hex" />
+    <use href="#gear" />
+    <use href="#bust" />
+  </g>
+</svg>
