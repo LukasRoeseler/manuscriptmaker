@@ -18,6 +18,9 @@ r2:
     Author, A., & Author, B. (2025). Title. *Replication Research (R2)*, *1*,
     R2.2025.000. https://doi.org/10.15626/R2.2025.000
 
+  # Displayed in this order: preregistered, open-materials, open-data,
+  # open-code, codecheck, reprocert-ai/-human (shown combined if both
+  # are true), openreview.
   badges:
     open-data: false
     open-code: false
@@ -26,3 +29,12 @@ r2:
     codecheck: false
     reprocert-ai: false
     reprocert-human: false
+    openreview: false
+
+  # Report URLs for badges that link out (leave blank to show the badge
+  # without a link). One shared link covers reprocert-ai/-human/-combined.
+  badge-links:
+    preregistered: ""
+    codecheck: ""
+    reprocert: ""
+    openreview: ""

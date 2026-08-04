@@ -289,15 +289,20 @@ $if(r2.recommended-citation)$
 $endif$
 
 % Earned open-science badges (rendered if declared true in metadata).
+% Order: Prereg, Materials, Data, Code, then the reproducibility/review
+% cluster (Codecheck, Reprocert, Open Review). Reprocert shows one of
+% three images depending on which of AI/Human are true, sharing one
+% report link. Badges with a badge-links entry become clickable.
 $if(r2.badges)$
 \begin{center}
+$if(r2.badges.preregistered)$$if(r2.badge-links.preregistered)$\href{$r2.badge-links.preregistered$}{\includegraphics[height=8mm]{preregestered.png}}$else$\includegraphics[height=8mm]{preregestered.png}$endif$\hspace{0.5em}$endif$%
+$if(r2.badges.open-materials)$\includegraphics[height=8mm]{openmaterial.png}\hspace{0.5em}$endif$%
 $if(r2.badges.open-data)$\includegraphics[height=8mm]{opendata.png}\hspace{0.5em}$endif$%
 $if(r2.badges.open-code)$\includegraphics[height=8mm]{opencode.png}\hspace{0.5em}$endif$%
-$if(r2.badges.open-materials)$\includegraphics[height=8mm]{openmaterial.png}\hspace{0.5em}$endif$%
-$if(r2.badges.preregistered)$\includegraphics[height=8mm]{preregestered.png}\hspace{0.5em}$endif$%
-$if(r2.badges.codecheck)$\includegraphics[height=8mm]{codecheck.png}\hspace{0.5em}$endif$%
-$if(r2.badges.reprocert-ai)$\includegraphics[height=8mm]{reprocert_ai.png}\hspace{0.5em}$endif$%
-$if(r2.badges.reprocert-human)$\includegraphics[height=8mm]{reprocert_human.png}$endif$%
+$if(r2.badges.codecheck)$$if(r2.badge-links.codecheck)$\href{$r2.badge-links.codecheck$}{\includegraphics[height=8mm]{codecheck.png}}$else$\includegraphics[height=8mm]{codecheck.png}$endif$\hspace{0.5em}$endif$%
+$if(r2.badges.reprocert-ai)$$if(r2.badges.reprocert-human)$$if(r2.badge-links.reprocert)$\href{$r2.badge-links.reprocert$}{\includegraphics[height=8mm]{reprocert_hai.png}}$else$\includegraphics[height=8mm]{reprocert_hai.png}$endif$$else$$if(r2.badge-links.reprocert)$\href{$r2.badge-links.reprocert$}{\includegraphics[height=8mm]{reprocert_ai.png}}$else$\includegraphics[height=8mm]{reprocert_ai.png}$endif$$endif$\hspace{0.5em}$endif$%
+$if(r2.badges.reprocert-human)$$if(r2.badges.reprocert-ai)$$else$$if(r2.badge-links.reprocert)$\href{$r2.badge-links.reprocert$}{\includegraphics[height=8mm]{reprocert_human.png}}$else$\includegraphics[height=8mm]{reprocert_human.png}$endif$\hspace{0.5em}$endif$$endif$%
+$if(r2.badges.openreview)$$if(r2.badge-links.openreview)$\href{$r2.badge-links.openreview$}{\includegraphics[height=8mm]{openreview.png}}$else$\includegraphics[height=8mm]{openreview.png}$endif$$endif$%
 \end{center}
 $endif$
 

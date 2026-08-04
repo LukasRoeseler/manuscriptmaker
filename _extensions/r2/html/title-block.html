@@ -35,13 +35,14 @@ $endif$
 
 $if(r2.badges)$
   <div class="r2-badges">
+$if(r2.badges.preregistered)$$if(r2.badge-links.preregistered)$<a href="$r2.badge-links.preregistered$"><img src="../../_extensions/r2/resources/badges/preregestered.png" alt="Preregistered" /></a>$else$<img src="../../_extensions/r2/resources/badges/preregestered.png" alt="Preregistered" />$endif$$endif$
+$if(r2.badges.open-materials)$<img src="../../_extensions/r2/resources/badges/openmaterial.png" alt="Open Materials" />$endif$
 $if(r2.badges.open-data)$<img src="../../_extensions/r2/resources/badges/opendata.png" alt="Open Data" />$endif$
 $if(r2.badges.open-code)$<img src="../../_extensions/r2/resources/badges/opencode.png" alt="Open Code" />$endif$
-$if(r2.badges.open-materials)$<img src="../../_extensions/r2/resources/badges/openmaterial.png" alt="Open Materials" />$endif$
-$if(r2.badges.preregistered)$<img src="../../_extensions/r2/resources/badges/preregestered.png" alt="Preregistered" />$endif$
-$if(r2.badges.codecheck)$<img src="../../_extensions/r2/resources/badges/codecheck.svg" alt="CODECHECK" />$endif$
-$if(r2.badges.reprocert-ai)$<img src="../../_extensions/r2/resources/badges/reprocert_ai.svg" alt="Reproducibility Certified (AI)" />$endif$
-$if(r2.badges.reprocert-human)$<img src="../../_extensions/r2/resources/badges/reprocert_human.svg" alt="Reproducibility Certified (Human)" />$endif$
+$if(r2.badges.codecheck)$$if(r2.badge-links.codecheck)$<a href="$r2.badge-links.codecheck$"><img src="../../_extensions/r2/resources/badges/codecheck.svg" alt="CODECHECK" /></a>$else$<img src="../../_extensions/r2/resources/badges/codecheck.svg" alt="CODECHECK" />$endif$$endif$
+$if(r2.badges.reprocert-ai)$$if(r2.badges.reprocert-human)$$if(r2.badge-links.reprocert)$<a href="$r2.badge-links.reprocert$"><img src="../../_extensions/r2/resources/badges/reprocert_hai.svg" alt="Reproducibility Certified (Human &amp; AI)" /></a>$else$<img src="../../_extensions/r2/resources/badges/reprocert_hai.svg" alt="Reproducibility Certified (Human &amp; AI)" />$endif$$else$$if(r2.badge-links.reprocert)$<a href="$r2.badge-links.reprocert$"><img src="../../_extensions/r2/resources/badges/reprocert_ai.svg" alt="Reproducibility Certified (AI)" /></a>$else$<img src="../../_extensions/r2/resources/badges/reprocert_ai.svg" alt="Reproducibility Certified (AI)" />$endif$$endif$$endif$
+$if(r2.badges.reprocert-human)$$if(r2.badges.reprocert-ai)$$else$$if(r2.badge-links.reprocert)$<a href="$r2.badge-links.reprocert$"><img src="../../_extensions/r2/resources/badges/reprocert_human.svg" alt="Reproducibility Certified (Human)" /></a>$else$<img src="../../_extensions/r2/resources/badges/reprocert_human.svg" alt="Reproducibility Certified (Human)" />$endif$$endif$$endif$
+$if(r2.badges.openreview)$$if(r2.badge-links.openreview)$<a href="$r2.badge-links.openreview$"><img src="../../_extensions/r2/resources/badges/openreview.svg" alt="Open Peer Review" /></a>$else$<img src="../../_extensions/r2/resources/badges/openreview.svg" alt="Open Peer Review" />$endif$$endif$
   </div>
 $endif$
 
