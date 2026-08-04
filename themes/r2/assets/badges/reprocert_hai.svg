@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 142 164" role="img" aria-label="Reproducibility Certified (Human and AI) badge">
-  <!-- Pointy-top/bottom hexagon matching the open-data/open-code/open-materials/preregistered/codecheck badge family (taller than wide, filled edge-to-edge, corners rounded by cutting back from each sharp vertex and rejoining with a quadratic-bezier arc). -->
+  <!-- Outer Hexagon Background -->
   <path d="M 55.41,4.50 L 55.41,4.50 Q 71.00,-4.50 86.59,4.50 L 130.32,29.74 Q 145.91,38.74 145.91,56.74 L 145.91,107.26 Q 145.91,125.26 130.32,134.26 L 86.59,159.50 Q 71.00,168.50 55.41,159.50 L 11.68,134.26 Q -3.91,125.26 -3.91,107.26 L -3.91,56.74 Q -3.91,38.74 11.68,29.74 Z" fill="#6B21A8"/>
 
-  <!-- Gear, centered on the hexagon (same construction as the codecheck badge). -->
+  <!-- Gear (Unchanged) -->
   <g fill="#ffffff">
     <polygon points="106.3,74.5 106.3,89.5 94.3,86.9 94.3,77.1"/>
     <polygon points="101.3,101.7 90.7,112.3 84.0,101.9 90.9,95.0"/>
@@ -16,17 +16,17 @@
   </g>
   <circle cx="71.0" cy="82.0" r="10.7" fill="#6B21A8"/>
 
-  <!-- Human-bust glyph (bottom-left) -->
+  <!-- Human-bust glyph (Scaled up & balanced on bottom-left) -->
   <g fill="#ffffff">
-    <circle cx="34" cy="113" r="9"/>
-    <path d="M 17,137 C 17,124 25,120 34,120 C 43,120 51,124 51,137 Z"/>
+    <circle cx="34" cy="110" r="10"/>
+    <path d="M 14,138 C 14,123 23,118 34,118 C 45,118 54,123 54,138 Z"/>
   </g>
 
-  <!-- Computer glyph (bottom-right) -->
+  <!-- Computer glyph (Scaled up & balanced on bottom-right) -->
   <g fill="#ffffff">
-    <rect x="91" y="106" width="34" height="24" rx="3"/>
-    <rect x="94" y="109" width="28" height="18" rx="2" fill="#6B21A8"/>
-    <path d="M 102,130 L 114,130 L 116,136 L 100,136 Z"/>
-    <rect x="96" y="136" width="24" height="4" rx="2"/>
+    <rect x="87" y="102" width="38" height="26" rx="3.5"/>
+    <rect x="90" y="105" width="32" height="20" rx="2" fill="#6B21A8"/>
+    <path d="M 99,128 L 113,128 L 115,135 L 97,135 Z"/>
+    <rect x="93" y="135" width="26" height="4.5" rx="2"/>
   </g>
 </svg>
