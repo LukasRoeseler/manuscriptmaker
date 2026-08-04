@@ -2,7 +2,7 @@
   <!-- Outer Hexagon Background -->
   <path d="M 55.41,4.50 L 55.41,4.50 Q 71.00,-4.50 86.59,4.50 L 130.32,29.74 Q 145.91,38.74 145.91,56.74 L 145.91,107.26 Q 145.91,125.26 130.32,134.26 L 86.59,159.50 Q 71.00,168.50 55.41,159.50 L 11.68,134.26 Q -3.91,125.26 -3.91,107.26 L -3.91,56.74 Q -3.91,38.74 11.68,29.74 Z" fill="#6B21A8"/>
 
-  <!-- Gear (Unchanged) -->
+  <!-- Gear -->
   <g fill="#ffffff">
     <polygon points="106.3,74.5 106.3,89.5 94.3,86.9 94.3,77.1"/>
     <polygon points="101.3,101.7 90.7,112.3 84.0,101.9 90.9,95.0"/>
@@ -16,17 +16,17 @@
   </g>
   <circle cx="71.0" cy="82.0" r="10.7" fill="#6B21A8"/>
 
-  <!-- Human-bust glyph (Scaled up & balanced on bottom-left) -->
-  <g fill="#ffffff">
-    <circle cx="34" cy="110" r="10"/>
-    <path d="M 14,138 C 14,123 23,118 34,118 C 45,118 54,123 54,138 Z"/>
+  <!-- Human-bust glyph (Shifted up & in, added purple outline) -->
+  <g fill="#ffffff" stroke="#6B21A8" stroke-width="2" stroke-linejoin="round">
+    <circle cx="42" cy="102" r="9.5"/>
+    <path d="M 23,129 C 23,115 31,110 42,110 C 53,110 61,115 61,129 Z"/>
   </g>
 
-  <!-- Computer glyph (Scaled up & balanced on bottom-right) -->
-  <g fill="#ffffff">
-    <rect x="87" y="102" width="38" height="26" rx="3.5"/>
-    <rect x="90" y="105" width="32" height="20" rx="2" fill="#6B21A8"/>
-    <path d="M 99,128 L 113,128 L 115,135 L 97,135 Z"/>
-    <rect x="93" y="135" width="26" height="4.5" rx="2"/>
+  <!-- Computer glyph (Shifted up & in, added purple outline) -->
+  <g fill="#ffffff" stroke="#6B21A8" stroke-width="2" stroke-linejoin="round">
+    <rect x="80" y="94" width="36" height="24" rx="3.5"/>
+    <rect x="83" y="97" width="30" height="18" rx="2" fill="#6B21A8" stroke="none"/>
+    <path d="M 91,118 L 105,118 L 107,125 L 89,125 Z"/>
+    <rect x="85" y="125" width="26" height="4.5" rx="2"/>
   </g>
 </svg>
