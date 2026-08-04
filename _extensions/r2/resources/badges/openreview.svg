@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 142 164" role="img" aria-label="Open Peer Review Report badge">
+  <!-- Pointy-top/bottom hexagon in a deep teal-green / dark bluish-green shade -->
+  <path d="M 55.41,4.50 L 55.41,4.50 Q 71.00,-4.50 86.59,4.50 L 130.32,29.74 Q 145.91,38.74 145.91,56.74 L 145.91,107.26 Q 145.91,125.26 130.32,134.26 L 86.59,159.50 Q 71.00,168.50 55.41,159.50 L 11.68,134.26 Q -3.91,125.26 -3.91,107.26 L -3.91,56.74 Q -3.91,38.74 11.68,29.74 Z" fill="#0D5C63"/>
+
+  <!-- Centered Overlapping Speech Bubbles with background-matching borders -->
+  <g transform="translate(71, 82)">
+    <!-- Right Bubble (Pointer pointing right) -->
+    <path fill="#ffffff" opacity="0.8" stroke="#0D5C63" stroke-width="2.5" stroke-linejoin="round" d="M 12, -26 C -3.46, -26 -16, -15.26 -16, -2 C -16, 11.26 -3.46, 22 12, 22 C 15.46, 22 18.79, 21.46 21.88, 20.48 L 31, 24.5 L 28.84, 15.69 C 35.69, 11.96 40, 5.75 40, -2 C 40, -15.26 27.46, -26 12, -26 Z"/>
+    
+    <!-- Left Bubble (Pointer pointing left) -->
+    <path fill="#ffffff" stroke="#0D5C63" stroke-width="2.5" stroke-linejoin="round" d="M -12, -12 C 3.46, -12 16, -1.26 16, 12 C 16, 25.26 3.46, 36 -12, 36 C -15.46, 36 -18.79, 35.46 -21.88, 34.48 L -31, 38.5 L -28.84, 29.69 C -35.69, 25.96 -40, 19.75 -40, 12 C -40, -1.26 -27.46, -12 -12, -12 Z"/>
+  </g>
+</svg>
