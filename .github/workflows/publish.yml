@@ -68,7 +68,14 @@ jobs:
           chmod +x engine/scripts/build_all.sh
           base="${{ github.event.before }}"
           event="${{ github.event_name }}"
-          all_manuscripts() { ls -d manuscripts/*/ | sed 's#/$##' | grep -v '/_'; }
+          # Test fixtures (Hussey, R2.2025.001) render fine locally/in CI but
+          # must never be published to the live site. They can't use the
+          # usual "/_"-prefix exclusion convention like _TEMPLATE, because
+          # Quarto itself treats underscore-prefixed directories as
+          # reserved/hidden and silently fails to render anything inside
+          # them - so they're denylisted by name here instead.
+          TEST_FIXTURES='^(Hussey|R2\.2025\.001)$'
+          all_manuscripts() { ls -d manuscripts/*/ | sed 's#/$##' | grep -v '/_' | grep -vE "/${TEST_FIXTURES#^}"; }
           if [ "$event" = "workflow_dispatch" ] || [ -z "$base" ] || ! git cat-file -e "$base" 2>/dev/null; then
             # No prior commit to diff against (manual dispatch, or an
             # unexpected push event) - can't tell what changed, so rebuild
@@ -83,8 +90,10 @@ jobs:
             else
               # Only specific manuscripts changed (or nothing did) - touch
               # just those, so an unrelated push can't republish everything.
+              # Also exclude the test fixtures by name (see TEST_FIXTURES
+              # above) even if someone edits them directly.
               changed=$(echo "$touched" | grep '^manuscripts/' \
-                        | awk -F/ 'NF>=3 && $2 !~ /^_/ {print $1"/"$2}' | sort -u)
+                        | awk -F/ -v skip="$TEST_FIXTURES" 'NF>=3 && $2 !~ /^_/ && $2 !~ skip {print $1"/"$2}' | sort -u)
             fi
           fi
           mkdir -p _build_out

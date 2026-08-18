@@ -62,9 +62,9 @@ and Python 3.10+ with `pyyaml` and `jinja2`.
 ```bash
 pip install pyyaml jinja2
 # Build the bundled sample end-to-end (skip PDF if you have no LaTeX):
-NO_PDF=1 engine/scripts/build_all.sh manuscripts/_R2.2025.001
+NO_PDF=1 engine/scripts/build_all.sh manuscripts/R2.2025.001
 # Or render a single format:
-quarto render manuscripts/_R2.2025.001/article.qmd --to r2-html
+quarto render manuscripts/R2.2025.001/article.qmd --to r2-html
 ```
 
 Outputs land next to the source: `article.html`, `article.pdf`, `article.xml`,
