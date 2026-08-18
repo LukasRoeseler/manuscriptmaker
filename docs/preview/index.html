@@ -3,12 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Instant preview · Manuscript Maker</title>
+<title>Manuscript Maker</title>
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="../assets/favicon-192.png" />
 <link rel="apple-touch-icon" href="../assets/favicon-180.png" />
 <style>
-  :root { --accent:#009CCF; --card-bg:#FAFAFA; --card-border:#EAE8DF; }
+  :root { --accent:#009CCF; --card-bg:#FAFAFA; --card-border:#EAE8DF;
+           --article-font:"Calibri","Carlito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+           --article-fontsize:1; --r2-border-w:2px; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:"Calibri","Carlito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
          color:#1c1c1c; line-height:1.5; background:#fafafa; }
@@ -49,9 +51,10 @@
   .stage { background:#fff; border:1px solid #e6e4db; border-radius:8px; padding:0; overflow:hidden; }
   .stagebar { background:#f4f2ea; border-bottom:1px solid #e6e4db; padding:.4rem .8rem; font-size:.8rem; color:#555;
               display:flex; justify-content:space-between; align-items:center; }
-  #paper { padding:2rem clamp(1rem,4vw,3rem); max-width:900px; margin:0 auto; }
+  #paper { padding:2rem clamp(1rem,4vw,3rem); max-width:900px; margin:0 auto;
+           font-family:var(--article-font); font-size:calc(1rem * var(--article-fontsize)); }
   .r2-top { display:flex; justify-content:space-between; align-items:flex-start; gap:1.5rem;
-            padding-bottom:.6rem; border-bottom:2px solid var(--accent); }
+            padding-bottom:.6rem; border-bottom:var(--r2-border-w) solid var(--accent); }
   .r2-top img { height:44px; }
   .r2-meta { text-align:right; font-size:.72rem; line-height:1.45; color:#333; }
   .r2-meta a { text-decoration:none; }
@@ -63,11 +66,15 @@
   .r2-affils { text-align:center; font-style:italic; font-size:.85rem; color:#444; margin:.3rem 0 1rem; }
   .r2-affils div { margin:.1rem 0; }
   .r2-badges { text-align:center; margin:.6rem 0 1rem; } .r2-badges img { height:30px; margin:0 3px; vertical-align:middle; }
-  .r2-card { background:var(--card-bg); border:.5px solid var(--card-border); border-left:3px solid var(--accent);
+  .r2-card { background:var(--card-bg); border:.5px solid var(--card-border);
+             border-left:calc(var(--r2-border-w) * 1.5) solid var(--accent);
              border-radius:3px; padding:.65rem .85rem; margin:.55rem 0; font-size:.94rem; }
   .r2-card b { font-weight:700; }
-  #r2-citation { border-left:none; border-right:3px solid var(--accent); }
+  #r2-citation { border-left:none; border-right:calc(var(--r2-border-w) * 1.5) solid var(--accent); }
   #r2-body { margin-top:1.4rem; }
+  #r2-body.twocol { column-count:2; column-gap:2.2rem; }
+  #r2-body.twocol .r2-figph, #r2-body.twocol .r2-pdf-figure,
+  #r2-body.twocol table, #r2-body.twocol .r2-math-block { break-inside:avoid; }
   #r2-body h1,#r2-body h2 { font-size:1.3rem; border-bottom:1px solid #eee; padding-bottom:.2rem; margin-top:1.6rem; }
   #r2-body h3 { font-size:1.08rem; margin-top:1.2rem; }
   #r2-body img { max-width:100%; height:auto; }
@@ -124,7 +131,7 @@
   /* ---- final page block (matches the published R2 design) ---- */
   .r2-final { margin:2.5rem 0 0; text-align:center; font-size:.82rem; color:#333; }
   /* Rule between the article body (References) and this block. */
-  .r2-final::before { content:""; display:block; border-top:2px solid var(--accent); margin-bottom:1.8rem; }
+  .r2-final::before { content:""; display:block; border-top:var(--r2-border-w) solid var(--accent); margin-bottom:1.8rem; }
   .r2-final .line1 { display:flex; justify-content:center; align-items:center; gap:.55rem;
                      font-weight:700; font-variant:small-caps; letter-spacing:.03em; }
   .r2-final .line1 img { height:26px; }
@@ -134,7 +141,18 @@
   .r2-final .part { font-style:italic; line-height:1.55; color:#444; max-width:560px; margin:0 auto; }
   .r2-final .orgs { margin-top:.7rem; font-weight:600; }
   .r2-final .orgs a { text-decoration:none; }
-  .r2-final .rule { border-top:2px solid var(--accent); margin-top:1.6rem; }
+  .r2-final .rule { border-top:var(--r2-border-w) solid var(--accent); margin-top:1.6rem; }
+
+  /* Open Science Badges summary (top of the final block, left-aligned,
+     one row per group of badges that share the same report link). */
+  .r2-osbadges { text-align:left; margin-bottom:2.2rem; }
+  .r2-osbadges h3 { margin:0 0 .3rem; font-size:1.05rem; }
+  .r2-osbadges > p.lead { margin:0 0 .9rem; font-size:.85rem; }
+  .os-badge-row { display:flex; align-items:center; gap:.8rem; margin:.7rem 0; }
+  .os-badge-icons { display:flex; gap:.3rem; flex-shrink:0; }
+  .os-badge-icons img { height:40px; }
+  .os-badge-label { font-size:.88rem; }
+  .os-badge-label a { margin-left:.35em; word-break:break-all; }
 
   .empty { color:#999; text-align:center; padding:4rem 1rem; }
   .warn { background:#fff7e6; border-left:3px solid #e0a800; padding:.5rem .7rem; font-size:.82rem; margin:.6rem 0; }
@@ -144,26 +162,45 @@
   .r2-report { margin:.6rem 0; font-size:.82rem; border:1px solid #e6e4db; border-radius:6px; background:#fff; }
   .r2-report summary { cursor:pointer; font-weight:600; padding:.5rem .7rem; }
   .r2-report ul { list-style:none; margin:0; padding:.2rem .7rem .7rem; }
-  .r2-report li { padding:.15rem 0; display:flex; gap:.4rem; }
-  .r2-report li.ok::before { content:"✓"; color:#2a8a4a; font-weight:700; }
-  .r2-report li.warn-row::before { content:"⚠"; color:#e0a800; }
+  .r2-report li { padding:.15rem 0; display:flex; gap:.4rem; align-items:flex-start; }
+  .r2-report li svg { flex-shrink:0; margin-top:.15em; }
+  .r2-report li.ok svg { color:#2a8a4a; }
+  .r2-report li.warn-row svg { color:#e0a800; }
   .r2-report li .n { font-weight:600; }
   .r2-report .unmatched-list { margin:.2rem 0 0 1.1rem; color:#666; }
 
   /* ---- saved drafts (IndexedDB, this browser only) ---- */
-  dialog#drafts { border:1px solid #e6e4db; border-radius:8px; padding:0; max-width:440px; width:90vw; }
-  dialog#drafts::backdrop { background:rgba(0,0,0,.35); }
-  dialog#drafts .dhead { padding:.7rem 1rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; }
-  dialog#drafts .dhead b { font-size:.95rem; }
-  dialog#drafts .dhead button { padding:.2rem .55rem; }
-  dialog#drafts .dlist { max-height:50vh; overflow-y:auto; padding:.4rem; }
-  dialog#drafts .ditem { display:flex; align-items:center; gap:.5rem; padding:.5rem .6rem; border-radius:6px; }
-  dialog#drafts .ditem:hover { background:#f4f2ea; }
-  dialog#drafts .ditem .dname { flex:1; font-size:.87rem; font-weight:600; cursor:pointer; line-height:1.35; }
-  dialog#drafts .ditem .dwhen { font-size:.72rem; font-weight:400; color:#888; }
-  dialog#drafts .ditem button { padding:.25rem .55rem; font-size:.78rem; white-space:nowrap; }
-  dialog#drafts .dempty { padding:1.6rem 1rem; text-align:center; color:#999; font-size:.85rem; }
-  dialog#drafts .dfoot { padding:.55rem 1rem; border-top:1px solid #eee; font-size:.74rem; color:#666; }
+  dialog.rdlg { border:1px solid #e6e4db; border-radius:8px; padding:0; max-width:440px; width:90vw; }
+  dialog.rdlg::backdrop { background:rgba(0,0,0,.35); }
+  dialog.rdlg .dhead { padding:.7rem 1rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center; }
+  dialog.rdlg .dhead b { font-size:.95rem; }
+  dialog.rdlg .dhead button { padding:.2rem .55rem; }
+  dialog.rdlg .dlist { max-height:50vh; overflow-y:auto; padding:.4rem; }
+  dialog.rdlg .ditem { display:flex; align-items:center; gap:.5rem; padding:.5rem .6rem; border-radius:6px; }
+  dialog.rdlg .ditem:hover { background:#f4f2ea; }
+  dialog.rdlg .ditem .dname { flex:1; font-size:.87rem; font-weight:600; cursor:pointer; line-height:1.35; }
+  dialog.rdlg .ditem .dwhen { font-size:.72rem; font-weight:400; color:#888; }
+  dialog.rdlg .ditem button { padding:.25rem .55rem; font-size:.78rem; white-space:nowrap; }
+  dialog.rdlg .dempty { padding:1.6rem 1rem; text-align:center; color:#999; font-size:.85rem; }
+  dialog.rdlg .dfoot { padding:.55rem 1rem; border-top:1px solid #eee; font-size:.74rem; color:#666; }
+  dialog.rdlg .dbody { padding:.9rem 1.1rem; font-size:.85rem; line-height:1.6; color:#333; max-height:70vh; overflow-y:auto; }
+  dialog.rdlg .dbody .credit { margin-top:.8rem; color:#666; font-size:.8rem; }
+
+  /* ---- header toolbar (icon-only action buttons) ---- */
+  header.site .in { justify-content:space-between; }
+  .toolbar { display:flex; align-items:center; gap:.15rem; margin-left:auto; }
+  .icon-btn { display:inline-flex; align-items:center; gap:.15rem; background:transparent; border:0;
+              color:#555; padding:.4rem; border-radius:6px; cursor:pointer; position:relative; }
+  .icon-btn:hover { background:#f4f2ea; color:var(--accent); }
+  .count-badge:not(:empty) { font-size:.68rem; font-weight:700; color:#fff; background:var(--accent);
+                              border-radius:8px; padding:0 .35em; min-width:1.1em; text-align:center; line-height:1.3; }
+  .dropdown { position:relative; display:inline-flex; }
+  .dropdown-menu { position:absolute; top:100%; right:0; background:#fff; border:1px solid #e6e4db;
+                    border-radius:8px; box-shadow:0 6px 20px rgba(0,0,0,.12); padding:.3rem; min-width:190px; z-index:20; }
+  .dropdown-menu button { display:block; width:100%; text-align:left; background:none; border:0; color:#1c1c1c;
+                            font-weight:400; font-size:.85rem; padding:.5rem .6rem; border-radius:5px; cursor:pointer; }
+  .dropdown-menu button:hover { background:#f4f2ea; }
+  .chev { margin-left:-2px; }
 
   /* ---- print / PDF export ------------------------------------------
      @page margin:0 suppresses the browser's own date/title/URL/page-number
@@ -204,14 +241,42 @@
 <body>
 <header class="site"><div class="in">
   <span class="brand"><a href="../"><img src="../assets/mucos_icon.png" alt="MüCOS" class="brand-logo" /> MANUSCRIPT MAKER</a></span>
-  <span style="color:#888">· Instant preview</span>
+  <span class="toolbar">
+    <button type="button" id="save-draft" class="icon-btn" title="Save for later" aria-label="Save for later">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+    </button>
+    <button type="button" id="open-drafts" class="icon-btn" title="Saved drafts" aria-label="Saved drafts">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+      <span id="draft-count" class="count-badge"></span>
+    </button>
+    <span class="dropdown">
+      <button type="button" id="export-btn" class="icon-btn" title="Export" aria-label="Export" aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" class="chev"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <span class="dropdown-menu" id="export-menu" hidden>
+        <button type="button" id="pdf">Export PDF</button>
+        <button type="button" id="docx">Export .docx</button>
+        <button type="button" id="dl">Download preview HTML</button>
+      </span>
+    </span>
+    <button type="button" id="reset" class="icon-btn" title="Reset" aria-label="Reset">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 1 2.6 5.9"/><path d="M4 17v-5h5"/></svg>
+    </button>
+    <button type="button" id="help-btn" class="icon-btn" title="About this preview" aria-label="About this preview">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 1 1 3.9 2.6c-.9.4-1.4 1-1.4 2.1"/><circle cx="12" cy="17" r=".5" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button type="button" id="cite-btn" class="icon-btn" title="Cite this tool" aria-label="Cite this tool">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="none"><path d="M4.8 8.8c0-2.3 1.7-4 4-4.2v2.1c-1 .1-1.7.9-1.7 1.9h1.7v4.6H4.8V8.8Z"/><path d="M13.6 8.8c0-2.3 1.7-4 4-4.2v2.1c-1 .1-1.7.9-1.7 1.9h1.7v4.6h-4V8.8Z"/></svg>
+    </button>
+  </span>
 </div></header>
 
 <div class="layout">
   <!-- ---------------- control panel ---------------- -->
   <aside class="panel">
     <div id="drop">
-      <strong>⬆ Drop a manuscript</strong>
+      <strong><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:4px;"><path d="M12 15V5"/><path d="M7 9l5-5 5 5"/><path d="M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>Drop a manuscript</strong>
       <small>or click to choose a file</small>
       <input type="file" id="file" accept=".docx,.pdf,.md,.markdown,.qmd,.rmd,.tex,.txt" hidden />
     </div>
@@ -237,10 +302,6 @@
 
     <details>
       <summary>Publication details</summary>
-      <div class="row">
-        <div><label>Accent color</label><input id="m-accent" type="color" value="#009CCF" /></div>
-        <div><label>&nbsp;</label><button type="button" id="m-accent-reset" class="ghost" style="width:100%;">Reset to #009CCF</button></div>
-      </div>
       <label>Journal</label><input id="m-journal" value="Replication Research (R2)" />
       <div class="row">
         <div><label>Article type</label>
@@ -280,38 +341,55 @@
         <label><input type="checkbox" id="b-openreview" /> Open Review</label>
       </div>
       <div class="badgelinks">
-        <div><label>Preregistration link <small>(optional)</small></label><input id="m-link-preregistered" placeholder="https://osf.io/..." /></div>
-        <div><label>CODECHECK report link <small>(optional)</small></label><input id="m-link-codecheck" placeholder="https://codecheck.org.uk/..." /></div>
-        <div><label>Reproducibility report link <small>(optional, used for AI/Human/combined)</small></label><input id="m-link-reprocert" placeholder="https://..." /></div>
-        <div><label>Peer review report link <small>(optional)</small></label><input id="m-link-openreview" placeholder="https://..." /></div>
+        <div><label>Preregistration link</label><input id="m-link-preregistered" placeholder="https://osf.io/..." /></div>
+        <div><label>Open Materials link</label><input id="m-link-open-materials" placeholder="https://osf.io/..." /></div>
+        <div><label>Open Data link</label><input id="m-link-open-data" placeholder="https://osf.io/..." /></div>
+        <div><label>Open Code link</label><input id="m-link-open-code" placeholder="https://github.com/..." /></div>
+        <div><label>Reproducibility Certificate Link</label><input id="m-link-codecheck" placeholder="https://codecheck.org.uk/..." /></div>
+        <div><label>Reproducibility report link <small>(used for AI/Human/combined)</small></label><input id="m-link-reprocert" placeholder="https://..." /></div>
+        <div><label>Peer review report link</label><input id="m-link-openreview" placeholder="https://..." /></div>
       </div>
     </details>
 
-    <div class="actions">
-      <button id="save-draft" class="ghost">💾 Save for later</button>
-      <button id="open-drafts" class="ghost">📂 Saved <span id="draft-count"></span></button>
-    </div>
-    <div class="actions">
-      <button id="pdf">🖨 Export PDF</button>
-      <button id="docx" class="ghost">📝 Export .docx</button>
-      <button id="dl" class="ghost">⬇ Download preview HTML</button>
-      <button id="reset" class="ghost">Reset</button>
-    </div>
-    <p class="note">100% in your browser — nothing is uploaded, and nothing is
-      stored anywhere else. This is a layout preview. The authoritative PDF,
-      JATS XML and OJS package are produced by the GitHub Actions pipeline
-      when you open a Pull Request (<a href="../author-guide.html">how to
-      submit</a>). Citations like <code>[@key]</code> resolve there, not here.
-      The article body is <strong>directly editable</strong> — click into it to
-      fix anything. <strong>Word equations</strong> become live formulas;
-      <strong>code-styled paragraphs</strong> become code blocks. A
-      <strong>PDF</strong> has no real structure to read, so its text is
-      best-effort and its formulas show as images cropped from the page
-      (not live equations) — fix by hand, then use <strong>.docx export</strong>
-      for a separate, fully editable copy (edits there don't flow back into
-      the pipeline). <strong>Save for later</strong> keeps a draft in this
-      browser only (IndexedDB) so you can close the tab and resume — clearing
-      your browser data removes it, and it never leaves your machine.</p>
+    <details>
+      <summary>Layout</summary>
+      <div class="row">
+        <div><label>Accent color</label><input id="m-accent" type="color" value="#009CCF" /></div>
+        <div><label>&nbsp;</label><button type="button" id="m-accent-reset" class="ghost" style="width:100%;">Reset to #009CCF</button></div>
+      </div>
+      <label>Masthead logo</label>
+      <div class="row">
+        <div><input type="file" id="m-logo" accept="image/*" /></div>
+        <div><button type="button" id="m-logo-reset" class="ghost" style="width:100%;">Reset to R2 logo</button></div>
+      </div>
+      <div class="row">
+        <div><label>Font</label>
+          <select id="m-font">
+            <option value='"Calibri","Carlito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'>Calibri (default)</option>
+            <option value='"Times New Roman","Liberation Serif",Georgia,serif'>Times New Roman</option>
+            <option value='Georgia,"Liberation Serif",serif'>Georgia</option>
+            <option value='Garamond,"EB Garamond",serif'>Garamond</option>
+            <option value='Arial,"Liberation Sans",sans-serif'>Arial</option>
+            <option value='Verdana,"Liberation Sans",sans-serif'>Verdana</option>
+          </select>
+        </div>
+        <div><label>Font size</label>
+          <select id="m-fontsize">
+            <option value=".9">Small</option>
+            <option value="1" selected>Normal</option>
+            <option value="1.12">Large</option>
+            <option value="1.25">Extra large</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div><label>Border width <small id="m-borderw-val">2px</small></label>
+          <input type="range" id="m-borderw" min="0" max="6" step="0.5" value="2" /></div>
+        <div><label>&nbsp;</label>
+          <label style="display:flex;align-items:center;gap:.4rem;font-weight:400;margin-top:.4rem;">
+            <input type="checkbox" id="m-twocol" /> Two-column article body</label></div>
+      </div>
+    </details>
   </aside>
 
   <!-- ---------------- live article preview ---------------- -->
@@ -338,6 +416,7 @@
         <div id="r2-body"></div>
         <!-- Final-page block (matches the published R2 layout) -->
         <div class="r2-final" id="r2-final">
+          <div id="r2-osbadges-slot"></div>
           <div class="line1">
             <span>License</span>
             <img src="../assets/license-cc-by.png" alt="CC BY 4.0" />
@@ -378,10 +457,52 @@
 <div id="printfoot"></div>
 
 <!-- Saved drafts (IndexedDB, this browser only — see #save-draft) -->
-<dialog id="drafts">
-  <div class="dhead"><b>Saved drafts</b><button type="button" id="drafts-close" class="ghost">✕</button></div>
+<dialog id="drafts" class="rdlg">
+  <div class="dhead"><b>Saved drafts</b><button type="button" id="drafts-close" class="ghost icon-btn">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button></div>
   <div class="dlist" id="drafts-list"></div>
-  <div class="dfoot">Stored only in this browser (IndexedDB) — never uploaded anywhere.</div>
+  <div class="dfoot">Stored only in this browser (IndexedDB), never uploaded anywhere.</div>
+</dialog>
+
+<!-- About this preview (privacy note + credit) -->
+<dialog id="help-dialog" class="rdlg">
+  <div class="dhead"><b>About this preview</b><button type="button" id="help-close" class="ghost icon-btn">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button></div>
+  <div class="dbody">
+    <p>100% in your browser. Nothing is uploaded, and nothing is stored
+      anywhere else. This is a layout preview: the authoritative PDF, JATS
+      XML, and OJS package are produced by the GitHub Actions pipeline when
+      you open a Pull Request (<a href="../author-guide.html">how to
+      submit</a>). Citations like <code>[@key]</code> resolve there, not
+      here. The article body is <strong>directly editable</strong>, so click
+      into it to fix anything. <strong>Word equations</strong> become live
+      formulas, and <strong>code-styled paragraphs</strong> become code
+      blocks. A <strong>PDF</strong> has no real structure to read, so its
+      text is best-effort and its formulas show as images cropped from the
+      page (not live equations); fix by hand, then use
+      <strong>.docx export</strong> for a separate, fully editable copy
+      (edits there don't flow back into the pipeline). <strong>Save for
+      later</strong> keeps a draft in this browser only (IndexedDB), so you
+      can close the tab and resume; clearing your browser data removes it,
+      and it never leaves your machine.</p>
+    <p class="credit">This tool was a human idea, programmed by Claude
+      Sonnet 5 and Claude Opus 5.</p>
+  </div>
+</dialog>
+
+<!-- Cite this tool / license -->
+<dialog id="cite-dialog" class="rdlg">
+  <div class="dhead"><b>Cite this tool</b><button type="button" id="cite-close" class="ghost icon-btn">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button></div>
+  <div class="dbody">
+    <p><strong>License:</strong> CC BY 4.0</p>
+    <p><strong>Recommended citation:</strong><br/>
+      Röseler, L. (2026). Manuscript Maker. [Software] Available at
+      <a href="https://lukasroeseler.github.io/manuscriptmaker/preview/">https://lukasroeseler.github.io/manuscriptmaker/preview/</a></p>
+  </div>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -994,7 +1115,7 @@ async function loadFile(file){
   warn("");
   try {
     if (ext === ".docx") {
-      setStatus("⏳ Converting .docx…");
+      setStatus("Converting .docx…");
       if (file.size > 3*1024*1024)
         warn("Large file — in-browser conversion may be slow. The Pull-Request pipeline converts it reliably either way.");
       const buf = await file.arrayBuffer();
@@ -1027,9 +1148,9 @@ async function loadFile(file){
       warn("Legacy <code>.doc</code> can't be read in the browser. Save as .docx, or submit it through the pipeline (LibreOffice converts it server-side).");
       bodyHtml = "";
     } else if (ext === ".pdf") {
-      setStatus("⏳ Extracting .pdf… (0%)");
+      setStatus("Extracting .pdf… (0%)");
       try {
-        const { html, truncated, hadLineNumbers } = await convertPdfToHtml(file, (p, total) => setStatus(`⏳ Extracting .pdf… (page ${p}/${total})`));
+        const { html, truncated, hadLineNumbers } = await convertPdfToHtml(file, (p, total) => setStatus(`Extracting .pdf… (page ${p}/${total})`));
         const fm = extractDocxFront(html);
         bodyHtml = fm.bodyHtml || html;
         const setIf = (id,v) => { if (v && !$(id).value) $(id).value = v; };
@@ -1129,10 +1250,12 @@ function buildExtractionReport(unmatchedCitations, lowResCount){
     brokenLinks,
   };
 }
+const ICON_OK = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>';
+const ICON_WARN = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 10v5"/><circle cx="12" cy="18" r=".6" fill="currentColor" stroke="none"/></svg>';
 function renderExtractionReport(r){
   if (!r || $("#article").hidden) { $("#report").hidden = true; return; }
   const rows = [];
-  const row = (ok, html) => rows.push(`<li class="${ok?"ok":"warn-row"}">${html}</li>`);
+  const row = (ok, html) => rows.push(`<li class="${ok?"ok":"warn-row"}">${ok?ICON_OK:ICON_WARN}<span>${html}</span></li>`);
   if (r.headings) row(true, `<span class="n">${r.headings}</span> section heading${r.headings===1?"":"s"} detected`);
   if (r.images || r.figPlaceholders)
     row(r.lowResImages===0, `<span class="n">${r.images}</span> figure${r.images===1?"":"s"}` +
@@ -1322,7 +1445,7 @@ function postProcessBody(html){
       emf++;
       const ph = document.createElement("div");
       ph.className = "r2-figph";
-      ph.innerHTML = "<b>🖼 Figure (" + emf + ")</b>This image is embedded in a format " +
+      ph.innerHTML = "<b><svg viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"vertical-align:-2px;margin-right:3px;\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><circle cx=\"9\" cy=\"10\" r=\"1.6\"/><path d=\"M4 17l5-5 4 4 3-3 4 4\"/></svg>Figure (" + emf + ")</b>This image is embedded in a format " +
         "(EMF/WMF) that browsers cannot display. The publishing pipeline converts it " +
         "automatically — it will appear in the final PDF and HTML.";
       img.replaceWith(ph);
@@ -1457,7 +1580,7 @@ function applyMeta(meta){
   const b = r2.badges || {};
   ["open-data","open-code","open-materials","preregistered","codecheck","reprocert-ai","reprocert-human","openreview"].forEach(k=>{ if(b[k]) $("#b-"+k).checked=true; });
   const bl = r2["badge-links"] || {};
-  ["preregistered","codecheck","reprocert","openreview"].forEach(k=>{ if(bl[k]) $("#m-link-"+k).value = bl[k]; });
+  ["preregistered","open-materials","open-data","open-code","codecheck","reprocert","openreview"].forEach(k=>{ if(bl[k]) $("#m-link-"+k).value = bl[k]; });
 }
 /* Builds one "Name" or "Name1,2" line per author from Quarto-style metadata:
    author[].affiliations[].ref is matched against affiliations[].id (in
@@ -1595,9 +1718,9 @@ function buildBadgeList(ext){
   const items = [];
   const add = (key, alt, href) => items.push({img: BADGE_FILES[key][ext], alt, href});
   if (on("#b-preregistered")) add("preregistered", "Preregistered", v("#m-link-preregistered"));
-  if (on("#b-open-materials")) add("open-materials", "Open Materials", "");
-  if (on("#b-open-data")) add("open-data", "Open Data", "");
-  if (on("#b-open-code")) add("open-code", "Open Code", "");
+  if (on("#b-open-materials")) add("open-materials", "Open Materials", v("#m-link-open-materials"));
+  if (on("#b-open-data")) add("open-data", "Open Data", v("#m-link-open-data"));
+  if (on("#b-open-code")) add("open-code", "Open Code", v("#m-link-open-code"));
   if (on("#b-codecheck")) add("codecheck", "CODECHECK", v("#m-link-codecheck"));
   const ai = on("#b-reprocert-ai"), human = on("#b-reprocert-human");
   if (ai || human) {
@@ -1608,6 +1731,51 @@ function buildBadgeList(ext){
   }
   if (on("#b-openreview")) add("openreview", "Open Peer Review", v("#m-link-openreview"));
   return items;
+}
+/* Groups adjacent badges that share the same non-empty report link into
+   one row (e.g. Open Code/Materials/Data all pointing at one OSF DOI). */
+function groupBadgesForFinal(items){
+  const groups = [];
+  items.forEach(it => {
+    const last = groups[groups.length-1];
+    if (it.href && last && last.href === it.href) last.items.push(it);
+    else groups.push({href: it.href, items: [it]});
+  });
+  return groups;
+}
+function joinNames(names){
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return names[0] + " and " + names[1];
+  return names.slice(0,-1).join(", ") + ", and " + names[names.length-1];
+}
+/* Left-aligned "Open Science Badges" summary for the final page: heading
+   + intro line + one row per link-group (icons, joined label, the link).
+   Omitted entirely if no badges are checked. */
+function buildOsBadgesBlock(ext){
+  const items = buildBadgeList(ext);
+  if (!items.length) return "";
+  const rows = groupBadgesForFinal(items).map(g => {
+    const icons = g.items.map(it => `<img src="../assets/badges/${it.img}" alt="${esc(it.alt)}">`).join("");
+    const label = joinNames(g.items.map(it => it.alt));
+    const link = g.href ? ` <a href="${esc(g.href)}">${esc(g.href)}</a>` : "";
+    return `<div class="os-badge-row"><div class="os-badge-icons">${icons}</div><div class="os-badge-label"><b>${esc(label)}:</b>${link}</div></div>`;
+  }).join("");
+  return `<div class="r2-osbadges"><h3>Open Science Badges</h3><p class="lead">This work has received the following badges:</p>${rows}</div>`;
+}
+/* Word-safe variant of buildOsBadgesBlock: a plain <table> (no flexbox,
+   since html-docx-js only understands basic HTML/CSS). */
+function buildOsBadgesBlockWord(){
+  const items = buildBadgeList("png");
+  if (!items.length) return "";
+  const rows = groupBadgesForFinal(items).map(g => {
+    const icons = g.items.map(it => `<img src="../assets/badges/${it.img}" height="34" style="margin-right:3px;">`).join("");
+    const label = joinNames(g.items.map(it => it.alt));
+    const link = g.href ? ` <a href="${esc(g.href)}">${esc(g.href)}</a>` : "";
+    return `<tr><td style="padding:4pt 8pt 4pt 0;white-space:nowrap;">${icons}</td><td style="padding:4pt 0;font-size:10pt;"><b>${esc(label)}:</b>${link}</td></tr>`;
+  }).join("");
+  return `<p style="font-weight:bold;font-size:12pt;margin-bottom:2pt;">Open Science Badges</p>
+<p style="font-size:10pt;margin-top:0;">This work has received the following badges:</p>
+<table role="presentation">${rows}</table>`;
 }
 
 /* ---------- render the R2 article ---------- */
@@ -1645,8 +1813,10 @@ function render(){
   card("#r2-abstract", v("#m-abstract")); card("#r2-keywords", v("#m-keywords"));
   card("#r2-lay", v("#m-lay")); card("#r2-citation", v("#m-citation"));
   $("#r2-body").innerHTML = bodyHtml;
+  $("#r2-body").classList.toggle("twocol", $("#m-twocol").checked);
 
   // final-page block + running print footer
+  $("#r2-osbadges-slot").innerHTML = buildOsBadgesBlock("svg");
   $("#f-journal").textContent = v("#m-journal").replace(/\s*\(R2\)\s*$/i, " R2") || "Replication Research R2";
   $("#f-year").textContent = v("#m-year") || "";
   $("#f-doi").innerHTML = doi ? `<a href="https://doi.org/${esc(doi)}">doi.org/${esc(doi)}</a>` : "";
@@ -1676,6 +1846,42 @@ $("#m-accent").addEventListener("input", e => {
 $("#m-accent-reset").addEventListener("click", () => {
   $("#m-accent").value = "#009CCF";
   document.documentElement.style.setProperty("--accent", "#009CCF");
+});
+
+/* Font, font size, border width and two-column layout — all scoped to
+   the article preview (#paper) via CSS custom properties, so they never
+   affect the tool's own sidebar/toolbar chrome. */
+$("#m-font").addEventListener("change", e => {
+  document.documentElement.style.setProperty("--article-font", e.target.value);
+});
+$("#m-fontsize").addEventListener("change", e => {
+  document.documentElement.style.setProperty("--article-fontsize", e.target.value);
+});
+$("#m-borderw").addEventListener("input", e => {
+  document.documentElement.style.setProperty("--r2-border-w", e.target.value + "px");
+  $("#m-borderw-val").textContent = e.target.value + "px";
+});
+$("#m-twocol").addEventListener("change", render);
+
+/* Custom masthead logo — replaces the R2 logo in the preview only (the
+   real pipeline's logo is a theme setting, not something this tool
+   controls). Held in memory (not a plain input value) so it round-trips
+   through Save-for-later drafts via collectDraft()/restoreDraft(). */
+let customLogo = null;
+$("#m-logo").addEventListener("change", () => {
+  const file = $("#m-logo").files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    customLogo = reader.result;
+    document.querySelector(".r2-top img").src = customLogo;
+  };
+  reader.readAsDataURL(file);
+});
+$("#m-logo-reset").addEventListener("click", () => {
+  customLogo = null;
+  $("#m-logo").value = "";
+  document.querySelector(".r2-top img").src = "../assets/logo.png";
 });
 
 /* ---------- download standalone HTML ---------- */
@@ -1756,6 +1962,7 @@ ${card("Citation", v("#m-citation"), "right")}`;
 
   const finalBlock = `
 <hr style="border:none;border-top:2pt solid ${ACCENT};margin-top:24pt;">
+${buildOsBadgesBlockWord()}
 <p style="text-align:center;margin-top:14pt;"><b>License</b> &nbsp;
   <img src="../assets/license-cc-by.png" height="26"> &nbsp;
   <span style="color:${ACCENT};">|</span> &nbsp;<b>${esc(v("#m-journal"))}</b> &nbsp;
@@ -1772,7 +1979,7 @@ ${doi ? `<p style="text-align:center;"><a href="https://doi.org/${esc(doi)}">doi
 $("#docx").addEventListener("click", async () => {
   if ($("#article").hidden) { warn("Load a manuscript first."); return; }
   if (typeof htmlDocx === "undefined") { warn("The .docx export library failed to load — check your connection and retry."); return; }
-  setStatus("⏳ Building .docx…");
+  setStatus("Building .docx…");
   try {
     const { header, body, finalBlock } = buildWordHtml();
     // Resolve every image (badges/logo/figures) to a data: URI so the
@@ -1805,8 +2012,10 @@ $("#reset").addEventListener("click", () => location.reload());
    later without re-uploading or re-typing metadata. */
 const DRAFT_FIELDS = ["m-title","m-authors","m-orcids","m-affils","m-abstract","m-keywords","m-lay",
   "m-accent","m-journal","m-type","m-discipline","m-volume","m-year","m-id","m-doi","m-citation",
-  "m-link-preregistered","m-link-codecheck","m-link-reprocert","m-link-openreview"];
-const DRAFT_CHECKS = ["b-open-data","b-open-code","b-open-materials","b-preregistered","b-codecheck","b-reprocert-ai","b-reprocert-human","b-openreview"];
+  "m-link-preregistered","m-link-open-materials","m-link-open-data","m-link-open-code",
+  "m-link-codecheck","m-link-reprocert","m-link-openreview",
+  "m-font","m-fontsize","m-borderw"];
+const DRAFT_CHECKS = ["b-open-data","b-open-code","b-open-materials","b-preregistered","b-codecheck","b-reprocert-ai","b-reprocert-human","b-openreview","m-twocol"];
 
 function openDraftsDB(){
   return new Promise((resolve,reject)=>{
@@ -1830,12 +2039,18 @@ function collectDraft(){
   const checks = {}; DRAFT_CHECKS.forEach(id => checks[id] = $("#"+id).checked);
   return { id: Date.now(), name: $("#m-title").value.trim() || "Untitled draft",
     savedAt: new Date().toISOString(), srcfmt: $("#srcfmt").textContent,
-    fileinfo: $("#fileinfo").innerHTML, bodyHtml, fields, checks };
+    fileinfo: $("#fileinfo").innerHTML, bodyHtml, fields, checks, logo: customLogo };
 }
 function restoreDraft(d){
   Object.entries(d.fields||{}).forEach(([id,val]) => { const el = $("#"+id); if (el) el.value = val; });
   Object.entries(d.checks||{}).forEach(([id,val]) => { const el = $("#"+id); if (el) el.checked = val; });
   document.documentElement.style.setProperty("--accent", $("#m-accent").value || "#009CCF");
+  document.documentElement.style.setProperty("--article-font", $("#m-font").value);
+  document.documentElement.style.setProperty("--article-fontsize", $("#m-fontsize").value);
+  document.documentElement.style.setProperty("--r2-border-w", ($("#m-borderw").value||"2") + "px");
+  $("#m-borderw-val").textContent = ($("#m-borderw").value||"2") + "px";
+  customLogo = d.logo || null;
+  document.querySelector(".r2-top img").src = customLogo || "../assets/logo.png";
   bodyHtml = d.bodyHtml || "";
   $("#srcfmt").textContent = d.srcfmt || "";
   $("#fileinfo").innerHTML = d.fileinfo || "";
@@ -1856,7 +2071,7 @@ $("#save-draft").addEventListener("click", async () => {
   try {
     await withDrafts("readwrite", store => idbRequest(store.put(draft)));
     await refreshDraftCount();
-    setStatus(`💾 Saved "${draft.name}" — stored only in this browser.`);
+    setStatus(`Saved "${draft.name}", stored only in this browser.`);
     setTimeout(()=>setStatus(""), 3000);
   } catch(e){ warn("Could not save: " + e.message); }
 });
@@ -1886,6 +2101,22 @@ async function renderDraftsList(){
 $("#open-drafts").addEventListener("click", async () => { await renderDraftsList(); $("#drafts").showModal(); });
 $("#drafts-close").addEventListener("click", () => $("#drafts").close());
 refreshDraftCount();
+
+/* ---------- export dropdown + help/cite popovers ---------- */
+$("#export-btn").addEventListener("click", e => {
+  e.stopPropagation();
+  const open = $("#export-menu").hidden;
+  $("#export-menu").hidden = !open;
+  $("#export-btn").setAttribute("aria-expanded", String(open));
+});
+document.addEventListener("click", e => {
+  if (!e.target.closest(".dropdown")) { $("#export-menu").hidden = true; $("#export-btn").setAttribute("aria-expanded","false"); }
+});
+["pdf","docx","dl"].forEach(id => $("#"+id).addEventListener("click", () => { $("#export-menu").hidden = true; $("#export-btn").setAttribute("aria-expanded","false"); }));
+$("#help-btn").addEventListener("click", () => $("#help-dialog").showModal());
+$("#help-close").addEventListener("click", () => $("#help-dialog").close());
+$("#cite-btn").addEventListener("click", () => $("#cite-dialog").showModal());
+$("#cite-close").addEventListener("click", () => $("#cite-dialog").close());
 
 /* ---------- PDF export (browser print → save as PDF) ----------
    Wraps #paper in a table whose thead/tfoot spacers repeat on every

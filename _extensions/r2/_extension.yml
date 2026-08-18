@@ -32,6 +32,11 @@ contributes:
       keep-tex: true
       link-citations: true
       colorlinks: true
+      # Runs only the shared Meta() computation (badge-groups for the
+      # Open Science Badges block); Pandoc(doc) early-returns for
+      # non-HTML formats, so this doesn't touch PDF's own final block.
+      filters:
+        - filters/r2-final.lua
 
     # ---------------------------------------------------------------
     # HTML – Quarto html + R2 SCSS theme + custom masthead partial.

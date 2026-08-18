@@ -335,6 +335,23 @@ $for(include-after)$
 $include-after$
 $endfor$
 
+% ---- Open Science Badges summary (icon + label + link per group of
+%      badges sharing the same report link; r2.badge-groups is computed
+%      by filters/r2-final.lua's Meta() so LaTeX doesn't need string
+%      comparisons). Omitted entirely if no badges are checked. --------
+$if(r2.badge-groups)$
+\vspace{1cm}
+\noindent{\color{accent}\rule{\linewidth}{1.2pt}}\\[10pt]
+\begin{flushleft}
+{\large\bfseries Open Science Badges}\\[2pt]
+This work has received the following badges:\\[8pt]
+$for(r2.badge-groups)$
+\begin{minipage}[c]{0.16\linewidth}$for(it.files)$\includegraphics[height=8mm]{$it.file$}\hspace{2pt}$endfor$\end{minipage}%
+\begin{minipage}[c]{0.82\linewidth}\raggedright\textbf{$it.label$:}$if(it.link)$ \href{$it.link$}{$it.link$}$endif$\end{minipage}\\[8pt]
+$endfor$
+\end{flushleft}
+$endif$
+
 % ---- Final-page block (License chip, DOI, FORRT/MüCOS lines) --------
 \vspace{1.5cm}
 \begin{center}

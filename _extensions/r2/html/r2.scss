@@ -98,8 +98,10 @@ $toc-color: $r2-accent;
 .r2-license { text-align: center; margin: 2.5rem 0 1rem; }
 .r2-license img { height: 31px; }
 
-// Final-page block (License chip · journal · year, DOI, FORRT/MüCOS)
+// Final-page block (Open Science Badges summary, License chip · journal
+// · year, DOI, FORRT/MüCOS)
 .r2-final { margin: 2.5rem 0 0; text-align: center; font-size: 0.82rem; color: #333; }
+.r2-final::before { content: ""; display: block; border-top: 2px solid $r2-accent; margin-bottom: 1.8rem; }
 .r2-final .line1 { display: flex; justify-content: center; align-items: center; gap: 0.55rem;
                    font-weight: 700; font-variant: small-caps; letter-spacing: 0.03em; }
 .r2-final .line1 img { height: 26px; }
@@ -110,6 +112,15 @@ $toc-color: $r2-accent;
 .r2-final .orgs { margin-top: 0.7rem; font-weight: 600; }
 .r2-final .orgs a { text-decoration: none; }
 .r2-final .rule { border-top: 2px solid $r2-accent; margin-top: 1.6rem; }
+
+.r2-osbadges { text-align: left; margin-bottom: 2.2rem; }
+.r2-osbadges h3 { margin: 0 0 0.3rem; font-size: 1.05rem; }
+.r2-osbadges > p.lead { margin: 0 0 0.9rem; font-size: 0.85rem; }
+.os-badge-row { display: flex; align-items: center; gap: 0.8rem; margin: 0.7rem 0; }
+.os-badge-icons { display: flex; gap: 0.3rem; flex-shrink: 0; }
+.os-badge-icons img { height: 40px; }
+.os-badge-label { font-size: 0.88rem; }
+.os-badge-label a { margin-left: 0.35em; word-break: break-all; }
 
 // --- APA 7 tables: horizontal rules only, no vertical lines ----------
 .quarto-title-block + * table,
