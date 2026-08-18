@@ -16,17 +16,7 @@
   </g>
   <circle cx="71.0" cy="82.0" r="10.7" fill="#6B21A8"/>
 
-  <!-- Human-bust glyph (Shifted up & in, added purple outline) -->
-  <g fill="#ffffff" stroke="#6B21A8" stroke-width="2" stroke-linejoin="round">
-    <circle cx="42" cy="102" r="9.5"/>
-    <path d="M 23,129 C 23,115 31,110 42,110 C 53,110 61,115 61,129 Z"/>
-  </g>
 
-  <!-- Computer glyph (Shifted up & in, added purple outline) -->
-  <g fill="#ffffff" stroke="#6B21A8" stroke-width="2" stroke-linejoin="round">
-    <rect x="80" y="94" width="36" height="24" rx="3.5"/>
-    <rect x="83" y="97" width="30" height="18" rx="2" fill="#6B21A8" stroke="none"/>
-    <path d="M 91,118 L 105,118 L 107,125 L 89,125 Z"/>
-    <rect x="85" y="125" width="26" height="4.5" rx="2"/>
-  </g>
+
+
 </svg>
