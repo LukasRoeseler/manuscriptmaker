@@ -15,7 +15,7 @@
   body { margin:0; font-family:"Calibri","Carlito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
          color:#1c1c1c; line-height:1.5; background:#fafafa; }
   a { color:var(--accent); }
-  header.site { border-bottom:3px solid var(--accent); background:#fff; }
+  header.site { border-bottom:3px solid var(--accent); background:#fff; position:sticky; top:0; z-index:50; }
   header.site .in { max-width:1280px; margin:0 auto; padding:1rem 1.2rem; display:flex; align-items:center; gap:.6rem; }
   .brand { font-weight:700; letter-spacing:.02em; display:inline-flex; align-items:center; gap:.5rem; }
   .brand-logo { height:1.6rem; width:auto; vertical-align:middle; }
@@ -23,9 +23,14 @@
   .layout { display:grid; grid-template-columns:380px 1fr; gap:1.2rem; max-width:1280px; margin:0 auto; padding:1.2rem; align-items:start; }
   @media (max-width:920px){ .layout { grid-template-columns:1fr; } }
 
-  /* ---- control panel (sticky + independently scrollable) ---- */
-  .panel { background:#fff; border:1px solid #e6e4db; border-radius:8px; padding:1rem; position:sticky; top:1rem;
-           max-height:calc(100vh - 2rem); overflow-y:auto; overscroll-behavior:contain; }
+  /* ---- control panel (sticky + independently scrollable) ----
+     --header-h is measured in JS (the header's real rendered height,
+     since the icon toolbar can wrap to two lines on narrow viewports)
+     so the panel settles right below the sticky header instead of
+     overlapping it or overshooting the bottom of the viewport. */
+  .panel { background:#fff; border:1px solid #e6e4db; border-radius:8px; padding:1rem;
+           position:sticky; top:calc(var(--header-h, 64px) + 1rem);
+           max-height:calc(100vh - var(--header-h, 64px) - 2rem); overflow-y:auto; overscroll-behavior:contain; }
   #drop { border:2px dashed var(--accent); border-radius:8px; padding:1.3rem 1rem; text-align:center;
           color:#33707f; background:var(--card-bg); cursor:pointer; transition:.15s; }
   #drop.drag { background:#e9f7fb; border-color:#0090bd; }
@@ -514,6 +519,17 @@
 const $ = s => document.querySelector(s);
 const md = window.markdownit({ html:true, linkify:true, typographer:true });
 let bodyHtml = "";
+
+/* The sticky header's real height (the icon toolbar can wrap to two
+   lines on narrow viewports), exposed as --header-h so the sticky
+   sidebar panel (.panel) can settle right below it without overlap
+   or overshooting the bottom of the viewport. */
+function syncHeaderHeight(){
+  const h = document.querySelector("header.site").offsetHeight;
+  document.documentElement.style.setProperty("--header-h", h + "px");
+}
+window.addEventListener("resize", syncHeaderHeight);
+syncHeaderHeight();
 
 /* Volume/year default to whatever year it actually is when the page loads
    (R2 volume 1 = 2025, so volume = year - 2024) - the static HTML value
