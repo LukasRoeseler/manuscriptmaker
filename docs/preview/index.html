@@ -262,6 +262,7 @@
       <span class="dropdown-menu" id="export-menu" hidden>
         <button type="button" id="pdf">Export PDF</button>
         <button type="button" id="docx">Export .docx</button>
+        <button type="button" id="gdocs">Export for Google Docs</button>
         <button type="button" id="dl">Download preview HTML</button>
       </span>
     </span>
@@ -2067,21 +2068,26 @@ ${doi ? `<p style="text-align:center;"><a href="https://doi.org/${esc(doi)}">doi
   return { header, body: bodyHtml, finalBlock };
 }
 
+/* Shared by #docx and #gdocs: same assembled article (masthead, badges,
+   front-matter cards, body, final block), with every image rasterized
+   and explicitly sized (see rasterizeImagesForDocx). */
+async function buildRasterizedArticleHtml(){
+  const { header, body, finalBlock } = buildWordHtml();
+  const holder = document.createElement("div");
+  holder.innerHTML = header + body + finalBlock;
+  await rasterizeImagesForDocx(holder);
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc($("#m-title").value||"R2 preview")}</title></head>
+<body style="font-family:Calibri, Carlito, sans-serif; font-size:11pt; color:#1c1c1c;">
+${holder.innerHTML}
+</body></html>`;
+}
+
 $("#docx").addEventListener("click", async () => {
   if ($("#article").hidden) { warn("Load a manuscript first."); return; }
   if (typeof htmlDocx === "undefined") { warn("The .docx export library failed to load — check your connection and retry."); return; }
   setStatus("Building .docx…");
   try {
-    const { header, body, finalBlock } = buildWordHtml();
-    // Resolve every image (badges/logo/figures) to a data: URI so the
-    // exported file is self-contained and opens correctly offline.
-    const holder = document.createElement("div");
-    holder.innerHTML = header + body + finalBlock;
-    await rasterizeImagesForDocx(holder);
-    const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc($("#m-title").value||"R2 preview")}</title></head>
-<body style="font-family:Calibri, Carlito, sans-serif; font-size:11pt; color:#1c1c1c;">
-${holder.innerHTML}
-</body></html>`;
+    const html = await buildRasterizedArticleHtml();
     const blob = htmlDocx.asBlob(html);
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
     a.download = ($("#m-id").value || "r2-preview") + ".docx"; a.click();
@@ -2092,6 +2098,27 @@ ${holder.innerHTML}
       warn("This export may be missing live formulas — html-docx-js doesn't understand MathML. Check the downloaded file, or use <strong>Save for later</strong> to keep the fully-correct version in this browser.");
   } catch(err){
     warn("Could not build the .docx export: " + err.message);
+  } finally { setStatus(""); }
+});
+
+/* ---------- Google Docs export ----------
+   html-docx-js doesn't produce a real Word document - it wraps the HTML
+   into a legacy "altChunk" part, which Word knows how to unpack on open
+   but Google Docs does not support at all, so a Drive upload of the
+   .docx opens completely empty. Google Docs' own HTML importer is
+   reliable, so this reuses the exact same assembled/rasterized article
+   and just saves it as plain .html instead of running it through
+   html-docx-js - upload that file to Drive and open it with Google Docs. */
+$("#gdocs").addEventListener("click", async () => {
+  if ($("#article").hidden) { warn("Load a manuscript first."); return; }
+  setStatus("Building Google Docs export…");
+  try {
+    const html = await buildRasterizedArticleHtml();
+    const blob = new Blob([html], { type: "text/html" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = ($("#m-id").value || "r2-preview") + ".html"; a.click();
+  } catch(err){
+    warn("Could not build the Google Docs export: " + err.message);
   } finally { setStatus(""); }
 });
 
@@ -2203,7 +2230,7 @@ $("#export-btn").addEventListener("click", e => {
 document.addEventListener("click", e => {
   if (!e.target.closest(".dropdown")) { $("#export-menu").hidden = true; $("#export-btn").setAttribute("aria-expanded","false"); }
 });
-["pdf","docx","dl"].forEach(id => $("#"+id).addEventListener("click", () => { $("#export-menu").hidden = true; $("#export-btn").setAttribute("aria-expanded","false"); }));
+["pdf","docx","gdocs","dl"].forEach(id => $("#"+id).addEventListener("click", () => { $("#export-menu").hidden = true; $("#export-btn").setAttribute("aria-expanded","false"); }));
 $("#help-btn").addEventListener("click", () => $("#help-dialog").showModal());
 $("#help-close").addEventListener("click", () => $("#help-dialog").close());
 $("#cite-btn").addEventListener("click", () => $("#cite-dialog").showModal());
