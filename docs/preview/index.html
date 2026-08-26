@@ -19,6 +19,7 @@
   header.site .in { max-width:1280px; margin:0 auto; padding:1rem 1.2rem; display:flex; align-items:center; gap:.6rem; }
   .brand { font-weight:700; letter-spacing:.02em; display:inline-flex; align-items:center; gap:.5rem; }
   .brand-logo { height:1.6rem; width:auto; vertical-align:middle; }
+  .version { font-weight:400; font-size:.72rem; color:#888; letter-spacing:0; }
   .brand a { text-decoration:none; color:inherit; display:inline-flex; align-items:center; gap:.5rem; }
   .layout { display:grid; grid-template-columns:380px 1fr; gap:1.2rem; max-width:1280px; margin:0 auto; padding:1.2rem; align-items:start; }
   @media (max-width:920px){ .layout { grid-template-columns:1fr; } }
@@ -245,7 +246,7 @@
 </head>
 <body>
 <header class="site"><div class="in">
-  <span class="brand"><a href="../"><img src="../assets/mucos_icon.png" alt="MüCOS" class="brand-logo" /> MANUSCRIPT MAKER</a></span>
+  <span class="brand"><a href="../"><img src="../assets/mucos_icon.png" alt="MüCOS" class="brand-logo" /> MANUSCRIPT MAKER</a> <span id="tool-version" class="version"></span></span>
   <span class="toolbar">
     <button type="button" id="save-draft" class="icon-btn" title="Save for later" aria-label="Save for later">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
@@ -506,7 +507,7 @@
   <div class="dbody">
     <p><strong>License:</strong> CC BY 4.0</p>
     <p><strong>Recommended citation:</strong><br/>
-      Röseler, L. (2026). Manuscript Maker. [Software] Available at
+      Röseler, L. (2026). Manuscript Maker (Version <span id="cite-version"></span>) [Software]. Available at
       <a href="https://lukasroeseler.github.io/manuscriptmaker/preview/">https://lukasroeseler.github.io/manuscriptmaker/preview/</a></p>
   </div>
 </dialog>
@@ -520,6 +521,14 @@
 const $ = s => document.querySelector(s);
 const md = window.markdownit({ html:true, linkify:true, typographer:true });
 let bodyHtml = "";
+
+/* Tool version (not the previewed article's version) - shown next to the
+   brand in the header and in the "Cite this tool" citation. Bump the
+   last digit on every commit that changes this tool; bump the middle
+   digit only when explicitly asked. */
+const TOOL_VERSION = "0.5.1";
+$("#tool-version").textContent = "v" + TOOL_VERSION;
+$("#cite-version").textContent = TOOL_VERSION;
 
 /* The sticky header's real height (the icon toolbar can wrap to two
    lines on narrow viewports), exposed as --header-h so the sticky
