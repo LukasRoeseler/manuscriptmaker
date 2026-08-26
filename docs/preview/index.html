@@ -1025,11 +1025,43 @@ async function convertPdfToHtml(file, progressCb){
   })));
   const bodySize = sizeHist.size ? [...sizeHist.entries()].sort((a,b)=>b[1]-a[1])[0][0] : 10;
 
+  // Self-calibrate the paragraph-break gap threshold to this document's own
+  // line spacing (same histogram idea as bodySize above): academic
+  // manuscripts submitted for review are conventionally double- or
+  // 1.5-spaced, so a threshold tuned for single-spacing treats every line
+  // as a new paragraph. Round each line-to-line gap ratio to 1 decimal and
+  // take the most frequent value - ordinary within-paragraph line wraps
+  // vastly outnumber the occasional heading/table/figure gap, so a handful
+  // of outliers can't skew this the way a mean/median would.
+  const gapHist = new Map();
+  pages.forEach(pg => {
+    let py = null, ps = null;
+    pg.lines.forEach(line => {
+      if (!line.length || line[0].isImage || line[0].isTable) { py = null; ps = null; return; }
+      const size = pdfDominantSize(line);
+      if (py !== null && ps) {
+        const ratio = Math.round(((py - line[0].y) / ps) * 10) / 10;
+        if (ratio > 0.3 && ratio < 4) gapHist.set(ratio, (gapHist.get(ratio)||0) + 1);
+      }
+      py = line[0].y; ps = size;
+    });
+  });
+  const normalLineGapRatio = gapHist.size ? [...gapHist.entries()].sort((a,b)=>b[1]-a[1])[0][0] : 1.15;
+
   const blocks = [];
   let curPara = null, prevY = null, prevSize = null;
   const flushPara = () => { if (curPara && curPara.length) blocks.push({ type:"p", html: curPara.join("") }); curPara = null; };
 
   for (const pg of pages){
+    // Y-coordinates are page-local, so a stale prevY from the previous
+    // page would compare two unrelated coordinate spaces and (almost
+    // always) look like a huge gap - forcing a spurious paragraph break
+    // at literally every page boundary. Resetting here means a paragraph
+    // that genuinely continues across a page break stays joined; the
+    // trade-off is that two paragraphs separated only by a page turn (no
+    // other signal) may end up merged - a much rarer, less disruptive
+    // failure than fragmenting text throughout the whole document.
+    prevY = null; prevSize = null;
     for (const line of pg.lines){
       if (!line.length) continue;
       if (line.length === 1 && line[0].isImage){
@@ -1080,7 +1112,7 @@ async function convertPdfToHtml(file, progressCb){
       } else {
         const inline = await pdfLineToInlineHtml(line, pg);
         const gap = prevY !== null ? prevY - line[0].y : 0;
-        if (curPara && gap > (prevSize||10)*1.35) flushPara();
+        if (curPara && gap > (prevSize||10) * Math.max(1.3, normalLineGapRatio*1.6)) flushPara();
         if (!curPara) curPara = [];
         curPara.push((curPara.length ? " " : "") + inline);
       }
@@ -1923,6 +1955,49 @@ async function inlineImages(node){
   }
   return node;
 }
+/* Word-safe image embedding for the .docx export. html-docx-js doesn't
+   rasterize/validate images itself - it wraps the HTML into a Word
+   altChunk and leaves image sizing entirely to whatever opens the file.
+   A bare height attribute with no width, next to a source image many
+   times larger than its intended display size (e.g. the 1831x397 logo
+   shown at 40px), makes Word's/Google Docs' importer fall back to
+   something derived from native pixel data instead of the intended
+   size - producing oversized, garbled-looking images. Re-rendering
+   every image onto a canvas at its actual intended pixel size and
+   setting explicit width/height attributes removes that ambiguity. */
+async function rasterizeImagesForDocx(node){
+  for (const img of node.querySelectorAll("img")){
+    try {
+      const cssW = parseInt(img.style.width) || 0, cssH = parseInt(img.style.height) || 0;
+      const attrW = parseInt(img.getAttribute("width")) || 0, attrH = parseInt(img.getAttribute("height")) || 0;
+      let targetW = attrW || cssW || 0, targetH = attrH || cssH || 0;
+
+      const r = await fetch(img.getAttribute("src"));
+      const b = await r.blob();
+      const objUrl = URL.createObjectURL(b);
+      const loaded = await new Promise((resolve,reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = objUrl;
+      });
+      URL.revokeObjectURL(objUrl);
+
+      if (!targetW && !targetH) { targetW = loaded.naturalWidth || 64; targetH = loaded.naturalHeight || 64; }
+      else if (!targetW) targetW = Math.round(targetH * ((loaded.naturalWidth||targetH) / (loaded.naturalHeight||targetH)));
+      else if (!targetH) targetH = Math.round(targetW * ((loaded.naturalHeight||targetW) / (loaded.naturalWidth||targetW)));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = targetW; canvas.height = targetH;
+      canvas.getContext("2d").drawImage(loaded, 0, 0, targetW, targetH);
+
+      img.src = canvas.toDataURL("image/png");
+      img.setAttribute("width", targetW);
+      img.setAttribute("height", targetH);
+    } catch(e){}
+  }
+  return node;
+}
 
 /* ---------- .docx export (editable copy, for manual polishing) ----------
    html-docx-js only understands a plain HTML/CSS subset (no flexbox, no
@@ -1963,7 +2038,7 @@ function buildWordHtml(){
   const header = `
 <table role="presentation" width="100%" style="border-bottom:2pt solid ${ACCENT};margin-bottom:10pt;">
   <tr>
-    <td width="50%" style="vertical-align:bottom;"><img src="../assets/logo.png" height="40"></td>
+    <td width="50%" style="vertical-align:bottom;"><img src="${customLogo || "../assets/logo.png"}" height="40"></td>
     <td width="50%" style="text-align:right;font-size:9pt;vertical-align:bottom;">${metaLines}</td>
   </tr>
 </table>
@@ -2002,7 +2077,7 @@ $("#docx").addEventListener("click", async () => {
     // exported file is self-contained and opens correctly offline.
     const holder = document.createElement("div");
     holder.innerHTML = header + body + finalBlock;
-    await inlineImages(holder);
+    await rasterizeImagesForDocx(holder);
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc($("#m-title").value||"R2 preview")}</title></head>
 <body style="font-family:Calibri, Carlito, sans-serif; font-size:11pt; color:#1c1c1c;">
 ${holder.innerHTML}
