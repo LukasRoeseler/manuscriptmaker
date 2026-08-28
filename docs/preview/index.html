@@ -526,7 +526,7 @@ let bodyHtml = "";
    brand in the header and in the "Cite this tool" citation. Bump the
    last digit on every commit that changes this tool; bump the middle
    digit only when explicitly asked. */
-const TOOL_VERSION = "0.5.1";
+const TOOL_VERSION = "0.5.2";
 $("#tool-version").textContent = "v" + TOOL_VERSION;
 $("#cite-version").textContent = TOOL_VERSION;
 
@@ -1102,11 +1102,20 @@ async function convertPdfToHtml(file, progressCb){
       const totalChars = line.reduce((s,it) => s + it.str.length, 0);
       const boldChars = line.reduce((s,it) => s + (it.bold ? it.str.length : 0), 0);
       const isBoldLine = totalChars > 0 && boldChars/totalChars > 0.6;
+      // Gap-based paragraph-break test, computed up front so the weaker
+      // heading signals (all-caps, bold-short-line) can require it too:
+      // a bolded term or acronym run in the MIDDLE of a paragraph (small
+      // gap, curPara still open) is body text, not a new section heading -
+      // only the strong signals (bigger font, numbered "1.2 Method") can
+      // promote a heading regardless of gap.
+      const gap = prevY !== null ? prevY - line[0].y : 0;
+      const paraBreakThreshold = (prevSize||10) * Math.max(1.3, normalLineGapRatio*1.6);
+      const looksLikeNewBlock = !curPara || gap > paraBreakThreshold;
       const heading = !allCode && !allMath && (
         domSize > bodySize*1.15 ||
         (/^\d+(\.\d+)*\s+[A-Z]/.test(text) && text.length < 90) ||
-        (text === text.toUpperCase() && /[A-Z]/.test(text) && text.length < 60) ||
-        (isBoldLine && text.length < 100 && !/[.!?]$/.test(text) && /[A-Za-z]/.test(text)));
+        (looksLikeNewBlock && text === text.toUpperCase() && /[A-Z]/.test(text) && text.length < 60) ||
+        (looksLikeNewBlock && isBoldLine && text.length < 100 && !/[.!?]$/.test(text) && /[A-Za-z]/.test(text)));
 
       if (allCode){
         flushPara();
@@ -1121,8 +1130,7 @@ async function convertPdfToHtml(file, progressCb){
         blocks.push({ type:"h", html: esc(text) });
       } else {
         const inline = await pdfLineToInlineHtml(line, pg);
-        const gap = prevY !== null ? prevY - line[0].y : 0;
-        if (curPara && gap > (prevSize||10) * Math.max(1.3, normalLineGapRatio*1.6)) flushPara();
+        if (curPara && gap > paraBreakThreshold) flushPara();
         if (!curPara) curPara = [];
         curPara.push((curPara.length ? " " : "") + inline);
       }
@@ -1154,13 +1162,17 @@ async function convertPdfToHtml(file, progressCb){
       }
     }
   });
+  // Inline styles (not classes) here, not just for the on-screen preview -
+  // the .docx/Google Docs export has no external stylesheet to fall back
+  // on, so an unstyled <h2>/<p> is what produces "headings and paragraphs
+  // don't match our template" once exported.
   const html = blocks.filter(b => b.type !== "consumed").map(b => {
-    if (b.type === "h") return `<h2>${b.html}</h2>`;
+    if (b.type === "h") return `<h2 style="font-size:13pt;font-weight:bold;margin:14pt 0 6pt;border-bottom:0.5pt solid #ccc;padding-bottom:2pt;">${b.html}</h2>`;
     if (b.type === "pre") return `<pre class="r2-code">${esc(b.html)}</pre>`;
     if (b.type === "mathblock") return `<div class="r2-math-block">${b.html}</div>`;
     if (b.type === "figure") return `<figure class="r2-pdf-figure">${b.html}${b.caption ? `<figcaption>${b.caption}</figcaption>` : ""}</figure>`;
     if (b.type === "table") return b.html;
-    return `<p>${b.html}</p>`;
+    return `<p style="margin:0 0 8pt;text-indent:0.5in;">${b.html}</p>`;
   }).join("\n");
 
   return { html, truncated: doc.numPages > PDF_MAX_PAGES, hadLineNumbers };
@@ -1461,9 +1473,13 @@ function extractDocxFront(html){
 /* Word manuscripts often list authors on one physical line ("Jane Doe,
    John Smith, and Jane Roe" / "Jane Doe & John Smith"). The Authors box is
    now one-name-per-line, so split that into separate lines here. A line
-   with no such separators is returned unchanged (still one author). */
+   with no such separators is returned unchanged (still one author).
+   The lookahead requires an uppercase letter right after the separator -
+   without it, an author with two affiliations ("Jane Doe1,2") gets its
+   own superscript numbers torn apart into a phantom extra "author" (a
+   bare "2"), which is what broke affiliation indexing. */
 function splitAuthorNames(s){
-  return (s||"").split(/\s*(?:,|&|\band\b)\s*/i).map(x=>x.trim()).filter(Boolean).join("\n");
+  return (s||"").split(/\s*(?:,|&|\band\b)\s*(?=[A-ZÀ-Þ])/i).map(x=>x.trim()).filter(Boolean).join("\n");
 }
 
 /* Post-process converted body HTML (all input formats):
@@ -1823,12 +1839,13 @@ function buildOsBadgesBlock(ext){
 /* Word-safe variant of buildOsBadgesBlock: a plain <table> (no flexbox,
    since html-docx-js only understands basic HTML/CSS). */
 function buildOsBadgesBlockWord(){
+  const ACCENT = $("#m-accent").value || "#009CCF";
   const items = buildBadgeList("png");
   if (!items.length) return "";
   const rows = groupBadgesForFinal(items).map(g => {
     const icons = g.items.map(it => `<img src="../assets/badges/${it.img}" height="34" style="margin-right:3px;">`).join("");
     const label = joinNames(g.items.map(it => it.alt));
-    const link = g.href ? ` <a href="${esc(g.href)}">${esc(g.href)}</a>` : "";
+    const link = g.href ? ` <a href="${esc(g.href)}" style="text-decoration:none;"><span style="color:${ACCENT};">${esc(g.href)}</span></a>` : "";
     return `<tr><td style="padding:4pt 8pt 4pt 0;white-space:nowrap;">${icons}</td><td style="padding:4pt 0;font-size:10pt;"><b>${esc(label)}:</b>${link}</td></tr>`;
   }).join("");
   return `<p style="font-weight:bold;font-size:12pt;margin-bottom:2pt;">Open Science Badges</p>
@@ -2021,7 +2038,7 @@ function buildWordHtml(){
   const doi = v("#m-doi");
   const metaLines = [
     `<i>${esc(v("#m-journal"))}</i>, ${esc(v("#m-year"))}, vol ${esc(v("#m-volume"))}${v("#m-id")?", "+esc(v("#m-id")):""}`,
-    doi ? `<a href="https://doi.org/${esc(doi)}" style="color:${ACCENT};text-decoration:none;">https://doi.org/${esc(doi)}</a>` : "",
+    doi ? `<a href="https://doi.org/${esc(doi)}" style="text-decoration:none;"><span style="color:${ACCENT};">https://doi.org/${esc(doi)}</span></a>` : "",
     `Article type: ${esc($("#m-type").value)}`,
     `Discipline: ${esc(v("#m-discipline"))}`,
     `Published under the CC-BY 4.0 license`
@@ -2043,16 +2060,20 @@ function buildWordHtml(){
     return it.href ? `<a href="${esc(it.href)}">${img}</a>` : img;
   }).join("");
 
-  const card = (label, val, side) => val ? `<table role="presentation" width="100%" style="background:${CARDBG};border:0.5pt solid ${CARDBORDER};border-${side||"left"}:3pt solid ${ACCENT};margin:8pt 0;"><tr><td style="padding:6pt 10pt;font-size:11pt;"><b>${label}.</b> ${esc(val)}</td></tr></table>` : "";
+  // Table-level background/border is what many weak HTML->Word importers
+  // (including Google Docs') drop silently - putting it on the cell
+  // instead is what actually survives, which is why these "cards" and the
+  // masthead rule below were showing up completely unstyled.
+  const card = (label, val, side) => val ? `<table role="presentation" width="100%" style="margin:8pt 0;"><tr><td style="background:${CARDBG};border:0.5pt solid ${CARDBORDER};border-${side||"left"}:3pt solid ${ACCENT};padding:6pt 10pt;font-size:11pt;"><b>${label}.</b> ${esc(val)}</td></tr></table>` : "";
 
   const header = `
-<table role="presentation" width="100%" style="border-bottom:2pt solid ${ACCENT};margin-bottom:10pt;">
+<table role="presentation" width="100%" style="margin-bottom:10pt;">
   <tr>
-    <td width="50%" style="vertical-align:bottom;"><img src="${customLogo || "../assets/logo.png"}" height="40"></td>
-    <td width="50%" style="text-align:right;font-size:9pt;vertical-align:bottom;">${metaLines}</td>
+    <td width="50%" style="vertical-align:bottom;border-bottom:2pt solid ${ACCENT};padding-bottom:4pt;"><img src="${customLogo || "../assets/logo.png"}" height="40"></td>
+    <td width="50%" style="text-align:right;font-size:9pt;line-height:1.5;vertical-align:bottom;border-bottom:2pt solid ${ACCENT};padding-bottom:4pt;">${metaLines}</td>
   </tr>
 </table>
-<h1 style="text-align:center;font-size:20pt;margin:16pt 0 8pt;">${esc(v("#m-title")||"Untitled")}</h1>
+<h1 style="text-align:center;font-size:17pt;font-weight:bold;margin:16pt 0 8pt;">${esc(v("#m-title")||"Untitled")}</h1>
 <p style="text-align:center;font-weight:bold;font-size:12pt;">${authorsHtml}</p>
 ${affils.length ? `<p style="text-align:center;font-style:italic;font-size:10pt;color:#444;">${affilsHtml}</p>` : ""}
 ${badgeImgs ? `<p style="text-align:center;">${badgeImgs}</p>` : ""}
@@ -2068,7 +2089,7 @@ ${buildOsBadgesBlockWord()}
   <img src="../assets/license-cc-by.png" height="26"> &nbsp;
   <span style="color:${ACCENT};">|</span> &nbsp;<b>${esc(v("#m-journal"))}</b> &nbsp;
   <span style="color:${ACCENT};">|</span> &nbsp;${esc(v("#m-year"))}</p>
-${doi ? `<p style="text-align:center;"><a href="https://doi.org/${esc(doi)}">doi.org/${esc(doi)}</a></p>` : ""}
+${doi ? `<p style="text-align:center;"><a href="https://doi.org/${esc(doi)}" style="text-decoration:none;"><span style="color:${ACCENT};">doi.org/${esc(doi)}</span></a></p>` : ""}
 <p style="text-align:center;font-style:italic;font-size:9pt;color:#444;">
   ${esc(v("#m-journal"))} (ISSN: 3052-5977) is part of the Framework for Open and
   Reproducible Research Training (FORRT; forrt.org) and the M&#252;nster Center
