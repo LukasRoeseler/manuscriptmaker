@@ -526,7 +526,7 @@ let bodyHtml = "";
    brand in the header and in the "Cite this tool" citation. Bump the
    last digit on every commit that changes this tool; bump the middle
    digit only when explicitly asked. */
-const TOOL_VERSION = "0.5.2";
+const TOOL_VERSION = "0.5.3";
 $("#tool-version").textContent = "v" + TOOL_VERSION;
 $("#cite-version").textContent = TOOL_VERSION;
 
@@ -772,7 +772,21 @@ async function ensurePdfPageCanvas(pg){
       const viewport = pg.page.getViewport({ scale: 2.5 });
       const canvas = document.createElement("canvas");
       canvas.width = viewport.width; canvas.height = viewport.height;
-      await pg.page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+      // A small minority of real-world PDFs contain a page whose vector
+      // content makes pdf.js's own renderer hang indefinitely (confirmed on
+      // a real submission - one page with inline math never resolved,
+      // silently blocking the ENTIRE import forever with no error and no
+      // way to recover). Racing against a timeout and cancelling the stuck
+      // render task means that one page's figures/formulas fall back to a
+      // blank crop (shown as "[equation]"/a missing figure) instead of
+      // taking down the whole document.
+      const renderTask = pg.page.render({ canvasContext: canvas.getContext("2d"), viewport });
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error("page render timed out")), 12000));
+      try {
+        await Promise.race([renderTask.promise, timeout]);
+      } catch(e){
+        try { renderTask.cancel(); } catch(e2){}
+      }
       pg.canvas = canvas; pg.viewport = viewport;
     })();
   }
