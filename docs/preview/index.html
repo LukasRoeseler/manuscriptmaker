@@ -526,7 +526,7 @@ let bodyHtml = "";
    brand in the header and in the "Cite this tool" citation. Bump the
    last digit on every commit that changes this tool; bump the middle
    digit only when explicitly asked. */
-const TOOL_VERSION = "0.5.3";
+const TOOL_VERSION = "0.5.4";
 $("#tool-version").textContent = "v" + TOOL_VERSION;
 $("#cite-version").textContent = TOOL_VERSION;
 
@@ -1422,12 +1422,25 @@ function extractDocxFront(html){
   // heading: title possibly split over two heading lines, then a short
   // author line like "Ian Hussey[1]", then short affiliation lines.
   const authorRx = /^[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?(?:\s*(?:,|and|&)\s*[A-ZÀ-Þ][\w'’.\-]+(?:\s+[A-ZÀ-Þ][\w'’.\-]+){0,3}(?:\s*\[\d+\])?)*$/;
+  // A 2-4-capitalized-word line matching authorRx can just as easily be a
+  // fragment of an ALL-CAPS multi-line title ("...ADVERSARIAL" / "STYLOMETRY
+  // EXPERIMENT") as a real author name - shape alone can't tell them apart.
+  // Real names are essentially never written in all-caps, so that's the
+  // deciding signal: reject an all-caps line from EVERY authorRx check below.
+  const looksLikeAuthorLine = s => authorRx.test(s) && s !== s.toUpperCase();
   // Enter the more careful scan below not just when the naive guess above
   // found nothing, but also when it found something that doesn't actually
   // look like an author list - e.g. when "Abstract" is found much further
   // down, blocks.slice(1, frontEnd) can span several heading-styled lines
   // that are really a wrapped title continuation, not a title+authors pair.
-  if (!authors || (isHeading(blocks[1]) && !authorRx.test(authors))){
+  if (!authors || (isHeading(blocks[1]) && !looksLikeAuthorLine(authors))){
+    // The naive guess above was rejected as not actually looking like an
+    // author line - clear it rather than leaving it in place, so that if
+    // the more careful scan below ALSO can't confirm a real author line
+    // (e.g. an unusual author-block layout it doesn't recognize either),
+    // the result is an honest "couldn't determine" (blank, left for the
+    // user to fill in) instead of confidently showing the wrong text.
+    authors = ""; affiliation = "";
     let j = 1;
     // additional heading lines = continuation of a multi-line title (a long
     // title often wraps across 2-3 short lines). Only commit once an
@@ -1436,7 +1449,7 @@ function extractDocxFront(html){
     const extraTitleLines = [];
     let k = j;
     while (k < blocks.length && extraTitleLines.length < 4 && isHeading(blocks[k]) &&
-           T(blocks[k]).length < 180 && !authorRx.test(T(blocks[k]))){
+           T(blocks[k]).length < 180 && !looksLikeAuthorLine(T(blocks[k]))){
       extraTitleLines.push(T(blocks[k])); k++;
     }
     if (extraTitleLines.length){
@@ -1446,12 +1459,12 @@ function extractDocxFront(html){
       // confirmation below. LaTeX's \ast renders as U+2217, not a plain "*".
       let m = k;
       while (m < blocks.length && /^[*∗†‡§¶\d]{1,3}$/.test(T(blocks[m]))) m++;
-      if (m < blocks.length && authorRx.test(T(blocks[m]))){
+      if (m < blocks.length && looksLikeAuthorLine(T(blocks[m]))){
         title = [title.replace(/[:;,\s]+$/, ""), ...extraTitleLines].join(" ");
         j = m;
       }
     }
-    if (j < blocks.length && T(blocks[j]).length < 90 && authorRx.test(T(blocks[j]))){
+    if (j < blocks.length && T(blocks[j]).length < 90 && looksLikeAuthorLine(T(blocks[j]))){
       authors = T(blocks[j]).replace(/\s*\[\d+\]/g, ""); j++;
       const affs = [];
       while (j < blocks.length && T(blocks[j]).length && T(blocks[j]).length < 80 &&
