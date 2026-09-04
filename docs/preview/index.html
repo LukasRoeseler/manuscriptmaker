@@ -526,7 +526,7 @@ let bodyHtml = "";
    brand in the header and in the "Cite this tool" citation. Bump the
    last digit on every commit that changes this tool; bump the middle
    digit only when explicitly asked. */
-const TOOL_VERSION = "0.5.4";
+const TOOL_VERSION = "0.5.5";
 $("#tool-version").textContent = "v" + TOOL_VERSION;
 $("#cite-version").textContent = TOOL_VERSION;
 
@@ -739,10 +739,24 @@ function groupPdfLines(items, pageWidth){
   });
   rows.forEach(r => r.items.sort((a,b)=>a.x-b.x));
 
+  // A row's items collectively span some horizontal range - test that
+  // SPAN against the midline, not each item's own center point. A line
+  // this PDF represents as one merged full-width text item (pdf.js
+  // doesn't always split a line per word) has a center that often lands
+  // within a few pt of the page's true middle for ordinary justified
+  // text, satisfying neither "clearly left" nor "clearly right" - making
+  // an entirely normal, full-width single-column line look "one-sided"
+  // and wrongly tripping two-column detection (confirmed on a real
+  // submission: a running head then got misrouted mid-paragraph instead
+  // of staying at the top of its page). Spanning min-to-max catches this
+  // regardless of how many items a line got split into.
+  const rowSpan = r => ({ minX: Math.min(...r.items.map(it=>it.x)), maxX: Math.max(...r.items.map(it=>it.x+it.w)) });
+
   let straddling = 0, sided = 0;
   rows.forEach(r => {
-    const hasLeft = r.items.some(it => it.x + it.w/2 < mid - 10);
-    const hasRight = r.items.some(it => it.x + it.w/2 >= mid + 10);
+    const { minX, maxX } = rowSpan(r);
+    const hasLeft = minX < mid - 10;
+    const hasRight = maxX >= mid + 10;
     if (hasLeft && hasRight) straddling++; else if (hasLeft || hasRight) sided++;
   });
   const isTwoCol = sided > 4 && straddling <= sided * 0.15;
@@ -751,11 +765,16 @@ function groupPdfLines(items, pageWidth){
 
   const left = [], right = [];
   rows.forEach(r => {
-    const hasLeft = r.items.some(it => it.x + it.w/2 < mid);
-    const hasRight = r.items.some(it => it.x + it.w/2 >= mid);
+    const { minX, maxX } = rowSpan(r);
+    const hasLeft = minX < mid;
+    const hasRight = maxX >= mid;
     if (hasLeft && !hasRight) left.push(r);
     else if (hasRight && !hasLeft) right.push(r);
     else {
+      // spans both halves (e.g. a full-width caption/footnote in an
+      // otherwise two-column layout) - assign by which half most of its
+      // own content sits in, using item centers now that span alone
+      // can't cleanly call it.
       const leftCount = r.items.filter(it => it.x + it.w/2 < mid).length;
       (leftCount >= r.items.length/2 ? left : right).push(r);
     }
