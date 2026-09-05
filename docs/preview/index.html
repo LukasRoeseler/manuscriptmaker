@@ -37,6 +37,8 @@
   #drop.drag { background:#e9f7fb; border-color:#0090bd; }
   #drop strong { display:block; font-size:1.02rem; }
   #drop small { color:#666; }
+  .linkish { background:none; border:0; padding:0; font:inherit; color:var(--accent);
+             text-decoration:underline; cursor:pointer; }
   #fileinfo { font-size:.85rem; margin:.5rem 0; color:#333; min-height:1.1em; }
   .fmt { display:inline-block; font-size:.72rem; background:var(--accent); color:#fff; padding:0 .4rem; border-radius:3px; }
   details { margin-top:.7rem; border-top:1px solid #eee; }
@@ -283,12 +285,14 @@
   <!-- ---------------- control panel ---------------- -->
   <aside class="panel">
     <div id="drop">
-      <strong><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:4px;"><path d="M12 15V5"/><path d="M7 9l5-5 5 5"/><path d="M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>Drop a manuscript</strong>
-      <small>or click to choose a file</small>
+      <strong><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:4px;"><path d="M12 15V5"/><path d="M7 9l5-5 5 5"/><path d="M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>Drop a manuscript or folder</strong>
+      <small>or click to choose a file, or <button type="button" id="pick-folder" class="linkish">a whole folder</button></small>
       <input type="file" id="file" accept=".docx,.pdf,.md,.markdown,.qmd,.rmd,.tex,.txt" hidden />
+      <input type="file" id="folderinput" webkitdirectory directory multiple hidden />
     </div>
     <div id="fileinfo">Supports <span class="fmt">.docx</span> <span class="fmt">.pdf</span> <span class="fmt">.md</span>
-      <span class="fmt">.qmd</span> <span class="fmt">.rmd</span> <span class="fmt">.tex</span></div>
+      <span class="fmt">.qmd</span> <span class="fmt">.rmd</span> <span class="fmt">.tex</span>
+      <span class="fmt">folder + figures</span></div>
     <div id="status" style="display:none; font-size:.85rem; color:var(--accent); font-weight:600; margin:.3rem 0;"></div>
 
     <details open>
@@ -526,7 +530,7 @@ let bodyHtml = "";
    brand in the header and in the "Cite this tool" citation. Bump the
    last digit on every commit that changes this tool; bump the middle
    digit only when explicitly asked. */
-const TOOL_VERSION = "0.5.5";
+const TOOL_VERSION = "0.5.6";
 $("#tool-version").textContent = "v" + TOOL_VERSION;
 $("#cite-version").textContent = TOOL_VERSION;
 
@@ -553,12 +557,47 @@ syncHeaderHeight();
 })();
 
 /* ---------- file handling ---------- */
-const drop = $("#drop"), fileInput = $("#file");
+const drop = $("#drop"), fileInput = $("#file"), folderInput = $("#folderinput");
 drop.addEventListener("click", () => fileInput.click());
 fileInput.addEventListener("change", e => e.target.files[0] && loadFile(e.target.files[0]));
+$("#pick-folder").addEventListener("click", e => { e.stopPropagation(); folderInput.click(); });
+folderInput.addEventListener("change", e => { if (e.target.files.length) loadFolder([...e.target.files]); });
 ["dragover","dragenter"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("drag"); }));
 ["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("drag"); }));
-drop.addEventListener("drop", e => e.dataTransfer.files[0] && loadFile(e.dataTransfer.files[0]));
+/* A dropped FOLDER only shows up through the entries API - dataTransfer.files
+   is empty for it. Both dataTransfer.items and .files are neutered as soon as
+   this handler yields, so read them synchronously here and hand the results
+   to the async walker. */
+drop.addEventListener("drop", e => {
+  const dt = e.dataTransfer;
+  const entries = [...(dt.items||[])].map(i => i.webkitGetAsEntry && i.webkitGetAsEntry()).filter(Boolean);
+  handleDropped(entries, [...(dt.files||[])]);
+});
+async function handleDropped(entries, files){
+  if (entries.some(en => en.isDirectory)){
+    const collected = [];
+    for (const en of entries) await walkDropEntry(en, "", collected);
+    if (collected.length) return loadFolder(collected);
+  }
+  if (files.length > 1) return loadFolder(files);
+  if (files[0]) loadFile(files[0]);
+}
+async function walkDropEntry(entry, prefix, out){
+  if (entry.isFile){
+    try {
+      const file = await new Promise((res, rej) => entry.file(res, rej));
+      file.relPath = prefix + entry.name;      // stand-in for webkitRelativePath
+      out.push(file);
+    } catch(e){}
+  } else if (entry.isDirectory){
+    const reader = entry.createReader();
+    let batch;
+    do {
+      batch = await new Promise(res => reader.readEntries(res, () => res([])));
+      for (const child of batch) await walkDropEntry(child, prefix + entry.name + "/", out);
+    } while (batch.length);          // readEntries returns at most 100 at a time
+  }
+}
 
 function warn(msg){ $("#warnbox").innerHTML = msg ? `<div class="warn">${msg}</div>` : ""; }
 function setStatus(msg){ $("#status").textContent = msg || ""; $("#status").style.display = msg ? "block" : "none"; }
@@ -1278,7 +1317,14 @@ async function loadFile(file){
       const text = await file.text();
       const { meta, body } = splitFrontMatter(text);
       applyMeta(meta);
-      bodyHtml = md.render(stripCodeChunks(body));
+      const built = markdownToManuscriptHtml(body, null);
+      bodyHtml = built.html;
+      const notes = [];
+      if (built.codeRemoved)
+        notes.push(`Left ${built.codeRemoved} code block${built.codeRemoved>1?"s":""} out of the manuscript text (figures are kept).`);
+      if (built.missing.length)
+        notes.push(`${built.missing.length} figure${built.missing.length>1?"s":""} point at files next to this document (${built.missing.slice(0,3).map(esc).join(", ")}${built.missing.length>3?", …":""}) — upload the whole <strong>folder</strong> instead so they get embedded.`);
+      if (notes.length) warn(notes.join(" "));
     } else if (ext === ".tex") {
       const text = await file.text();
       const { meta, body } = parseLatex(text);
@@ -1289,8 +1335,12 @@ async function loadFile(file){
       bodyHtml = md.render(await file.text());
     }
   } catch(err){ warn("Could not convert this file: " + err.message); bodyHtml = ""; }
+  finishLoad();
+}
 
-  // Shared post-processing: EMF placeholders, linked citations, refs indent.
+/* Shared tail of every import path: EMF placeholders, linked citations,
+   references indent, then render + extraction report. */
+function finishLoad(){
   let unmatchedCitations = [];
   if (bodyHtml){
     const pp = postProcessBody(bodyHtml);
@@ -1303,6 +1353,138 @@ async function loadFile(file){
   render();
   renderExtractionReport(buildExtractionReport(unmatchedCitations, 0));
   warnLowResImages().then(lowRes => renderExtractionReport(buildExtractionReport(unmatchedCitations, lowRes)));
+}
+
+/* ---------- folder import (a Markdown/Quarto source + its figures) ----------
+   A .md/.qmd/.rmd next to its figure files: the prose becomes the manuscript,
+   the figures get embedded as data: URIs (so they survive every export), and
+   the code - fenced chunks in the source, plus the <pre>/sourceCode wrappers
+   a rendered Quarto/R Markdown .md is full of - is left out, since a typeset
+   manuscript wants the RESULTS, not the script that produced them. */
+const FOLDER_IMG_RX = /\.(png|jpe?g|gif|svg|webp|bmp|tiff?|avif|emf|wmf)$/i;
+const FOLDER_DOC_RX = /\.(md|markdown|qmd|rmd)$/i;
+const relPathOf = f => (f.webkitRelativePath || f.relPath || f.name).replace(/\\/g, "/");
+function readAsDataUrl(file){
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(fr.result); fr.onerror = () => rej(new Error("unreadable"));
+    fr.readAsDataURL(file);
+  });
+}
+async function loadFolder(files){
+  warn(""); setStatus("Reading folder…");
+  try {
+    const docs = files.filter(f => FOLDER_DOC_RX.test(f.name))
+      // Prefer the shallowest, shortest path: the manuscript itself rather
+      // than a README or something inside a subfolder.
+      .sort((a,b) => relPathOf(a).split("/").length - relPathOf(b).split("/").length
+                  || relPathOf(a).length - relPathOf(b).length);
+    if (!docs.length){
+      const other = files.find(f => /\.(docx|pdf|tex)$/i.test(f.name));
+      if (other){ setStatus(""); return loadFile(other); }
+      setStatus("");
+      warn("That folder has no Markdown file (.md, .qmd or .rmd) in it.");
+      return;
+    }
+    const mdFile = docs[0];
+    const imgFiles = files.filter(f => FOLDER_IMG_RX.test(f.name));
+
+    // Key every figure by full path, path-without-top-folder and bare
+    // filename, so any of the ways a document might reference it resolves.
+    const assets = new Map();
+    for (const f of imgFiles){
+      try {
+        const url = await readAsDataUrl(f);
+        const rel = relPathOf(f);
+        [rel, rel.split("/").slice(1).join("/"), f.name].forEach(k => {
+          if (k) assets.set(k.toLowerCase(), url);
+        });
+      } catch(e){}
+    }
+
+    const { meta, body } = splitFrontMatter(await mdFile.text());
+    applyMeta(meta);
+    const built = markdownToManuscriptHtml(body, assets);
+    bodyHtml = built.html;
+
+    $("#fileinfo").innerHTML = `Loaded <strong>${esc(relPathOf(mdFile))}</strong> ` +
+      `<span class="fmt">folder</span> ${imgFiles.length} figure${imgFiles.length===1?"":"s"}`;
+    $("#srcfmt").textContent = "folder";
+
+    const notes = [];
+    if (built.codeRemoved)
+      notes.push(`Left ${built.codeRemoved} code block${built.codeRemoved>1?"s":""} out of the manuscript text — the figures they produced are kept.`);
+    if (built.resolved)
+      notes.push(`Embedded ${built.resolved} figure${built.resolved>1?"s":""} from the folder.`);
+    if (built.missing.length)
+      notes.push(`Could not find ${built.missing.length} referenced figure${built.missing.length>1?"s":""} in the folder: ${built.missing.slice(0,4).map(esc).join(", ")}${built.missing.length>4?", …":""}.`);
+    if (notes.length) warn(notes.join(" "));
+  } catch(err){
+    bodyHtml = "";
+    warn("Could not read that folder: " + err.message);
+  } finally { setStatus(""); }
+  finishLoad();
+}
+/* Markdown (often with rendered-Quarto HTML baked in) -> manuscript HTML:
+   drop the code, keep the figures, and resolve figure paths against the
+   uploaded folder when there is one. */
+function markdownToManuscriptHtml(body, assets){
+  const fenced = stripFencedCode(body);
+  const cleaned = stripCodeFromHtml(md.render(fenced.md));
+  const linked = resolveAssetImages(cleaned.html, assets);
+  return { html: linked.html, codeRemoved: fenced.removed + cleaned.removed,
+           resolved: linked.resolved, missing: linked.missing };
+}
+/* Parses HTML into an INERT document: unlike assigning innerHTML on an
+   element of the live document, this doesn't make the browser start
+   fetching every relative <img src> (which 404s against the app's own
+   URL) before we've had a chance to rewrite those srcs. */
+function parseInertHtml(html){
+  return new DOMParser().parseFromString("<body>" + html + "</body>", "text/html").body;
+}
+/* Fenced blocks in the source (``` / ~~~, including {r ...} chunk headers). */
+function stripFencedCode(mdText){
+  let removed = 0;
+  const out = mdText.replace(/^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm,
+    () => { removed++; return ""; });
+  return { md: out, removed };
+}
+/* Code that survives as HTML: <pre> blocks (chunk source AND console output),
+   Quarto's .sourceCode/.cell-code wrappers, plus <script>/<style> and
+   comments. Any <img> inside such a block is rescued first so a figure is
+   never thrown away with the code around it. Inline <code> spans stay -
+   they're prose ("the `lme4` package"), not a code listing. */
+function stripCodeFromHtml(html){
+  let removed = 0;
+  const root = parseInertHtml(html);
+  const walker = root.ownerDocument.createTreeWalker(root, NodeFilter.SHOW_COMMENT);
+  const comments = []; while (walker.nextNode()) comments.push(walker.currentNode);
+  comments.forEach(c => c.remove());
+  root.querySelectorAll("script,style,pre,.sourceCode,.cell-code,.code-annotation-container,.cell-output-stderr")
+    .forEach(el => {
+      if (!root.contains(el)) return;              // already gone with its parent
+                                                   // (isConnected is always false here: root is detached)
+      el.querySelectorAll("img").forEach(img => el.parentNode.insertBefore(img, el));
+      el.remove(); removed++;
+    });
+  return { html: root.innerHTML, removed };
+}
+/* Rewrites relative <img src> to the embedded data: URI of the matching
+   uploaded figure. Reports what could not be matched. */
+function resolveAssetImages(html, assets){
+  const root = parseInertHtml(html);
+  const missing = []; let resolved = 0;
+  root.querySelectorAll("img[src]").forEach(img => {
+    const raw = img.getAttribute("src") || "";
+    if (!raw || /^(data:|https?:|blob:)/i.test(raw)) return;
+    let key = raw.split("#")[0].split("?")[0].replace(/^\.\//, "").replace(/^\//, "");
+    try { key = decodeURIComponent(key); } catch(e){}
+    key = key.toLowerCase();
+    const hit = assets && (assets.get(key) || assets.get(key.split("/").pop()));
+    if (hit){ img.setAttribute("src", hit); resolved++; }
+    else missing.push(raw);
+  });
+  return { html: root.innerHTML, resolved, missing };
 }
 /* A figure whose natural pixel size is smaller than the size it's actually
    displayed at will look soft/blurry once printed - flag it so it can be
@@ -1391,10 +1573,6 @@ function splitFrontMatter(text){
   if (!m) return { meta:{}, body:text };
   try { return { meta: jsyaml.load(m[1]) || {}, body: m[2] }; }
   catch(e){ return { meta:{}, body:text }; }
-}
-function stripCodeChunks(mdText){
-  // Drop executable chunk options so .qmd/.rmd chunks show as plain code.
-  return mdText.replace(/```\{[^}]*\}/g, "```");
 }
 function guessTitle(html){
   const h = html.match(/<h1[^>]*>(.*?)<\/h1>/i) || html.match(/<p[^>]*>\s*<strong>(.*?)<\/strong>\s*<\/p>/i);
