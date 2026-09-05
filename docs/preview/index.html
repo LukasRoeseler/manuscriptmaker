@@ -21,8 +21,14 @@
   .brand-logo { height:1.6rem; width:auto; vertical-align:middle; }
   .version { font-weight:400; font-size:.72rem; color:#888; letter-spacing:0; }
   .brand a { text-decoration:none; color:inherit; display:inline-flex; align-items:center; gap:.5rem; }
-  .layout { display:grid; grid-template-columns:380px 1fr; gap:1.2rem; max-width:1280px; margin:0 auto; padding:1.2rem; align-items:start; }
-  @media (max-width:920px){ .layout { grid-template-columns:1fr; } }
+  .layout { display:grid; grid-template-columns:380px minmax(0,1fr) 320px; gap:1.2rem;
+            max-width:1600px; margin:0 auto; padding:1.2rem; align-items:start; }
+  /* Either side panel can be collapsed away; the stage takes the space. */
+  .layout.hide-left  { grid-template-columns:minmax(0,1fr) 320px; }
+  .layout.hide-right { grid-template-columns:380px minmax(0,1fr); }
+  .layout.hide-left.hide-right { grid-template-columns:minmax(0,1fr); }
+  .layout.hide-left #leftpanel, .layout.hide-right #rightpanel { display:none; }
+  @media (max-width:1200px){ .layout, .layout.hide-left, .layout.hide-right { grid-template-columns:1fr; } }
 
   /* ---- control panel (sticky + independently scrollable) ----
      --header-h is measured in JS (the header's real rendered height,
@@ -39,6 +45,33 @@
   #drop small { color:#666; }
   .linkish { background:none; border:0; padding:0; font:inherit; color:var(--accent);
              text-decoration:underline; cursor:pointer; }
+
+  /* ---- right-hand tools panel (manuscript / figures / formulas) ---- */
+  #rightpanel .toolsec { margin-bottom:1rem; }
+  #rightpanel .toolsec > h3 { font-size:.82rem; text-transform:uppercase; letter-spacing:.04em;
+                              color:#666; margin:0 0 .45rem; }
+  .minidrop { border:2px dashed var(--accent); border-radius:8px; padding:.7rem; text-align:center;
+              color:#33707f; background:var(--card-bg); cursor:pointer; font-size:.82rem; }
+  .minidrop.drag { background:#e9f7fb; border-color:#0090bd; }
+  #figgrid { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; margin-top:.6rem; }
+  .figcard { position:relative; border:1px solid #e6e4db; border-radius:6px; padding:.3rem;
+             background:#fff; cursor:grab; font-size:.7rem; }
+  .figcard:active { cursor:grabbing; }
+  .figcard.sel { border-color:var(--accent); box-shadow:0 0 0 2px rgba(0,156,207,.25); }
+  .figcard img { width:100%; height:60px; object-fit:contain; display:block; background:#fafafa; }
+  .figcard .fname { display:block; margin-top:.25rem; word-break:break-all; line-height:1.25; }
+  .figcard .fdpi { display:block; color:#888; font-size:.65rem; }
+  .figcard .fdpi.low { color:#c26a00; }
+  .figcard .tick { position:absolute; top:2px; right:2px; width:16px; height:16px; border-radius:50%;
+                   background:#2a8a4a; color:#fff; display:none; align-items:center; justify-content:center; }
+  .figcard.done .tick { display:flex; }
+  .figempty { grid-column:1/-1; color:#999; text-align:center; font-size:.78rem; padding:.5rem 0; }
+  #mathpreview { border:1px solid #e6e4db; border-radius:6px; background:#fff; padding:.5rem;
+                 min-height:2.2rem; margin:.4rem 0; overflow-x:auto; font-size:.95rem; }
+  #mathpreview .r2-math-err { font-size:.75rem; }
+  .toolrow { display:flex; gap:.4rem; align-items:center; flex-wrap:wrap; }
+  .toolrow button { padding:.35rem .6rem; font-size:.78rem; }
+  .toolhint { font-size:.72rem; color:#777; margin-top:.35rem; }
   #fileinfo { font-size:.85rem; margin:.5rem 0; color:#333; min-height:1.1em; }
   .fmt { display:inline-block; font-size:.72rem; background:var(--accent); color:#fff; padding:0 .4rem; border-radius:3px; }
   details { margin-top:.7rem; border-top:1px solid #eee; }
@@ -102,9 +135,9 @@
   /* A figure extracted from a PDF - cropped straight from the rendered
      page, so visually exact even though it's a picture, not a live image
      asset. */
-  .r2-pdf-figure { margin:1.2rem 0; text-align:center; }
-  .r2-pdf-figure img.r2-pdf-fig { display:block; margin:0 auto; border-radius:4px; }
-  .r2-pdf-figure figcaption { font-size:.85rem; color:#444; margin-top:.5rem; text-align:left; }
+  .r2-pdf-figure, .r2-figure { margin:1.2rem 0; text-align:center; }
+  .r2-pdf-figure img.r2-pdf-fig, .r2-figure img { display:block; margin:0 auto; border-radius:4px; max-width:100%; }
+  .r2-pdf-figure figcaption, .r2-figure figcaption { font-size:.85rem; color:#444; margin-top:.5rem; text-align:left; }
   .r2-pdf-figure figcaption p { margin:0; }
 
   /* Formulas: DOCX equations become live MathML (native browser rendering,
@@ -239,7 +272,7 @@
     .print-runner-bottom .txt { position:absolute; right:0; top:4.6mm; text-align:right; }
     .print-runner-bottom a { color:var(--accent); text-decoration:none; }
     .r2-figph { break-inside:avoid; }
-    .r2-pdf-figure { break-inside:avoid; }
+    .r2-pdf-figure, .r2-figure { break-inside:avoid; }
     .r2-math-block { break-inside:avoid; }
     #r2-body table { break-inside:avoid; }
     #r2-body h1, #r2-body h2, #r2-body h3 { break-after:avoid; }
@@ -278,22 +311,18 @@
     <button type="button" id="cite-btn" class="icon-btn" title="Cite this tool" aria-label="Cite this tool">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="none"><path d="M4.8 8.8c0-2.3 1.7-4 4-4.2v2.1c-1 .1-1.7.9-1.7 1.9h1.7v4.6H4.8V8.8Z"/><path d="M13.6 8.8c0-2.3 1.7-4 4-4.2v2.1c-1 .1-1.7.9-1.7 1.9h1.7v4.6h-4V8.8Z"/></svg>
     </button>
+    <button type="button" id="toggle-left" class="icon-btn" title="Hide/show the metadata panel" aria-label="Hide or show the metadata panel">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
+    </button>
+    <button type="button" id="toggle-right" class="icon-btn" title="Hide/show the tools panel" aria-label="Hide or show the tools panel">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M15 4v16"/></svg>
+    </button>
   </span>
 </div></header>
 
-<div class="layout">
+<div class="layout" id="layout">
   <!-- ---------------- control panel ---------------- -->
-  <aside class="panel">
-    <div id="drop">
-      <strong><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:4px;"><path d="M12 15V5"/><path d="M7 9l5-5 5 5"/><path d="M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>Drop a manuscript or folder</strong>
-      <small>or click to choose a file, or <button type="button" id="pick-folder" class="linkish">a whole folder</button></small>
-      <input type="file" id="file" accept=".docx,.pdf,.md,.markdown,.qmd,.rmd,.tex,.txt" hidden />
-      <input type="file" id="folderinput" webkitdirectory directory multiple hidden />
-    </div>
-    <div id="fileinfo">Supports <span class="fmt">.docx</span> <span class="fmt">.pdf</span> <span class="fmt">.md</span>
-      <span class="fmt">.qmd</span> <span class="fmt">.rmd</span> <span class="fmt">.tex</span>
-      <span class="fmt">folder + figures</span></div>
-    <div id="status" style="display:none; font-size:.85rem; color:var(--accent); font-weight:600; margin:.3rem 0;"></div>
+  <aside class="panel" id="leftpanel">
 
     <details open>
       <summary>Article metadata</summary>
@@ -461,6 +490,51 @@
       </details>
     </div>
   </main>
+
+  <!-- ---------------- tools panel: sources you add to the manuscript ------ -->
+  <aside class="panel" id="rightpanel">
+    <div class="toolsec">
+      <h3>Manuscript</h3>
+      <div id="drop">
+        <strong><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:4px;"><path d="M12 15V5"/><path d="M7 9l5-5 5 5"/><path d="M4 17v1a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"/></svg>Drop a manuscript or folder</strong>
+        <small>or click to choose a file, or <button type="button" id="pick-folder" class="linkish">a whole folder</button></small>
+        <input type="file" id="file" accept=".docx,.pdf,.md,.markdown,.qmd,.rmd,.tex,.txt" hidden />
+        <input type="file" id="folderinput" webkitdirectory directory multiple hidden />
+      </div>
+      <div id="fileinfo">Supports <span class="fmt">.docx</span> <span class="fmt">.pdf</span> <span class="fmt">.md</span>
+        <span class="fmt">.qmd</span> <span class="fmt">.rmd</span> <span class="fmt">.tex</span>
+        <span class="fmt">folder + figures</span></div>
+      <div id="status" style="display:none; font-size:.85rem; color:var(--accent); font-weight:600; margin:.3rem 0;"></div>
+    </div>
+
+    <div class="toolsec">
+      <h3>Figures</h3>
+      <div class="minidrop" id="figdrop">
+        Drop images here or click to choose
+        <input type="file" id="figinput" accept="image/*" multiple hidden />
+      </div>
+      <div id="figgrid"><div class="figempty">No figures added yet.</div></div>
+      <div class="toolrow" style="margin-top:.5rem;">
+        <button type="button" id="fig-insert" class="ghost" disabled>Insert at cursor</button>
+        <button type="button" id="fig-clear" class="ghost" disabled>Clear</button>
+      </div>
+      <div class="toolhint">Drag a figure straight into the text, or select it and click
+        <em>Insert at cursor</em>. A green tick marks figures already placed.</div>
+    </div>
+
+    <div class="toolsec">
+      <h3>Formula (LaTeX)</h3>
+      <textarea id="mathinput" rows="3" placeholder="\frac{a}{b} = \sqrt{c^2 + d^2}"></textarea>
+      <div id="mathpreview"><span style="color:#999;font-size:.78rem;">Preview appears here.</span></div>
+      <div class="toolrow">
+        <label style="display:flex;align-items:center;gap:.3rem;font-weight:400;margin:0;">
+          <input type="checkbox" id="math-display" /> Own line</label>
+        <button type="button" id="math-insert" class="ghost" disabled>Insert at cursor</button>
+      </div>
+      <div class="toolhint">Rendered as MathML, so it stays a real formula in the preview and the
+        exports (the same form equations from a Word file take).</div>
+    </div>
+  </aside>
 </div>
 
 <!-- Hidden storage: render() keeps the current footer text here; the PDF
@@ -530,7 +604,7 @@ let bodyHtml = "";
    brand in the header and in the "Cite this tool" citation. Bump the
    last digit on every commit that changes this tool; bump the middle
    digit only when explicitly asked. */
-const TOOL_VERSION = "0.5.6";
+const TOOL_VERSION = "0.5.7";
 $("#tool-version").textContent = "v" + TOOL_VERSION;
 $("#cite-version").textContent = TOOL_VERSION;
 
@@ -598,6 +672,277 @@ async function walkDropEntry(entry, prefix, out){
     } while (batch.length);          // readEntries returns at most 100 at a time
   }
 }
+
+/* ---------- collapsible side panels ---------- */
+["left","right"].forEach(side => {
+  $("#toggle-" + side).addEventListener("click", () => {
+    const on = $("#layout").classList.toggle("hide-" + side);
+    $("#toggle-" + side).setAttribute("aria-pressed", String(on));
+    syncHeaderHeight();
+  });
+});
+
+/* ---------- inserting things into the manuscript at the caret ----------
+   Clicking a button in the side panel moves focus out of the article, so
+   remember the last caret position that WAS inside it and insert there. */
+let lastBodyRange = null;
+document.addEventListener("selectionchange", () => {
+  const sel = document.getSelection();
+  if (!sel || !sel.rangeCount) return;
+  const r = sel.getRangeAt(0);
+  const body = $("#r2-body");
+  if (body && body.contains(r.commonAncestorContainer)) lastBodyRange = r.cloneRange();
+});
+function rangeFromPoint(x, y){
+  if (document.caretRangeFromPoint) return document.caretRangeFromPoint(x, y);
+  if (document.caretPositionFromPoint){
+    const p = document.caretPositionFromPoint(x, y);
+    if (!p) return null;
+    const r = document.createRange();
+    r.setStart(p.offsetNode, p.offset); r.collapse(true);
+    return r;
+  }
+  return null;
+}
+function insertIntoBody(node, range){
+  const body = $("#r2-body");
+  if (!body || $("#article").hidden){ warn("Load a manuscript first — then you can place figures and formulas in it."); return false; }
+  let r = range && body.contains(r0Container(range)) ? range : lastBodyRange;
+  if (!r || !body.contains(r0Container(r))){          // nothing clicked yet: append at the end
+    r = document.createRange(); r.selectNodeContents(body); r.collapse(false);
+  }
+  r.deleteContents();
+  if (isBlockNode(node)) insertBlockAtRange(node, r, body);
+  else r.insertNode(node);
+  const after = document.createRange();
+  after.setStartAfter(node); after.collapse(true);
+  const sel = document.getSelection(); sel.removeAllRanges(); sel.addRange(after);
+  lastBodyRange = after.cloneRange();
+  bodyHtml = body.innerHTML;
+  syncFigureTicks();
+  return true;
+}
+const r0Container = r => r.commonAncestorContainer;
+const isBlockNode = n => n.nodeType === 1 && /^(FIGURE|DIV|TABLE|P|BLOCKQUOTE|PRE)$/.test(n.tagName);
+/* A <figure> or display equation dropped in mid-sentence must not end up
+   INSIDE the <p> - that's invalid HTML and Word/Google Docs mangle it on
+   import. Split the paragraph at the caret and put the block between the
+   two halves, which is also what "insert it here" means visually. */
+function insertBlockAtRange(node, r, body){
+  let block = r.startContainer;
+  if (block.nodeType === 3) block = block.parentNode;
+  while (block && block !== body && block.parentNode !== body) block = block.parentNode;
+  if (!block || block === body || !block.parentNode){ r.insertNode(node); return; }
+
+  const tail = document.createRange();
+  tail.setStart(r.startContainer, r.startOffset);
+  if (block.lastChild) tail.setEndAfter(block.lastChild); else tail.setEndAfter(block);
+  const frag = tail.extractContents();
+
+  block.parentNode.insertBefore(node, block.nextSibling);
+  const hasStuff = el => el.textContent.trim() || el.querySelector("img,math,table,figure");
+  if (hasStuff(frag)){
+    const rest = document.createElement(block.tagName === "BODY" ? "P" : block.tagName);
+    rest.appendChild(frag);
+    node.parentNode.insertBefore(rest, node.nextSibling);
+  }
+  if (!hasStuff(block)) block.remove();      // caret sat at the very start
+}
+
+/* ---------- figures panel ---------- */
+let figures = [], figSeq = 0, selectedFig = null, figSyncT = null;
+const figDrop = $("#figdrop"), figInput = $("#figinput");
+figDrop.addEventListener("click", () => figInput.click());
+figInput.addEventListener("change", e => { addFigureFiles([...e.target.files]); figInput.value = ""; });
+["dragover","dragenter"].forEach(ev => figDrop.addEventListener(ev, e => { e.preventDefault(); figDrop.classList.add("drag"); }));
+["dragleave","drop"].forEach(ev => figDrop.addEventListener(ev, e => { e.preventDefault(); figDrop.classList.remove("drag"); }));
+figDrop.addEventListener("drop", e => addFigureFiles([...(e.dataTransfer.files||[])]));
+
+async function addFigureFiles(files){
+  const imgs = files.filter(f => /^image\//.test(f.type) || FOLDER_IMG_RX.test(f.name));
+  if (!imgs.length) return;
+  setStatus("Reading figures…");
+  for (const f of imgs){
+    try {
+      const url = await readAsDataUrl(f);
+      const [dim, dpi] = await Promise.all([imagePixelSize(url), readImageDpi(f)]);
+      figures.push({ id: "fig" + (++figSeq), name: f.name, url, w: dim.w, h: dim.h, dpi, inserted:false });
+    } catch(e){}
+  }
+  setStatus("");
+  renderFigGrid();
+}
+function imagePixelSize(url){
+  return new Promise(res => {
+    const im = new Image();
+    im.onload = () => res({ w: im.naturalWidth, h: im.naturalHeight });
+    im.onerror = () => res({ w: 0, h: 0 });
+    im.src = url;
+  });
+}
+/* Real DPI as recorded in the file: PNG stores it in a pHYs chunk (pixels
+   per metre), JPEG in the JFIF APP0 density fields. Most screenshots and
+   plots carry no such tag at all, in which case we just show the pixel
+   size rather than inventing a number. */
+async function readImageDpi(file){
+  try {
+    const buf = new Uint8Array(await file.slice(0, 65536).arrayBuffer());
+    if (buf[0] === 0x89 && buf[1] === 0x50){                       // PNG
+      let p = 8;
+      while (p + 12 <= buf.length){
+        const len = (buf[p]*16777216) + (buf[p+1]<<16) + (buf[p+2]<<8) + buf[p+3];
+        const type = String.fromCharCode(buf[p+4], buf[p+5], buf[p+6], buf[p+7]);
+        if (type === "pHYs"){
+          const ppu = (buf[p+8]*16777216) + (buf[p+9]<<16) + (buf[p+10]<<8) + buf[p+11];
+          return (buf[p+16] === 1 && ppu > 0) ? Math.round(ppu * 0.0254) : null;
+        }
+        if (type === "IDAT" || type === "IEND") return null;
+        p += 12 + len;
+      }
+      return null;
+    }
+    if (buf[0] === 0xFF && buf[1] === 0xD8){                       // JPEG
+      let p = 2;
+      while (p + 4 <= buf.length && buf[p] === 0xFF){
+        const marker = buf[p+1], len = (buf[p+2]<<8) + buf[p+3];
+        if (marker === 0xE0 && String.fromCharCode(buf[p+4],buf[p+5],buf[p+6],buf[p+7]) === "JFIF"){
+          const units = buf[p+11], x = (buf[p+12]<<8) + buf[p+13];
+          if (!x) return null;
+          return units === 1 ? x : units === 2 ? Math.round(x * 2.54) : null;
+        }
+        if (marker === 0xDA || marker === 0xD9) return null;       // start of scan / end
+        p += 2 + len;
+      }
+    }
+  } catch(e){}
+  return null;
+}
+function renderFigGrid(){
+  const grid = $("#figgrid");
+  if (!figures.length){
+    grid.innerHTML = `<div class="figempty">No figures added yet.</div>`;
+    $("#fig-insert").disabled = true; $("#fig-clear").disabled = true;
+    return;
+  }
+  grid.innerHTML = figures.map(f => {
+    const meta = f.dpi ? `${f.dpi} dpi · ${f.w}×${f.h}` : `${f.w}×${f.h} px`;
+    const low = f.dpi && f.dpi < 300 ? " low" : "";
+    return `<div class="figcard${f.inserted ? " done" : ""}${selectedFig === f.id ? " sel" : ""}"
+                 data-fig="${f.id}" draggable="true" title="${esc(f.name)}">
+      <span class="tick"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>
+      <img src="${f.url}" alt="${esc(f.name)}">
+      <span class="fname">${esc(f.name)}</span>
+      <span class="fdpi${low}">${meta}</span>
+    </div>`;
+  }).join("");
+  grid.querySelectorAll(".figcard").forEach(card => {
+    const id = card.getAttribute("data-fig");
+    card.addEventListener("click", () => {
+      selectedFig = (selectedFig === id) ? null : id;
+      renderFigGrid();
+    });
+    card.addEventListener("dragstart", e => {
+      e.dataTransfer.setData("text/x-r2-figure", id);
+      e.dataTransfer.setData("text/plain", "");   // Firefox needs a plain payload too
+      e.dataTransfer.effectAllowed = "copy";
+    });
+  });
+  $("#fig-insert").disabled = !selectedFig;
+  $("#fig-clear").disabled = false;
+}
+function figureNode(fig){
+  const el = document.createElement("figure");
+  el.className = "r2-figure";
+  el.setAttribute("data-figid", fig.id);
+  const img = document.createElement("img");
+  img.src = fig.url; img.alt = fig.name;
+  const cap = document.createElement("figcaption");
+  cap.textContent = "Figure " + ($("#r2-body").querySelectorAll("figure.r2-figure").length + 1) + ". ";
+  el.append(img, cap);
+  return el;
+}
+$("#fig-insert").addEventListener("click", () => {
+  const fig = figures.find(f => f.id === selectedFig);
+  if (fig) insertIntoBody(figureNode(fig));
+});
+$("#fig-clear").addEventListener("click", () => { figures = []; selectedFig = null; renderFigGrid(); });
+/* Drop a figure straight onto the spot in the text where it belongs. */
+$("#r2-body").addEventListener("dragover", e => {
+  if ([...e.dataTransfer.types].includes("text/x-r2-figure")){ e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }
+});
+$("#r2-body").addEventListener("drop", e => {
+  const id = e.dataTransfer.getData("text/x-r2-figure");
+  if (!id) return;
+  e.preventDefault();
+  const fig = figures.find(f => f.id === id);
+  if (fig) insertIntoBody(figureNode(fig), rangeFromPoint(e.clientX, e.clientY));
+});
+function syncFigureTicks(){
+  const body = $("#r2-body");
+  let changed = false;
+  figures.forEach(f => {
+    const now = !!(body && body.querySelector(`[data-figid="${f.id}"]`));
+    if (now !== f.inserted){ f.inserted = now; changed = true; }
+  });
+  if (changed) renderFigGrid();
+}
+$("#r2-body").addEventListener("input", () => {
+  clearTimeout(figSyncT); figSyncT = setTimeout(syncFigureTicks, 300);
+});
+
+/* ---------- LaTeX formulas ----------
+   KaTeX renders to MathML only: no stylesheet to ship, browsers draw it
+   natively, and it lands in the document in exactly the same shape as an
+   equation imported from a Word file (see extractDocxMath). */
+let _katex = null, _katexFailed = false, mathT = null;
+async function getKatex(){
+  if (_katex || _katexFailed) return _katex;
+  try { _katex = (await import("https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.mjs")).default; }
+  catch(e){ _katexFailed = true; }
+  return _katex;
+}
+async function latexToMathNode(latex, display){
+  const k = await getKatex();
+  if (!k) return null;
+  try {
+    const html = k.renderToString(latex, { output:"mathml", displayMode: display, throwOnError:true });
+    return new DOMParser().parseFromString("<body>"+html+"</body>", "text/html").querySelector("math");
+  } catch(e){ return { error: e.message }; }
+}
+async function updateMathPreview(){
+  const latex = $("#mathinput").value.trim();
+  const box = $("#mathpreview");
+  if (!latex){
+    box.innerHTML = `<span style="color:#999;font-size:.78rem;">Preview appears here.</span>`;
+    $("#math-insert").disabled = true; return;
+  }
+  const node = await latexToMathNode(latex, $("#math-display").checked);
+  box.innerHTML = "";
+  if (!node){
+    box.innerHTML = `<span class="r2-math-err">Formula rendering is unavailable offline — it will be inserted as raw LaTeX.</span>`;
+    $("#math-insert").disabled = false;
+  } else if (node.error){
+    box.innerHTML = `<span class="r2-math-err">${esc(node.error)}</span>`;
+    $("#math-insert").disabled = true;
+  } else {
+    box.appendChild(node);
+    $("#math-insert").disabled = false;
+  }
+}
+$("#mathinput").addEventListener("input", () => { clearTimeout(mathT); mathT = setTimeout(updateMathPreview, 250); });
+$("#math-display").addEventListener("change", updateMathPreview);
+$("#math-insert").addEventListener("click", async () => {
+  const latex = $("#mathinput").value.trim();
+  if (!latex) return;
+  const display = $("#math-display").checked;
+  const node = await latexToMathNode(latex, display);
+  const wrap = document.createElement(display ? "div" : "span");
+  wrap.className = display ? "r2-math-block" : "r2-math-inline";
+  wrap.setAttribute("data-latex", latex);        // keep the source for round-tripping
+  if (node && !node.error) wrap.appendChild(node);
+  else wrap.textContent = display ? `$$${latex}$$` : `$${latex}$`;
+  if (insertIntoBody(wrap)) $("#mathinput").value = "", updateMathPreview();
+});
 
 function warn(msg){ $("#warnbox").innerHTML = msg ? `<div class="warn">${msg}</div>` : ""; }
 function setStatus(msg){ $("#status").textContent = msg || ""; $("#status").style.display = msg ? "block" : "none"; }
